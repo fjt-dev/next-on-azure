@@ -1,0 +1,40 @@
+{
+  "name": "opennextjs-azure",
+  "version": "0.0.1",
+  "description": "Azure adapter for OpenNext: run Next.js on Azure Functions (Flex Consumption) with Blob, Table and Queue Storage",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "opennext-azure": "./dist/cli/index.js"
+  },
+  "exports": {
+    "./overrides/*.js": {
+      "types": "./dist/overrides/*.d.ts",
+      "default": "./dist/overrides/*.js"
+    }
+  },
+  "files": ["dist", "infra", "open-next.config.example.ts"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "bicep:build": "az bicep build --file infra/main.bicep --stdout > /dev/null"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0",
+    "@azure/functions": "^4.7.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/storage-blob": "^12.26.0",
+    "@azure/storage-queue": "^12.25.0"
+  },
+  "peerDependencies": {
+    "@opennextjs/aws": "^4.1.0"
+  },
+  "devDependencies": {
+    "@opennextjs/aws": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

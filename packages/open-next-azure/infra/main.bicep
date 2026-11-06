@@ -41,6 +41,22 @@ param alwaysReadyInstances int = 0
 @minValue(0)
 param revalidationAlwaysReady int = 0
 
+@description('How long (seconds) a request that found a page stale holds the right to enqueue its revalidation; other requests for the same page version enqueue nothing meanwhile. 0 turns the deduplication off (every stale request enqueues). See ADR-0010.')
+@minValue(0)
+param revalidationDedupeSeconds int = 60
+
+@description('Longest wait (seconds, 1 to 60) between polls of an empty revalidation queue. The platform default is 60: an idle queue listener backs off to it, so a message can wait up to that long. Lower values cut the wait and add a small constant number of storage transactions per running instance. Not measured on Azure yet (ADR-0010).')
+@minValue(1)
+@maxValue(60)
+param revalidationPollingSeconds int = 60
+
+@description('Create an alert when the storage account holds more than this many queue messages on average over one hour (revalidation and poison queues together; the metric is reported hourly). 0 = no alert. Without an action group it is only visible in the portal.')
+@minValue(0)
+param queueBacklogAlertThreshold int = 0
+
+@description('Resource id of an action group to notify when the queue backlog alert fires. Empty = none.')
+param alertActionGroupId string = ''
+
 @description('What happens to deferred work (after(), queue enqueues) when the response is complete. "hold" keeps the response open until the work is done (safe, the client waits). "detach" ends the response at once and lets the work run in the background (see ADR-0006 for what is known about the platform).')
 @allowed(['hold', 'detach'])
 param waitUntilMode string = 'hold'
@@ -225,9 +241,16 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
         { name: 'CACHE_TABLE_NAME', value: tagCacheTable.name }
         { name: 'REVALIDATION_QUEUE_NAME', value: revalidationQueue.name }
         { name: 'WAIT_UNTIL_MODE', value: waitUntilMode }
+        { name: 'REVALIDATION_DEDUPE_SECONDS', value: string(revalidationDedupeSeconds) }
         // Large request bodies / Server Actions
         { name: 'FUNCTIONS_REQUEST_BODY_SIZE_LIMIT', value: '104857600' }
-      ], frontDoor ? [
+      ], revalidationPollingSeconds < 60 ? [
+        // Overrides host.json extensions.queues.maxPollingInterval (hh:mm:ss)
+        {
+          name: 'AzureFunctionsJobHost__extensions__queues__maxPollingInterval'
+          value: '00:00:${padLeft(string(revalidationPollingSeconds), 2, '0')}'
+        }
+      ] : [], frontDoor ? [
         // The wrapper rejects requests whose X-Azure-FDID differs
         { name: 'FRONT_DOOR_ID', value: frontDoorId }
       ] : [])
@@ -274,6 +297,43 @@ resource deployerBlobRole 'Microsoft.Authorization/roleAssignments@2022-04-01' =
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roles.blobContributor)
     principalId: deployerPrincipalId
     principalType: deployerPrincipalType
+  }
+}
+
+// ------------------------------------------------ Queue backlog alert (optional)
+// Storage reports no "age of the oldest message", so a count that stays high is the signal: a
+// healthy consumer keeps the queues near empty (ADR-0010).
+resource queueBacklogAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (queueBacklogAlertThreshold > 0) {
+  name: 'alert-queue-backlog-${name}-${suffix}'
+  location: 'global'
+  properties: {
+    description: 'Revalidation messages are piling up in storage; the revalidation function may not be running (ADR-0010).'
+    severity: 3
+    enabled: true
+    scopes: [queueService.id]
+    // QueueMessageCount is reported hourly: Azure Monitor only accepts PT1H, PT6H, PT12H or P1D as
+    // the window for it (a shorter one passes `validate` and fails the real deployment).
+    evaluationFrequency: 'PT15M'
+    windowSize: 'PT1H'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          name: 'QueueMessageCount'
+          criterionType: 'StaticThresholdCriterion'
+          metricName: 'QueueMessageCount'
+          metricNamespace: 'Microsoft.Storage/storageAccounts/queueServices'
+          timeAggregation: 'Average'
+          operator: 'GreaterThan'
+          threshold: queueBacklogAlertThreshold
+        }
+      ]
+    }
+    actions: empty(alertActionGroupId) ? [] : [
+      {
+        actionGroupId: alertActionGroupId
+      }
+    ]
   }
 }
 

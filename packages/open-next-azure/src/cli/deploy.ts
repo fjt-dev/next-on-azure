@@ -15,8 +15,28 @@ function option(argv: string[], flag: string, short?: string): string | undefine
   return i >= 0 ? argv[i + 1] : undefined;
 }
 
+function integerOption(
+  argv: string[],
+  flag: string,
+  fallback: number,
+  min: number,
+  max = Number.MAX_SAFE_INTEGER,
+) {
+  const raw = option(argv, flag);
+  if (raw === undefined) return fallback;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < min || value > max) {
+    throw new Error(
+      `${flag} must be an integer from ${min}${max === Number.MAX_SAFE_INTEGER ? "" : ` to ${max}`}`,
+    );
+  }
+  return value;
+}
+
 /**
- * opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach] [--revalidation-always-ready <n>]
+ * opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach]
+ *   [--revalidation-always-ready <n>] [--revalidation-dedupe-seconds <n>]
+ *   [--revalidation-polling-seconds <1-60>] [--alert-queue-backlog <messages>]
  *
  * Creates the infrastructure with Bicep, uploads static assets and the prerender cache, and
  * deploys `.open-next-azure/app.zip`. Creates billable resources; see docs/contribute/azure_runs.md.
@@ -30,13 +50,16 @@ export function deploy(argv: string[]) {
   if (!Number.isInteger(revalidationAlwaysReady) || revalidationAlwaysReady < 0) {
     throw new Error("--revalidation-always-ready must be a non-negative integer");
   }
+  const dedupeSeconds = integerOption(argv, "--revalidation-dedupe-seconds", 60, 0);
+  const pollingSeconds = integerOption(argv, "--revalidation-polling-seconds", 60, 1, 60);
+  const backlogAlert = integerOption(argv, "--alert-queue-backlog", 0, 0);
   const waitUntilMode = option(argv, "--wait-until") ?? "hold";
   if (waitUntilMode !== "hold" && waitUntilMode !== "detach") {
     throw new Error('--wait-until must be "hold" or "detach"');
   }
   if (!rg || !name) {
     throw new Error(
-      "usage: opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach] [--revalidation-always-ready <n>]",
+      "usage: opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [options, see docs/get_started.md]",
     );
   }
   const zip = path.resolve(".open-next-azure", "app.zip");
@@ -71,6 +94,9 @@ export function deploy(argv: string[]) {
       `name=${name}`,
       `frontDoor=${frontDoor}`,
       `waitUntilMode=${waitUntilMode}`,
+      `revalidationDedupeSeconds=${dedupeSeconds}`,
+      `revalidationPollingSeconds=${pollingSeconds}`,
+      `queueBacklogAlertThreshold=${backlogAlert}`,
       `revalidationAlwaysReady=${revalidationAlwaysReady}`,
       `deployerPrincipalId=${deployerId}`,
       "--query",

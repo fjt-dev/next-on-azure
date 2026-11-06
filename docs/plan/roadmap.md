@@ -85,7 +85,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [x] `packages/tests-e2e` (Vitest + HTTPS, not Playwright): runs against the local Functions + Azurite stack; a browser-driven suite can be added later if UI behaviour needs it
 - [ ] E2E against a real Azure deployment, deployed from CI using OIDC federation (no stored secrets), with automatic teardown
 - [ ] Evaluate reusing the example apps and E2E specs from `opennextjs/opennextjs-aws` as a conformance suite
-- [~] CI (GitHub Actions): `check` workflow written (lint, typecheck, build, unit, integration, Bicep, local E2E; SHA-pinned actions, read-only token, Dependabot) and dry-run in a clean copy, but never run on GitHub ([CI](../contribute/ci.md)); Azure E2E on demand and nightly still to do
+- [x] CI (GitHub Actions): `check` workflow (lint, typecheck, build, unit, integration, Bicep, local E2E; SHA-pinned actions, read-only token, Dependabot) ran on GitHub and passed on 2026-11-06 ([CI](../contribute/ci.md)). Still to do: Azure E2E on demand and nightly; `actionlint` was never run
 - [ ] Poison-queue end-to-end test (B3 beyond the converter): a malformed message must reach `revalidation-poison` after 3 attempts
 - [ ] `npm pack` contents check (exports, CLI entry, Bicep, notices) and a clean-install test on Node 22 and 24 on macOS, Linux and Windows
 

@@ -1,6 +1,6 @@
 # Continuous integration
 
-> **Status: written and dry-run locally, never run on GitHub.** This repository has no remote yet, so `.github/workflows/check.yml` has not executed on GitHub Actions. Treat the first run as the real verification.
+> **Status: ran on GitHub Actions on 2026-11-06 and succeeded.** The maintainer reported that every job of the first run passed (`check` on Node 22 and 24, and `e2e`) after the repository (private, `fjt-dev/opennextjs-azure-fjtd`) received its first push of 9 commits. The author of this page could not read the run (no access to a private repository's Actions from the development environment), so the details of the logs were not seen: durations, whether `func` came from the postinstall or from the fallback, and any warnings.
 
 ## Workflow `check`
 
@@ -36,12 +36,14 @@ Verified locally (2026-11-06):
 - The same commands, run in a clean copy of the repository (no `node_modules`, no build output) on Node 26: `pnpm install --frozen-lockfile` and the whole `check` job pass, and `pnpm e2e:test` passes (27 + 10 tests), including with the Core Tools binary deleted beforehand (the stack script restores it) and with `LOCAL_STACK_LOG_DIR` producing the saved logs.
 - The stack script leaves nothing behind when it crashes (tested by making `func` unexecutable).
 
+Verified on GitHub (reported by the maintainer, 2026-11-06): the whole workflow, which includes `ubuntu-latest` providing `az`, `zip`, `unzip` and `openssl`, the Node 22 and Node 24 jobs, `npm install --global pnpm@<packageManager version>`, `pnpm install --frozen-lockfile`, and the end-to-end job with the Functions host.
+
 Not verified:
 
-- Any run on GitHub Actions, including `ubuntu-latest` tool availability (`az`, `zip`, `unzip`, `openssl`).
+- The contents of that first run: nothing was read from its logs.
 - `actionlint`: not run, because downloading and executing its binary was not allowed in the development session. Run it yourself before the first push if you want a stricter check.
-- Node 22 and 24: development used Node 26 only.
-- Installing pnpm 11 with `npm install --global` on the runner.
+- Whether the artifact upload of failed runs works (it only runs on failure and has never run).
+- Pull requests from forks, and the first Dependabot pull requests.
 
 ## Not in CI yet
 

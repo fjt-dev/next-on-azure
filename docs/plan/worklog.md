@@ -4,6 +4,28 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-06 (session 10): first push and first CI run
+
+### Done
+
+- Pushed the 9 commits of `main` to the private repository `fjt-dev/opennextjs-azure-fjtd` (created empty on github.com by the maintainer; remote added over HTTPS, authenticated by the maintainer's stored credentials; no token was shared).
+- Before the push, the whole history (not only the working tree) was searched for the subscription, tenant and object ids, the maintainer's e-mail addresses, private keys, SAS tokens and common token formats: nothing found. The only key-like string is Azurite's published development key in `azurite.ts`. All commits are authored by `fjt-dev` with the GitHub noreply address.
+- A signing failure during the previous commit step (`gpg: not a tty`) had left implementation files inside the test commit; the two local, unpushed commits were reset (`git reset --soft`, working tree untouched) and redone as three correct commits before this push.
+
+### Result
+
+The maintainer reported that **all jobs of the first `check` run succeeded**: `check` on Node 22 and 24 and `e2e`. This was not seen directly (a private repository's Actions cannot be read from the development environment); see [CI](../contribute/ci.md) for what that does and does not establish.
+
+### Not done / still open
+
+- `actionlint` was skipped on purpose (the maintainer chose to push without it).
+- The repository name starts with `opennextjs-`; fine while private, to be reconsidered before publishing ([ADR-0005](./decisions.md#adr-0005-package-name-is-deferred)).
+- Azure E2E in CI (OIDC federation, new resource group per run, teardown) is not written.
+- Cost of both Azure runs: still to be read the day after.
+- This doc update is not committed yet; pushing it runs the workflow again.
+
+---
+
 ## 2026-11-06 (session 9): second Azure run, ISR deduplication and queue options (finished, resources deleted)
 
 ### Plan (recorded before anything was created)

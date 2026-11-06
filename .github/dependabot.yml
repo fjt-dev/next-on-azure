@@ -1,0 +1,21 @@
+# Keeps the SHA-pinned GitHub Actions and the npm dependencies current. Review each update: for
+# actions, check that the new SHA belongs to the tagged release in the comment.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        dependency-type: development

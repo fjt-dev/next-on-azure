@@ -1,0 +1,110 @@
+# Roadmap
+
+Goal: an npm package that deploys Next.js to Azure, built to the same quality bar as [OpenNext for AWS](https://opennext.js.org/aws): documented, tested (unit, integration, E2E) and released with a repeatable process. Official adoption is not a goal in itself, but the project should be good enough to be considered.
+
+Status legend: `[x]` done, `[~]` partially done, `[ ]` not started.
+
+Revision history: revised 2026-11-06 after an external review (see the [work log](./worklog.md)). Main changes: local Functions stack first, `git init` immediately, access restriction moved up, app layout and Front Door made measurable decisions, behavioral test cases and missing security/release items added.
+
+## Phase 0: Prototype (done, 2026-11-05)
+
+- [x] Choose architecture: Azure Functions (Flex Consumption), Blob/Table/Queue Storage, Front Door ([ADR-0001](./decisions.md#adr-0001-compute-and-storage-targets))
+- [x] OpenNext overrides: wrapper, converter, incremental cache, tag cache, queue, image loader, revalidation wrapper/converter
+- [x] CLI: `package` and `deploy`
+- [x] Bicep template for all infrastructure (compiles; not deployed)
+- [x] Verified locally: `open-next build`, SSR/ISR/404 through the wrapper, Blob cache `MISS` then `HIT`, Table tag cache and Queue against Azurite
+- [x] Convert to a pnpm + Turborepo monorepo ([ADR-0004](./decisions.md#adr-0004-monorepo-layout-and-tooling))
+- [x] `git init` (2026-11-06; no commits yet)
+
+## Phase 1: Prove it, locally first, then on Azure
+
+Most real defects are expected to show up under the real Functions host running locally; real Azure should only add a few. So the local stack comes first and costs nothing.
+
+### 1a. Local Functions stack (no Azure resources)
+
+- [x] Run the packaged apps with Azure Functions Core Tools + Azurite; one command starts the stack (`pnpm local:stack`)
+- [~] Verify on it: streaming (done), queue-triggered ISR regeneration (done), `revalidateTag` (done), `/_next/image` (done), `waitUntil` (completion done; client latency is a problem, see [ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream)), `revalidatePath` (not done)
+- [x] HTTPS local run with a self-signed certificate created for the run and deleted afterwards (B14)
+- [ ] Add a Pages Router fixture next to `examples/app-router`
+- [~] Fix whatever the above uncovers: extension bundle, sharp native binaries and a packaging guard fixed; `waitUntil` latency, missing-image status code (500 instead of 404) and `Content-Length` handling open; see the [work log](./worklog.md)
+
+### 1b. Decide the deployment shape
+
+Decided on 2026-11-06 in [ADR-0009](./decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default): one Function app with three functions, Front Door optional and off by default.
+
+- [x] Check the current Front Door Standard base fee: 35 USD/month per profile (Premium 330); optional, off by default
+- [x] Compare three apps vs one app registering all three functions locally: behavior identical, +about 15 ms module load, +about 4 MB; the only constraint is the working directory
+- [x] Decide direct access restriction: not needed without Front Door; with it, `X-Azure-FDID` check in the wrapper plus a service-tag access restriction
+- [ ] Cold start, scale-out and cost of single vs split on real Azure (Phase 1c; local numbers cannot answer this)
+
+Work this decision created (implemented 2026-11-06, verified locally only):
+
+- [x] `opennext-azure package`: builds the single app (`chdir` per bundle, server last, Azure SDKs installed once at the root); the old three-app layout was removed
+- [x] `scripts/local-stack.mjs`: runs the single app
+- [x] Bicep: one Function app, one deployment container, Front Door behind the `frontDoor` parameter; `deploy` updated (compiles; never deployed)
+- [x] Asset serving without Front Door: `AssetResolver` override reading Blob via a manifest (B10, exact paths)
+- [ ] Measure the cost of serving static files through the function (Phase 1c)
+- [x] Wrapper: `FRONT_DOOR_ID` / `X-Azure-FDID` validation, checked on the local host
+- [x] Document the Front Door variant and the no-Front-Door variant in Get started
+- [ ] Automated tests for all of the above (Phase 2): manifest builder, asset resolver (200/304/206/416/HEAD), entry point generation, `isFrontDoorRequestAllowed`
+
+### 1c. First real deployment
+
+Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, region and resource group before creating anything.
+
+- [x] Deploy `examples/app-router` with `opennext-azure deploy` (2026-11-06; it took five attempts, see the work log: role id typo, deployer data role, pnpm symlinks twice)
+- [~] Verify the Flex Consumption specifics in [Azure notes](../inner_workings/azure_notes.md): `properties` response shape, config-zip, identity-based host storage and Node 22 verified; rejected classic settings, init limit and the explicit maximum instance count still open
+- [x] Verify response streaming through Functions (directly on the app; through Front Door not tested)
+- [x] Verify `waitUntil` ([ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream)): `hold` and `detach` measured on Azure; deferred work survives the response, an idle instance is removed after about 1.5 to 3.5 minutes
+- [x] Verify ISR regeneration is executed by the queue consumer, not by an in-process fallback: 34 `revalidation` invocations recorded in Application Insights, each followed by a `HEAD` request to the page ([ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group))
+- [x] Verify managed identity RBAC: no shared keys, Blob/Queue/Table roles, host storage role
+- [x] Measure cold start and scale-out: HTTP cold start 4.1 to 4.5 s; 200 requests at 40 in parallel on 17 instances, p95 4.5 s ([Azure notes](../inner_workings/azure_notes.md), items 19 and 20). Not yet: the same on the three-app layout, with Node 24, or with a larger package
+- [ ] Add a post-deployment readiness check: a health route that reports the same release as the local build
+- [x] Delete everything created and verify it (2026-11-06 07:06 UTC: 0 resources of the run left in the subscription)
+- [ ] **Next-day** read-only inventory of the subscription and a look at the actual cost of the run (usage had not been reported yet when the resources were deleted)
+
+### 1d. What the first Azure run found that still needs work
+
+- [ ] ISR revalidation: dedupe messages before enqueueing; alert on queue age; try a lower `maxPollingInterval`; find the cause of `Unable to create client for AzureWebJobsStorage` on some new instances ([ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group))
+- [ ] Decide the `WAIT_UNTIL_MODE` default with more data than one run ([ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream))
+- [ ] Limit the instance count for small sites: a 200-request burst started 17 instances, 16 of which served one or two requests
+- [ ] Make `tests-e2e` run against a deployed URL (the probes used on Azure were throwaway scripts): the Azure E2E workflow in Phase 2
+- [ ] A missing source image answers 500 instead of 404 (seen locally and on Azure)
+- [ ] Verify the three-app layout against the single app on Azure, then close or supersede [ADR-0009](./decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default)
+- [ ] Deploy the Front Door variant once (`--front-door`), including the access restriction on Flex
+- [ ] Verify npm and Yarn layouts of `node_modules` on Azure; extend the flattening or the guard if a layout other than pnpm's needs it
+
+## Phase 2: Test infrastructure
+
+- [x] `packages/tests-unit` (Vitest): converter, wrapper, asset resolver, caches, queue, revalidation, image loader, manifest and packaging helpers against in-memory fakes
+- [x] Integration tests against Azurite (real SDKs, dedicated ports), automating the manual checks done in Phase 0
+- [~] Implement the behavioral test cases listed in [testing](../contribute/testing.md#required-behavioral-test-cases): B1, B2 (partly), B3 (converter level), B4, B5 (partly), B6, B7 (current behaviour), B9 (HEAD), B10, B11 (resize and rejections) are covered; B8, B12, B13, B14-beyond-HTTPS, cookie sanitizing, `Content-Length` removal, optimized-image cache rules are not
+- [x] `packages/tests-e2e` (Vitest + HTTPS, not Playwright): runs against the local Functions + Azurite stack; a browser-driven suite can be added later if UI behaviour needs it
+- [ ] E2E against a real Azure deployment, deployed from CI using OIDC federation (no stored secrets), with automatic teardown
+- [ ] Evaluate reusing the example apps and E2E specs from `opennextjs/opennextjs-aws` as a conformance suite
+- [~] CI (GitHub Actions): `check` workflow written (lint, typecheck, build, unit, integration, Bicep, local E2E; SHA-pinned actions, read-only token, Dependabot) and dry-run in a clean copy, but never run on GitHub ([CI](../contribute/ci.md)); Azure E2E on demand and nightly still to do
+- [ ] Poison-queue end-to-end test (B3 beyond the converter): a malformed message must reach `revalidation-poison` after 3 attempts
+- [ ] `npm pack` contents check (exports, CLI entry, Bicep, notices) and a clean-install test on Node 22 and 24 on macOS, Linux and Windows
+
+## Phase 3: Feature parity and hardening
+
+- [ ] Next.js version policy: supported ranges enforced by a guard that refuses others; engine choice per Next.js major; version matrix in CI
+- [ ] Pages Router, `app-pages-router`, middleware (including external middleware)
+- [ ] Server Actions, including the stable encryption key guidance (B12), `next/image` remote patterns, streaming/Suspense, PPR where supported
+- [ ] Image optimization hardening: private cache container, cache rules, refuse non-Linux-x64 artifacts (B11)
+- [ ] Static assets served from an exact-path manifest instead of name patterns (B10)
+- [ ] Security hardening of responses: error detail only when `NODE_ENV` is `development`, cookie sanitizing, no body on HEAD/204/205/304/101, drop `Content-Length` on streamed responses
+- [~] Supply chain and security checks: SHA-pinned actions, read-only token and no privileged triggers are in place for `check` (see [CI](../contribute/ci.md)); dependency audit, secret scan, license allow-list with a third-party notices file are not
+- [ ] Rollback and engine switch behavior, documented and tested
+- [ ] Observability: Application Insights wiring, structured logging, documented queries
+- [ ] Revisit known limitations in [Compatibility](../compatibility.md) and [Common issues](../common_issues.md)
+- [ ] Optional: custom domain and certificate support in the Bicep template; Cosmos DB tag cache as an alternative override
+
+## Phase 4: Publish
+
+- [ ] Decide the final npm package name ([ADR-0005](./decisions.md#adr-0005-package-name-is-deferred)); do not use `opennextjs` as a name prefix unless the OpenNext maintainers agree
+- [ ] Attribution wording in README and package metadata: not an official OpenNext package
+- [ ] Repository settings, branch protection, `CONTRIBUTING.md`, `SECURITY.md`
+- [ ] Changesets-based release with npm provenance; pre-release channel via `pkg-pr-new` or an npm `next` tag
+- [ ] Docs site (generated from `docs/`), example apps, migration guide from other hosts
+- [ ] First public release `0.1.0`, clearly labeled experimental until Phases 1 to 3 are complete

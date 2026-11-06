@@ -1,0 +1,32 @@
+{
+  "name": "opennextjs-azure-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@11.5.2",
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "e2e:test": "turbo run e2e:test",
+    "lint": "biome check",
+    "lint:fix": "biome check --fix",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "turbo run build && changeset publish",
+    "local:stack": "node scripts/local-stack.mjs"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@changesets/cli": "^2.31.1",
+    "azure-functions-core-tools": "^4.16.0",
+    "azurite": "^3.37.0",
+    "turbo": "2.11.7"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  }
+}

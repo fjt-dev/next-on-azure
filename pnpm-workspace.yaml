@@ -1,0 +1,22 @@
+packages:
+  - "packages/*"
+  - "examples/*"
+
+# Build scripts we allow to run on install.
+allowBuilds:
+  "@biomejs/biome": true
+  azure-functions-core-tools: true
+  esbuild: true
+  protobufjs: false
+  sharp: true
+  turbo: true
+
+# Single source of truth for versions shared across the workspace.
+catalog:
+  "@opennextjs/aws": 4.1.15
+  next: 15.5.29
+  react: 19.1.0
+  react-dom: 19.1.0
+  "@types/node": ^22.10.0
+  typescript: ^5.7.0
+  vitest: ^3.2.0

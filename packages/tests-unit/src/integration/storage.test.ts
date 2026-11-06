@@ -98,6 +98,54 @@ describe("revalidation queue on Storage Queue", () => {
   });
 });
 
+describe("revalidation dedupe on the real Table Storage (ADR-0010)", () => {
+  const body = (over: Record<string, unknown> = {}) => ({
+    MessageBody: { host: "www.example.com", url: "/race", lastModified: 1, eTag: "e", ...over },
+    MessageDeduplicationId: "d",
+    MessageGroupId: "g",
+  });
+
+  it("50 simultaneous requests enqueue exactly one message, a new page version one more", async () => {
+    vi.stubEnv("REVALIDATION_QUEUE_NAME", "it-dedupe-queue");
+    const queueClient = new QueueClient(CONNECTION_STRING, "it-dedupe-queue");
+    await queueClient.createIfNotExists();
+    const { default: queue } = await import("../../../open-next-azure/src/overrides/queue.js");
+
+    // 409 on create and 412 on a conditional replace are the real service's answers here.
+    await Promise.all(Array.from({ length: 50 }, () => queue.send(body())));
+    expect(
+      (await queueClient.peekMessages({ numberOfMessages: 32 })).peekedMessageItems,
+    ).toHaveLength(1);
+
+    await queue.send(body()); // still the same version
+    expect(
+      (await queueClient.peekMessages({ numberOfMessages: 32 })).peekedMessageItems,
+    ).toHaveLength(1);
+
+    await queue.send(body({ eTag: "regenerated" })); // new content, it can go stale again
+    await queue.send(body({ url: "/other" })); // another page
+    expect(
+      (await queueClient.peekMessages({ numberOfMessages: 32 })).peekedMessageItems,
+    ).toHaveLength(3);
+  });
+
+  it("many simultaneous requests racing to replace an expired claim enqueue exactly one message", async () => {
+    vi.stubEnv("REVALIDATION_QUEUE_NAME", "it-dedupe-queue-2");
+    vi.stubEnv("REVALIDATION_DEDUPE_SECONDS", "1");
+    const queueClient = new QueueClient(CONNECTION_STRING, "it-dedupe-queue-2");
+    await queueClient.createIfNotExists();
+    const { default: queue } = await import("../../../open-next-azure/src/overrides/queue.js");
+
+    await queue.send(body({ url: "/expiring" }));
+    await new Promise((resolve) => setTimeout(resolve, 1200)); // the one second window ends
+    await Promise.all(Array.from({ length: 50 }, () => queue.send(body({ url: "/expiring" }))));
+    // the original message plus exactly one from the race over the expired claim (ETag 412 for the rest)
+    expect(
+      (await queueClient.peekMessages({ numberOfMessages: 32 })).peekedMessageItems,
+    ).toHaveLength(2);
+  });
+});
+
 describe("asset resolver and image loader on Blob Storage", () => {
   let dir: string;
   const files: Record<string, Buffer> = {

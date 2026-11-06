@@ -34,6 +34,29 @@ describe("ISR through the revalidation queue (B1, B2)", () => {
   });
 });
 
+describe("ISR stampede (ADR-0010)", () => {
+  it("30 simultaneous requests for a stale page cause one regeneration, not thirty", async () => {
+    await request("/isr");
+    await sleep(6500); // /isr has revalidate = 5, so it is stale now
+    const before = consumerRuns();
+
+    const responses = await Promise.all(Array.from({ length: 30 }, () => request("/isr")));
+    expect(responses.every((r) => r.status === 200)).toBe(true);
+
+    const stamp = timestampIn(responses[0]?.text ?? "");
+    await eventually(async () => {
+      const r = await request("/isr");
+      return timestampIn(r.text) !== stamp ? r : false;
+    });
+    await sleep(3000); // let any extra message be consumed before counting
+
+    const runs = consumerRuns() - before;
+    // Without the dedupe every one of the 30 requests adds a message and a regeneration.
+    expect(runs).toBeGreaterThanOrEqual(1);
+    expect(runs).toBeLessThanOrEqual(2);
+  });
+});
+
 describe("on-demand revalidation (revalidateTag)", () => {
   it("keeps a cached value until the tag is revalidated, then renders a new one", async () => {
     const a = timestampIn((await request("/tagged")).text);

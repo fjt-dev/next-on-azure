@@ -35,3 +35,25 @@ describe("main.bicep role definition ids", () => {
     for (const role of new Set(used)) expect(Object.keys(BUILT_IN_ROLES)).toContain(role);
   });
 });
+
+describe("main.bicep metric alert", () => {
+  // Azure Monitor accepts only these windows for QueueMessageCount (an hourly metric). A shorter one
+  // passes `az deployment group validate` and `what-if` and fails the real deployment with
+  // "Evaluation window size must be one of [PT1H, PT6H, PT12H, P1D]".
+  const allowed = ["PT1H", "PT6H", "PT12H", "P1D"];
+
+  it("uses a window the QueueMessageCount metric accepts", () => {
+    const window = /windowSize:\s*'([^']+)'/.exec(bicep)?.[1];
+    expect(allowed).toContain(window);
+  });
+
+  it("evaluates at least as often as its window is long", () => {
+    const minutes = (iso: string) =>
+      iso.startsWith("P1D")
+        ? 1440
+        : Number(/PT(\d+)([HM])/.exec(iso)?.[1]) * (iso.endsWith("H") ? 60 : 1);
+    const frequency = /evaluationFrequency:\s*'([^']+)'/.exec(bicep)?.[1] ?? "";
+    const window = /windowSize:\s*'([^']+)'/.exec(bicep)?.[1] ?? "";
+    expect(minutes(frequency)).toBeLessThanOrEqual(minutes(window));
+  });
+});

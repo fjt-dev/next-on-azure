@@ -82,17 +82,38 @@ export function fakeBlobService() {
 type Entity = { partitionKey: string; rowKey: string; [k: string]: unknown };
 
 export function fakeTable() {
-  const rows = new Map<string, Entity>();
+  const rows = new Map<string, Entity & { etag: string }>();
   const upserts: { entity: Entity; mode: unknown }[] = [];
+  let version = 0;
+  const key = (pk: string, rk: string) => `${pk}|${rk}`;
+  const error = (statusCode: number, name: string) =>
+    Object.assign(new Error(name), { statusCode });
+
   const client = {
     async getEntity(partitionKey: string, rowKey: string) {
-      const row = rows.get(`${partitionKey}|${rowKey}`);
-      if (!row) throw Object.assign(new Error("ResourceNotFound"), { statusCode: 404 });
-      return row;
+      const row = rows.get(key(partitionKey, rowKey));
+      if (!row) throw error(404, "ResourceNotFound");
+      return { ...row };
     },
     async upsertEntity(entity: Entity, mode: unknown) {
       upserts.push({ entity, mode });
-      rows.set(`${entity.partitionKey}|${entity.rowKey}`, entity);
+      rows.set(key(entity.partitionKey, entity.rowKey), { ...entity, etag: `W/"${++version}"` });
+    },
+    /** Like Table Storage: 409 when the row exists. */
+    async createEntity(entity: Entity) {
+      const k = key(entity.partitionKey, entity.rowKey);
+      if (rows.has(k)) throw error(409, "EntityAlreadyExists");
+      rows.set(k, { ...entity, etag: `W/"${++version}"` });
+    },
+    /** Like Table Storage: 412 when the ETag no longer matches, 404 when the row is gone. */
+    async updateEntity(entity: Entity, _mode: unknown, options?: { etag?: string }) {
+      const k = key(entity.partitionKey, entity.rowKey);
+      const current = rows.get(k);
+      if (!current) throw error(404, "ResourceNotFound");
+      if (options?.etag && options.etag !== current.etag) {
+        throw error(412, "UpdateConditionNotSatisfied");
+      }
+      rows.set(k, { ...entity, etag: `W/"${++version}"` });
     },
   };
   return { client, rows, upserts };

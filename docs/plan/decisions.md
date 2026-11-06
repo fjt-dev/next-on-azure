@@ -183,7 +183,7 @@ ISR enqueue under `detach`: a stale page was regenerated 3 s after the stale req
 
 ## ADR-0010: ISR revalidation depends on the queue trigger scale group
 
-**Status:** Observations recorded 2026-11-06 on Azure; cause of the one stall **unconfirmed**; mitigation option **Proposed** and only partly tested.
+**Status:** Observations recorded 2026-11-06 on Azure; cause of the one stall **unconfirmed**. **Deduplication implemented and verified on Azure 2026-11-06** (second Azure run). The lower polling interval is verified to remove the wait; the backlog alert was created by Azure Monitor but never fired.
 
 ### What was observed (Flex Consumption, one Function app, Node 22, japaneast)
 
@@ -197,19 +197,39 @@ During the stall two instances reported the host health check `azure.functions.w
 
 ### Consequences that follow from the data, whatever the cause
 
-1. **Messages are not deduplicated** (Storage Queue). Each request that finds the page stale enqueues a message. While the revalidation is delayed, every further request adds one: 25 polling requests became 25 messages and 27 regenerations of the same page. The cost grows with traffic during the delay. A dedupe (for example a Table row per path with a short TTL, checked before enqueueing) is needed; not implemented.
+1. **Messages are not deduplicated** (Storage Queue). Each request that finds the page stale enqueues a message. While the revalidation is delayed, every further request adds one: 25 polling requests became 25 messages and 27 regenerations of the same page. The cost grows with traffic during the delay. **Fixed by a claim before enqueueing, see "Deduplication" below.**
 2. **A stale page can stay stale for minutes** if the consumer stalls. Pages are still served (stale-while-revalidate), so this is a freshness problem, not an outage.
 3. Failed consumption is silent from the HTTP side. Nothing alerts on a queue that is not being drained.
+
+### Deduplication (implemented)
+
+Before a message is enqueued the request must win a **claim** on that page: a row in the tag cache table (own partition `dedupe-<build id>`, row key a SHA-1 of host and URL) written with optimistic concurrency. No row: create it (409 means somebody else did). Row of the same version younger than the window (`REVALIDATION_DEDUPE_SECONDS`, default 60): somebody already asked, enqueue nothing. Otherwise: replace it using the row's ETag (412 means somebody else did). So of any number of simultaneous requests on any number of instances exactly one enqueues; after the window the claim can be taken again, so a lost message cannot block a page for good. A storage error while claiming enqueues anyway (a duplicate costs a render, a missing revalidation leaves a page stale).
+
+**The page version is the ETag, not `lastModified`.** The first version used `lastModified` from the message and failed its end-to-end test: 30 simultaneous requests still caused 6 regenerations. Reproduced locally; the dedupe row showed `version = 0`. OpenNext's server path sets the async-storage `lastModified` to a *marker* (`1` when the entry is stale, `0` when unset; `adapters/cache.js`, `store.lastModified = _isStale ? 1 : _lastModified`), so concurrent requests for the same page reported 0 or 1, counted as different versions, and took turns winning the claim. The ETag of the cached content is the same for every request that sees the same page and changes when it is regenerated with new content. An unknown version (no ETag, `lastModified` 0 or 1) is a wildcard: only the window decides. Consequence: a page regenerated to *identical* content keeps its claim until the window ends, which is harmless because the content did not change.
+
+Limits: one row per page and build stays in the table (small, never cleaned); with an unknown version a page cannot be revalidated more often than the window (60 s by default), set `REVALIDATION_DEDUPE_SECONDS` lower for pages that must refresh faster; the claim costs one Table read and, for the winner, one write per stale request. Unit, Azurite (50 simultaneous requests against the real service, plus a race over an expired claim) and local end-to-end tests cover it. **Verified on Azure (second run, 2026-11-06):** 30 simultaneous requests for a stale page returned 30 `STALE` responses and caused **exactly one** `revalidation` invocation (22 s later, with the default polling). The first run, without dedupe, had 27 invocations from a polling loop of 25 requests.
+
+### Why the wait was 20 to 57 seconds: measured
+
+Three timed trials per setting, one stale request each, at least 2.5 minutes of silence between trials, one always-ready instance of the revalidation function in both cases (japaneast, Flex Consumption). "Wait" is from the end of the stale HTTP request (the enqueue) to the start of the `revalidation` invocation, both from Application Insights.
+
+| `maxPollingInterval` | Waits (s) | Mean |
+| --- | --- | --- |
+| 60 s (platform default) | 32.7, 42.7, 57.5 | **44.3 s** |
+| 5 s (`revalidationPollingSeconds=5`) | 1.6, 3.8, 1.1 | **2.2 s** |
+
+Together with the earlier 22 s (stampede) and 37 s (first run) this confirms the hypothesis: an idle queue listener backs off its polling up to `maxPollingInterval`, so a message waits up to a minute. The cost of the fix is storage transactions: one poll every 5 s is 518,400 `GetMessages` per month per listening instance, which is about **0.21 USD per month** at the list price of 0.004 USD per 10,000 operations (Queues v2, Standard LRS, japaneast, Azure retail prices API, 2026-11-06); at 60 s it is about 0.02 USD. The storage metric for the actual count was not yet available when the resources were deleted, so that number is an estimate, not a measurement.
 
 ### Options
 
 - **Always-ready instance for the revalidation function** (`revalidationAlwaysReady` in Bicep, `deploy --revalidation-always-ready 1`, setting `function:revalidation`). Costs one instance continuously. **Tested:** Flex accepted it (`alwaysReady: [{name: "function:revalidation", instanceCount: 1}]` is in the effective configuration). **It did not make consumption faster:** the message enqueued at 06:59:53 was consumed at 07:00:30, **37 s** later, against 5 s from a cold start. Likely reason (hypothesis, not tested): an idle queue listener backs off its polling up to `maxPollingInterval`, which is 1 minute by default (it shows in the host's `QueuesOptions`), whereas a freshly scaled-out instance polls at once. The stall of 2 min 21 s was seen once and could not be reproduced, so the effect on it is unknown.
-- **Lower `extensions.queues.maxPollingInterval`** in `host.json` (for example to 2 to 5 s). Each poll of an empty queue is a storage transaction, so this trades a small, constant cost for latency. Untested.
-- **Dedupe before enqueueing** (consequence 1), independent of the stall.
-- **An alert on queue age or length** (Azure Monitor metric `QueueMessageCount` / oldest message), and on the host health check.
+- **Lower `maxPollingInterval`:** `revalidationPollingSeconds` in Bicep (`deploy --revalidation-polling-seconds <1-60>`) sets the app setting `AzureFunctionsJobHost__extensions__queues__maxPollingInterval`, which overrides `host.json`. Each poll of an empty queue is a storage transaction, so this trades a small, constant cost per running instance for latency. **Measured: 44 s becomes 2 s** (table above). Default stays 60 (the platform default) until a default is chosen; 5 s is the value that was tested.
+- **Dedupe before enqueueing**: done, above.
+- **An alert on the queue backlog:** (created and enabled on Azure with window PT1H and evaluation every PT15M; it never fired because the queues stayed empty, so nothing is known about a real alert.)
+  Details: `queueBacklogAlertThreshold` in Bicep (`deploy --alert-queue-backlog <messages>`) creates a metric alert on `QueueMessageCount` of the storage account's queue service (average above the threshold over one hour, because Azure Monitor only accepts windows of PT1H, PT6H, PT12H or P1D for `QueueMessageCount` (found by the first deployment of the alert, not by `validate`); revalidation and poison queue together, since Storage reports no "age of the oldest message"). Off by default; without an action group (`alertActionGroupId`) it is visible in the portal only. Validated and what-if'd, not deployed. Still missing: an alert on the host health check.
 - Find the cause of "Unable to create client for AzureWebJobsStorage" (identity token timing, role propagation, or the identity-based `AzureWebJobsStorage` settings) before choosing.
 
 ### Not decided
 
-The default for `revalidationAlwaysReady` stays 0, and `maxPollingInterval` stays at the platform default; neither measurement supports a change yet. Nothing here is a reason to change the architecture; it is a reason to add dedupe and monitoring.
+The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` stays at the platform default 60 for now; the measurement supports recommending a low value (5 s) for sites where a stale page should be refreshed within seconds. Which default to ship is a decision for the maintainer, not made here. Nothing here is a reason to change the architecture; it is a reason to add dedupe and monitoring.
 

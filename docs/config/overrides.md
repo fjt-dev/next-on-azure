@@ -38,6 +38,7 @@ The Bicep template sets these on the Function apps.
 | `WAIT_UNTIL_MODE` | `hold` | wrapper: `hold` keeps the response open until deferred work (`after()`, queue enqueue) has settled; `detach` ends the response at once and lets the work run on. See [ADR-0006](../plan/decisions.md#adr-0006-waituntil-via-response-stream) for the Azure measurements. Set it through the Bicep parameter, not with `az` (the next deploy would remove it) |
 | `CACHE_TABLE_NAME` | `tagcache` | tag cache |
 | `REVALIDATION_QUEUE_NAME` | `revalidation` | queue, revalidation trigger |
+| `REVALIDATION_DEDUPE_SECONDS` | `60` | queue: how long a request that found a page stale holds the right to enqueue its revalidation (0 = off). See [Queue behavior](#queue-behavior) |
 | `OPEN_NEXT_BUILD_ID` | set by OpenNext at build time | all caches (key prefix) |
 | `FUNCTIONS_REQUEST_BODY_SIZE_LIMIT` | `104857600` | Functions host (request bodies, Server Actions) |
 
@@ -85,7 +86,9 @@ Entries are written on demand. Nothing needs to be seeded at deploy time.
 
 ## Queue behavior
 
-Messages are plain JSON (`{ host, url, lastModified, eTag }`), so `host.json` sets `extensions.queues.messageEncoding` to `none`. Storage Queues have no deduplication or message groups, so `MessageDeduplicationId` and `MessageGroupId` are ignored. A failed revalidation throws, the host retries up to `maxDequeueCount` (3), and then moves the message to the `revalidation-poison` queue.
+Messages are plain JSON (`{ host, url, lastModified, eTag }`), so `host.json` sets `extensions.queues.messageEncoding` to `none`. Storage Queues have no deduplication or message groups, so `MessageDeduplicationId` and `MessageGroupId` are ignored. **Deduplication.** Before enqueueing, a request must win a claim on the page: a row in the tag table (partition `dedupe-<build id>`) created or replaced with optimistic concurrency, so one message per page and window however many requests find it stale ([ADR-0010](../plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group)). The page version is the ETag of the cached content; a regeneration with new content allows the next claim at once. Without a known version only `REVALIDATION_DEDUPE_SECONDS` decides. If the claim cannot be made (storage error) the message is enqueued anyway.
+
+A failed revalidation throws, the host retries up to `maxDequeueCount` (3), and then moves the message to the `revalidation-poison` queue.
 
 ## Writing your own override
 

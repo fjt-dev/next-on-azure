@@ -85,6 +85,10 @@ Options:
 | `--wait-until hold\|detach` | `hold` | What happens to deferred work such as `after()` when the response is complete. `hold` makes the client wait for it; `detach` answers at once, which is safe for short work only (an idle instance is removed after about 1.5 to 3.5 minutes) |
 | `--revalidation-always-ready <n>` | `0` | Keeps `n` instance(s) of the queue-triggered revalidation function running (billed continuously). With `0` a stale page can wait minutes for its regeneration, see [ADR-0010](./plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group) |
 
+| `--revalidation-dedupe-seconds <n>` | `60` | How long one stale request holds the right to enqueue a page's revalidation; the other requests for that page enqueue nothing meanwhile. `0` turns it off |
+| `--revalidation-polling-seconds <1-60>` | `60` | Longest wait between polls of an empty revalidation queue (the platform default is 60). Lower = shorter wait for a stale page, a few more storage transactions. Not measured on Azure |
+| `--alert-queue-backlog <messages>` | off | Creates an Azure Monitor alert when the queues hold more than this many messages on average over one hour |
+
 Every setting lives in the Bicep template, because a redeployment replaces the app settings: a setting added later with `az functionapp config appsettings set` is gone after the next `deploy`.
 
 `deploy`:

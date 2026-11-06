@@ -35,3 +35,4 @@ Rules for any work that creates resources in an Azure subscription. They exist t
 - **Do not set app settings with `az functionapp config appsettings set` for anything you want to keep:** the next template deployment replaces them all. Put them in the Bicep template.
 - **Idle instances disappear after minutes**, so a measurement that needs a fresh instance needs minutes without traffic, and deferred work that outlives the instance is lost.
 - Keep a timestamped record while you go (start time, hard stop, resource names): the cleanup is mechanical when the list exists.
+- **A second class of errors that `validate` and `what-if` let through: values Azure Monitor and ARM check only at deployment** (the `QueueMessageCount` alert window, built-in role ids). Pin every such constraint in a test the first time you hit it (`packages/tests-unit/src/unit/bicep.test.ts`), and budget a failed first deployment for any new resource type.

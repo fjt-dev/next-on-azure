@@ -102,3 +102,7 @@ The next `deploy` replaces all app settings with the ones in the template. Add t
 ## Stale pages are not regenerated for minutes
 
 The revalidation message sits in the `revalidation` queue until the queue-triggered function runs. Observed: 1 to 5 s normally, one stall of 2 min 21 s, and 37 s with an idle always-ready instance. See [ADR-0010](./plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group). Meanwhile every stale request adds another message (no deduplication).
+
+## `deploy` fails with "Evaluation window size must be one of [PT1H, PT6H, PT12H, P1D]"
+
+The queue backlog alert uses the `QueueMessageCount` metric, which Azure Monitor evaluates over windows of at least one hour. The template uses PT1H; a shorter window passes `validate` and `what-if` and fails the deployment. Do not shorten it.

@@ -4,6 +4,103 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-06 (session 9): second Azure run, ISR deduplication and queue options (finished, resources deleted)
+
+### Plan (recorded before anything was created)
+
+| Item | Value |
+| --- | --- |
+| Subscription | Azure for Students (`<subscription-id>`), signed-in user is Owner |
+| Region | japaneast |
+| Resource group | `rg-opennextjs-azure-2`, **new**, created by this run. The pre-existing empty group `opennextjs-azure` is not touched; the group of the first run was deleted |
+| Layout | Single Function app, no Front Door |
+| Cost ceiling | 5 USD (an estimate; the first run's real cost is still not reported: 3 meters recorded, 0.0000 so far). Stop and delete if it looks like it will be exceeded |
+| Time window | 2 hours: started 2026-11-06T12:39:05Z, hard stop 2026-11-06T14:39:05Z |
+| Deploy 1 | `--revalidation-always-ready 1 --alert-queue-backlog 20` (polling stays 60 s, the baseline) |
+| Deploy 2 | the same plus `--revalidation-polling-seconds 5` |
+| What is measured | (a) the new alert and settings are accepted by Flex/Azure Monitor; (b) 30 simultaneous requests for a stale page cause 1 or 2 `revalidation` invocations, not 30 (Application Insights); (c) three trials per polling setting of the time from the stale request to the `revalidation` invocation, with at least 2 minutes of silence between trials. The baseline so far is one measurement of 37 s |
+| Cleanup | Delete the created resources one by one by name, then the group (created by this run); read-only inventory afterwards and next day |
+
+### Record of created resources
+
+All in `rg-opennextjs-azure-2` (japaneast), created by this run at 12:39 UTC and deleted by 13:18 UTC (39 minutes of the 2 hour window).
+
+| Type | Name |
+| --- | --- |
+| Resource group | `rg-opennextjs-azure-2` (new, created by this run) |
+| Storage account | `stonx2rwnu7d4g` |
+| Log Analytics workspace | `log-onx2-rwnu7d4ggqqx4` |
+| Application Insights | `appi-onx2-rwnu7d4ggqqx4` |
+| Flex Consumption plan | `plan-onx2-rwnu7d4ggqqx4` |
+| Function app | `func-onx2-rwnu7d4ggqqx4` |
+| Metric alert | `alert-queue-backlog-onx2-rwnu7d4ggqqx4` |
+| Action group (created by Azure next to Application Insights, not in the template) | `Application Insights Smart Detection` |
+
+### What happened
+
+| Step | Result |
+| --- | --- |
+| Deploy 1 (`--revalidation-always-ready 1 --alert-queue-backlog 20`) | **failed**: `BadRequest: Evaluation window size must be one of [PT1H, PT6H, PT12H, P1D] for the metric QueueMessageCount`. `validate` and `what-if` had passed. Fixed to window PT1H, evaluated every PT15M; a unit test pins it. Second attempt succeeded (about 2.6 minutes) |
+| Alert, always-ready, settings | alert created and enabled (PT1H, every PT15M, threshold 20); `function:revalidation` always-ready 1 in the effective configuration; `REVALIDATION_DEDUPE_SECONDS=60` set; the polling setting is absent at the default 60, as designed |
+| **Deduplication** | 30 simultaneous requests for a stale page: 30 `STALE` responses and **exactly one** `revalidation` invocation. Without dedupe the first run had 27 invocations |
+| **Why the wait was long** (3 timed trials per setting) | `maxPollingInterval` 60 s (default): waits 32.7 / 42.7 / 57.5 s, mean **44.3 s**. 5 s: 1.6 / 3.8 / 1.1 s, mean **2.2 s** |
+| Burst of 200 requests (40 parallel) then a stale request at once, the situation of the 2 min 21 s stall in the first run | consumed after 3.9 s with one invocation. **The stall did not reproduce** (one attempt) |
+| Whole run | 45 `server` and 7 `revalidation` invocations, 0 failed, 0 exceptions; 21 distinct instances, 26 host starts |
+| `Unable to create client for AzureWebJobsStorage` | seen once, during the restart of deploy 2 (1 of 26 host starts); 2 of about 20 in the first run. Cause still unknown |
+| Cold start of the HTTP function | 4.5 to 4.75 s again (three first requests after idle) |
+| Deployment time | about 2.5 minutes per package deployment |
+| Cost | not reported yet for this run either; see below |
+| Alert firing | not tested: the queues stayed empty, as they should |
+| Storage transaction metric | not yet available when the resources were deleted; the cost of polling at 5 s is an estimate from list prices (see ADR-0010) |
+
+### Cleanup (13:16 to 13:18 UTC)
+
+Deleted one by one from the record above: metric alert, Function app, plan, Application Insights, Log Analytics workspace (purged with `--force`), storage account (with its role assignments), the action group, then the resource group. Verified: no resource of the run in the subscription, no soft-deleted workspace, the pre-existing groups `opennextjs-azure` and `NetworkWatcherRG` untouched.
+
+### Still to do after this run
+
+- **Next day:** read-only inventory of the subscription and the actual cost of **both** Azure runs. When the first run was deleted, the usage API showed 3 meters at 0.0000; this run's usage was not available at all yet. The ceiling was 5 USD per run; both ran well under 2 hours on scale-to-zero resources plus one always-ready instance, but the cost is an estimate until usage is reported.
+- Decide the default for `revalidationPollingSeconds` ([ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group)).
+- The alert has never fired; whether it does when a consumer stalls is untested.
+- Nothing of sessions 8 and 9 is committed yet.
+
+---
+
+## 2026-11-06 (session 8): ISR revalidation, deduplication and options
+
+### Done
+
+- **Deduplication of revalidation messages** (`revalidation-dedupe.ts`, used by `queue.ts`): a request must win a claim, a Table row written with optimistic concurrency (create: 409 means lost; replace with the row's ETag: 412 means lost), before it enqueues. Window `REVALIDATION_DEDUPE_SECONDS` (default 60, 0 = off). Fails open on storage errors. Design and limits in [ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group).
+- Bicep and `deploy`: `revalidationDedupeSeconds` (`--revalidation-dedupe-seconds`), `revalidationPollingSeconds` (`--revalidation-polling-seconds`, sets `AzureFunctionsJobHost__extensions__queues__maxPollingInterval`), `queueBacklogAlertThreshold` (`--alert-queue-backlog`, a metric alert on `QueueMessageCount`) and `alertActionGroupId`. All off or at the platform default.
+- Tests: dedupe unit tests (17, including 50 simultaneous claims and an alternating known/unknown version), queue tests, two Azurite tests against the real Table Storage (50 simultaneous requests give one message; a race over an expired claim gives one more), and an E2E test (30 simultaneous requests for a stale page cause one or two regenerations).
+
+### The first version was wrong, and the end-to-end test found it
+
+The first design used the message's `lastModified` as the page version. The E2E test failed: 30 simultaneous requests still caused **6** regenerations (instead of 30 before, but not 1). Reproduced on the local stack: no dedupe error in the host log, one dedupe row with `version = 0`. Reading OpenNext (`adapters/cache.js`): in the server path `store.lastModified = _isStale ? 1 : _lastModified`, a **marker** (1 stale, 0 unset), not a version. Concurrent requests for one page reported 0 or 1, counted as different versions and took turns winning the claim. The unit tests had used realistic-looking but wrong `lastModified` values, so they passed.
+
+Fix: the version is the **ETag** of the cached content (stable per page content, changes on regeneration); an unknown version is a wildcard decided by the window alone. A unit test now replays the alternating 0/1 pattern, and the E2E test stays as the guard.
+
+### Verified
+
+| Check | Result |
+| --- | --- |
+| Unit tests | 181 passed |
+| Azurite integration tests | 9 passed (run three times in a row) |
+| Local E2E | 28 passed (`default`, includes the stampede test) and 10 passed (`front-door`) |
+| `az bicep build`, `az deployment group validate` against an empty group, with and without the new options | compile, both validate; `what-if` plans 18 resources with the alert |
+| Lint, build, type check | pass |
+
+### Not verified
+
+- **Anything on Azure.** Nothing of this session was deployed. Whether the dedupe prevents the 27 regenerations on Azure, whether a lower polling interval shortens the 37 s, and whether the metric alert is accepted and fires: untested. The Azure run was finished and deleted in session 7.
+- The cause of the 2 min 21 s stall (`Unable to create client for AzureWebJobsStorage`) is still unknown; the dedupe makes a stall cheaper (one message instead of dozens) but does not remove it.
+
+### Next
+
+Deploy once with the new defaults and with `--alert-queue-backlog` and a lower polling interval, repeat the burst of stale requests and look at the invocations in Application Insights ([Real Azure runs](../contribute/azure_runs.md): subscription, region, group, cost ceiling and time window needed). Nothing is committed yet.
+
+---
+
 ## 2026-11-06 (session 7): Phase 1c, first real Azure run (finished, resources deleted)
 
 ### Plan (recorded before anything was created)

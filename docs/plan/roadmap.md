@@ -65,7 +65,10 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 
 ### 1d. What the first Azure run found that still needs work
 
-- [ ] ISR revalidation: dedupe messages before enqueueing; alert on queue age; try a lower `maxPollingInterval`; find the cause of `Unable to create client for AzureWebJobsStorage` on some new instances ([ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group))
+- [x] ISR revalidation: dedupe messages before enqueueing (implemented and tested locally, [ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group))
+- [~] ISR revalidation: the backlog alert is deployed and enabled on Azure but has never fired; the `maxPollingInterval` option is verified. Open: choose the default polling interval
+- [x] ISR revalidation: deployed on Azure; 30 simultaneous stale requests caused one regeneration; a lower polling interval cuts the wait from 44 s to 2 s (second Azure run)
+- [ ] Find the cause of `Unable to create client for AzureWebJobsStorage` on some new instances (seen on 3 of about 46 host starts in two runs); add an alert on the host health check
 - [ ] Decide the `WAIT_UNTIL_MODE` default with more data than one run ([ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream))
 - [ ] Limit the instance count for small sites: a 200-request burst started 17 instances, 16 of which served one or two requests
 - [ ] Make `tests-e2e` run against a deployed URL (the probes used on Azure were throwaway scripts): the Azure E2E workflow in Phase 2

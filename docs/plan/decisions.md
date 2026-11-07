@@ -247,3 +247,24 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 **Consequences.** Azure has not been run on 16 (Unverified). A guard that refuses an unsupported version at `package` time is still open (roadmap).
 
+---
+
+## ADR-0012: The Next.js Adapter API is not adopted yet; Next.js 15 stays supported
+
+**Date:** 2026-11-07. **Status:** accepted. Builds on [ADR-0011](#adr-0011-nextjs-support-follows-opennextjsaws).
+
+**Decision.** This adapter keeps building on `@opennextjs/aws`, which reads the `next build` output, and does not use the Next.js Adapter API (`adapterPath`, `modifyConfig`, `onBuildComplete`). Next.js 15 stays in the supported range. Revisit when `@opennextjs/aws` adopts the Adapter API, or when Next.js 15 is no longer supported by the Next.js team.
+
+**Why.**
+
+- The Adapter API is a build-time interface that describes routes, outputs, prerenders and static files. Request handling, streaming and caching stay with the Next.js server and the cache interfaces (`cacheHandler`, `cacheHandlers`), so the overrides of this package (caches, queue, image, assets, wrapper) are not replaced by it. Source: the Next.js docs on adapters, read by a research agent on 2026-11-07, not by the maintainer or the assistant.
+- It is stable only since Next.js 16.2 (blog post of 2026-03-18, same source). With Next.js 15 in the range, it cannot be the only path.
+- Official OpenNext follows its own course: neither the `opennextjs-aws` nor the `opennextjs-cloudflare` README mentions it, and the Next.js "Across Platforms" post (2026-03) calls the Netlify, Cloudflare and AWS (OpenNext) adapters in development (current status not checked). Following OpenNext is the policy in ADR-0011.
+- Next.js 15 is supported by the Next.js team until 2027-01-31, according to the maintainer (2026-11-07; official source not checked here). Dropping it earlier would leave users of a supported release without this adapter.
+
+**Review date.** 2027-01-31, or earlier if `@opennextjs/aws` changes its `next` peer range or adopts the Adapter API. At that date: remove 15 from the range and the CI matrix if OpenNext has done so, and decide on the Adapter API.
+
+**Rejected.** Moving to the Adapter API now (no gain for the runtime overrides, excludes Next.js 15); dropping Next.js 15 before its support ends.
+
+**Not read.** The adapter sub-pages on PPR, routing and static assets, the feature matrix, the RFC (`vercel/next.js` discussion 77740), and `opennextjs-aws` issues beyond the first page.
+

@@ -4,6 +4,19 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 23): Next.js Adapter API
+
+### Done
+
+- Researched the Next.js Adapter API (docs and blog, by a research agent): build-time interface, stable since Next.js 16.2, runtime and caches stay with Next.js (`cacheHandler`, `cacheHandlers`); not mentioned by the official OpenNext READMEs.
+- [ADR-0012](./decisions.md#adr-0012-the-nextjs-adapter-api-is-not-adopted-yet-nextjs-15-stays-supported): not adopted yet; Next.js 15 stays supported (end of its support on 2027-01-31 per the maintainer, source not checked); review on that date.
+
+### Not verified
+
+- The Next.js 15 end-of-support date, the status of the Adapter API in `opennextjs-aws`, and the unread pages listed in the ADR.
+
+---
+
 ## 2026-11-07 (session 22): comparison with the official adapters, `'use cache'`
 
 ### Done

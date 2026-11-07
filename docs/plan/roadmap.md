@@ -91,7 +91,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 
 ## Phase 3: Feature parity and hardening
 
-- [~] Next.js version policy: decided in [ADR-0011](./decisions.md#adr-0011-nextjs-support-follows-opennextjsaws) (follow `@opennextjs/aws`; `next` peer range declared; local E2E on 15.5.29 and 16.4.5 in CI). Open: a guard that refuses an unsupported version at `package` time, Azure E2E on 16
+- [~] Next.js version policy: decided in [ADR-0011](./decisions.md#adr-0011-nextjs-support-follows-opennextjsaws) (follow `@opennextjs/aws`; `next` peer range declared; local E2E on 15.5.29 and 16.4.5 in CI). Open: a guard that refuses an unsupported version at `package` time, Azure E2E on 16. Review on 2027-01-31 (end of Next.js 15 support, per the maintainer) or when `@opennextjs/aws` adopts the Next.js Adapter API: see [ADR-0012](./decisions.md#adr-0012-the-nextjs-adapter-api-is-not-adopted-yet-nextjs-15-stays-supported)
 - [~] Pages Router and middleware: SSR, static page, API route, and middleware redirect/rewrite/header are covered by local E2E (Verified (local)). Pages Router ISR (`revalidate`), `fallback: "blocking"` and `notFound` are covered locally. `res.revalidate` is covered locally. Open: these on Azure, `fallback: true`, `app-pages-router`, external middleware
 - [~] Server Actions: form post and `revalidatePath` are covered by local E2E. A `Next-Action` header call is covered locally. Open: a real browser, the stable encryption key guidance (B12), Azure. Also open: `next/image` remote patterns, streaming/Suspense, PPR where supported
 - [ ] Image optimization hardening: private cache container, cache rules, refuse non-Linux-x64 artifacts (B11)

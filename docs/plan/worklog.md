@@ -4,6 +4,16 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 27): image cache investigation
+
+### Done
+
+- Pushed up to `d0a6867`; `check` green.
+- Read the image adapter of `@opennextjs/aws` 4.1.15: it does not cache images by design (`Cache-Control: public,max-age=<n>,immutable`, `Vary: Accept`, optional ETag and 304 with `OPENNEXT_STATIC_ETAG`). Correction: the earlier statement that the missing cache is a gap against the official adapters was wrong; on AWS the CDN does the caching.
+- [ADR-0014](./decisions.md#adr-0014-optimized-images-are-not-cached-by-the-server-proposed) (proposed): options A to D; recommendation B (set `OPENNEXT_STATIC_ETAG`), measure on Azure before building a Blob cache. Waiting for the maintainer.
+
+---
+
 ## 2026-11-07 (session 26): cookies lost, `cdnInvalidation` not needed
 
 ### Done

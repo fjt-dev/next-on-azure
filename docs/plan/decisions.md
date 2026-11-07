@@ -291,9 +291,9 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 ---
 
-## ADR-0014: Optimized images are not cached by the server (proposed)
+## ADR-0014: Optimized images are not cached by the server; `OPENNEXT_STATIC_ETAG` is on
 
-**Date:** 2026-11-07. **Status:** proposed, waiting for the maintainer's decision.
+**Date:** 2026-11-07. **Status:** accepted (option B). The maintainer asked to follow the official adapter.
 
 **What was found.** The roadmap and B11 assumed a missing server-side cache for optimized images and called it the biggest gap against the official adapters. Reading the installed `@opennextjs/aws` 4.1.15 image adapter (`dist/adapters/image-optimization-adapter.js`) shows that this is the official design too: "We don't cache any images". It answers `Cache-Control: public,max-age=<n>,immutable` and `Vary: Accept`; the cache is expected to be the CDN (CloudFront on AWS) and the browser. With the environment variable `OPENNEXT_STATIC_ETAG` set, it also returns an `ETag` (hash of URL, width, quality and build id) and answers `304` to a matching `If-None-Match` before any image work. On Azure without Front Door there is no shared cache, and Front Door here caches only `/_next/static/*`, so each visitor's first request for each image size runs `sharp` on a function instance. Repeat requests of the same browser are answered from the browser cache.
 
@@ -304,7 +304,7 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 - **C. A Blob cache in the image function's wrapper.** On a request, look up a blob keyed by URL, width, quality, the full `Accept` value and the build id; on a miss run the handler, copy the bytes while streaming them, and store them after the response (`waitUntil`) when the status is 200, there is no `Set-Cookie` and `Cache-Control` has no `private`/`no-store`. Expire by the `max-age` of the stored response; add a Blob lifecycle rule to delete old entries. Buildable inside the existing override points, testable against Azurite. Costs: a storage container, a lifecycle rule in Bicep, a read per hit (a function execution still happens), a write per miss, and code to maintain.
 - **D. Let Front Door cache `/_next/image`.** Only helps with the optional Front Door and needs a cache key on the query string and `Accept`.
 
-**Recommendation.** B now: it is the official mechanism, costs nothing and needs no new component. Do not build C until a measurement on Azure (time and memory of the image function for a typical photo, and the cost of repeated first requests) shows a problem. Revisit with the numbers. D is a separate decision for the Front Door variant.
+**Decision.** B, implemented: `OPENNEXT_STATIC_ETAG=true` in the Bicep app settings and in the local stack; an E2E case checks the ETag and the 304. C and D are not built. The reasoning: it is the official mechanism, costs nothing and needs no new component. Do not build C until a measurement on Azure (time and memory of the image function for a typical photo, and the cost of repeated first requests) shows a problem. Revisit with the numbers. D is a separate decision for the Front Door variant.
 
 **Not measured.** The time of `sharp` on Azure for realistic images (locally 30 to 50 ms for a 128 px source); how often visitors with a cold browser cache request the same image.
 

@@ -252,6 +252,7 @@ const env = {
   ASSETS_CONTAINER_NAME: "assets",
   CACHE_TABLE_NAME: "tagcache",
   REVALIDATION_QUEUE_NAME: "revalidation",
+  OPENNEXT_STATIC_ETAG: "true",
   FUNCTIONS_REQUEST_BODY_SIZE_LIMIT: "104857600",
   // The revalidation trigger calls https://localhost:7071; trust only this run's certificate.
   NODE_EXTRA_CA_CERTS: path.join(tmp, "cert.pem"),

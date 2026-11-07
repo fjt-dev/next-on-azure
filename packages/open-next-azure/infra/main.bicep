@@ -241,6 +241,8 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
         { name: 'CACHE_TABLE_NAME', value: tagCacheTable.name }
         { name: 'REVALIDATION_QUEUE_NAME', value: revalidationQueue.name }
         { name: 'WAIT_UNTIL_MODE', value: waitUntilMode }
+        // Optimized images carry an ETag and a matching If-None-Match is answered 304 without running sharp (ADR-0014)
+        { name: 'OPENNEXT_STATIC_ETAG', value: 'true' }
         { name: 'REVALIDATION_DEDUPE_SECONDS', value: string(revalidationDedupeSeconds) }
         // Large request bodies / Server Actions
         { name: 'FUNCTIONS_REQUEST_BODY_SIZE_LIMIT', value: '104857600' }

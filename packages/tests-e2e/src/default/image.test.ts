@@ -24,6 +24,23 @@ describe("image optimization on /_next/image (B11)", () => {
     expect(res.body.length).toBeLessThan(source.body.length); // really resized, not passed through
   });
 
+  it("sends an ETag and answers 304 to a matching If-None-Match without a body (ADR-0014)", async () => {
+    const first = await image("url=%2Ftest.png&w=64&q=75", "image/webp");
+    const etag = header(first, "etag");
+    expect(etag).toBeTruthy();
+    expect(header(first, "vary")).toBe("Accept");
+    const again = await request("/_next/image?url=%2Ftest.png&w=64&q=75", {
+      headers: { Accept: "image/webp", "If-None-Match": etag as string },
+    });
+    expect(again.status).toBe(304);
+    expect(again.body.length).toBe(0);
+    // A different size has a different ETag, so it is not answered 304.
+    const other = await request("/_next/image?url=%2Ftest.png&w=32&q=75", {
+      headers: { Accept: "image/webp", "If-None-Match": etag as string },
+    });
+    expect(other.status).toBe(200);
+  });
+
   it("rejects widths that are not configured", async () => {
     expect((await image("url=%2Ftest.png&w=999&q=75")).status).toBe(400);
   });

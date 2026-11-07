@@ -853,3 +853,10 @@ Everything that needs Azure or the Functions host: deployment, streaming through
 ### Direction confirmed (2026-11-08, later)
 
 ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the same day: the maintainer confirmed that the goal is the **Azure version of `opennextjs-aws`**, to use Next.js on Azure. The project stays an OpenNext adapter built on `@opennextjs/aws`; ADR-0011, ADR-0012 and ADR-0015 stand, and the docs keep the OpenNext structure. The earlier wish not to "depend on" OpenNext was a misunderstanding on my side; it should not be read as dropping `@opennextjs/aws`.
+
+## Session 33 (2026-11-08): tag cache reads in batches
+
+- Table Storage allows 15 comparisons in one `$filter` (Microsoft Learn, Query Entities / Querying tables and entities), so a query asks for 14 row keys plus the partition key. `tag-cache.ts`: one tag stays a point read; several tags become one query per 14 keys, in parallel, with absent tags remembered for the request. No tag limit (the official DynamoDB implementation refuses more than 100).
+- Tests: 6 unit tests (batch size, 150 tags, request cache, failure not hidden) with a fake table that rejects filters over 15 comparisons, and 1 integration test with 40 tags on Azurite. Unit 233, integration 10 pass; local E2E run below.
+- **Unverified:** speed against point reads on Azure. A query with OR on row keys may cost more than 14 point reads; measure before claiming a gain.
+- CI check on `ae2bf59` passed. The two Dependabot PRs for react and react-dom 19.3.1 fail their `check` run (not yet looked at).

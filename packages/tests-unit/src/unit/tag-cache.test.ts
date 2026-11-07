@@ -121,6 +121,63 @@ describe("hasBeenRevalidated", () => {
   });
 });
 
+describe("reading many tags at once", () => {
+  const tags = (n: number) => Array.from({ length: n }, (_, i) => `tag-${i}`);
+
+  it("uses one point read for a single tag and no query", async () => {
+    const get = vi.spyOn(table.client, "getEntity");
+    const cache = await load();
+    await cache.hasBeenRevalidated(["only"], 0);
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(table.client.queries).toHaveLength(0);
+  });
+
+  it("asks for at most 14 row keys per query, so no filter exceeds the 15 comparison limit", async () => {
+    const cache = await load();
+    expect(await cache.hasBeenRevalidated(tags(30), 0)).toBe(false);
+    expect(table.client.queries).toHaveLength(3); // 14 + 14 + 2
+    for (const q of table.client.queries) {
+      expect(q.match(/\beq\b/g)?.length).toBeLessThanOrEqual(15);
+      expect(q).toContain("PartitionKey eq 'build-1'");
+    }
+  });
+
+  it("handles more than 100 tags", async () => {
+    vi.useFakeTimers({ now: 10_000 });
+    const cache = await load();
+    await cache.writeTags(["tag-137"]);
+    expect(await cache.hasBeenRevalidated(tags(150), 0)).toBe(true);
+    expect(await cache.hasBeenRevalidated(tags(150), 10_000)).toBe(false);
+  });
+
+  it("finds the revalidated tag whichever group it is in, and reads each tag once per request", async () => {
+    vi.useFakeTimers({ now: 10_000 });
+    const cacheMap = new Map<string, unknown>();
+    g.__openNextAls = { getStore: () => ({ requestCache: { getOrCreate: () => cacheMap } }) };
+    const cache = await load();
+    await cache.writeTags(["tag-20"]);
+    expect(await cache.hasBeenRevalidated(tags(30), 0)).toBe(true);
+    const queries = table.client.queries.length;
+    expect(await cache.hasBeenRevalidated(tags(30), 0)).toBe(true);
+    expect(await cache.isStale?.(tags(30), 0)).toBe(false);
+    expect(table.client.queries).toHaveLength(queries); // answered from the request cache, absent tags included
+  });
+
+  it("counts a repeated tag once", async () => {
+    const cache = await load();
+    await cache.hasBeenRevalidated(["a", "a", "a"], 0);
+    expect(table.client.queries).toHaveLength(0); // one distinct tag: a point read
+  });
+
+  it("does not hide a failing query", async () => {
+    vi.spyOn(table.client, "listEntities").mockImplementation(() => {
+      throw Object.assign(new Error("query failed"), { statusCode: 500 });
+    });
+    const cache = await load();
+    await expect(cache.hasBeenRevalidated(tags(5), 0)).rejects.toThrow("query failed");
+  });
+});
+
 describe("isStale", () => {
   it("is true only for a soft-revalidated tag that is newer than the page", async () => {
     vi.useFakeTimers({ now: 10_000 });

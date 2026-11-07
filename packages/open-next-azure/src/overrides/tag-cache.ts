@@ -25,19 +25,53 @@ async function getEntity(tag: string): Promise<TagEntity | null> {
   }
 }
 
+/**
+ * Table Storage allows at most 15 discrete comparisons in one `$filter`. One is the partition key,
+ * so a query can ask for 14 row keys.
+ */
+export const MAX_KEYS_PER_QUERY = 14;
+
+/** Reads several tags with as few requests as possible: one query per 14 tags instead of one request per tag. */
+async function getEntities(tags: string[]): Promise<Map<string, TagEntity | null>> {
+  const found = new Map<string, TagEntity | null>();
+  if (tags.length === 1) {
+    found.set(tags[0] as string, await getEntity(tags[0] as string));
+    return found;
+  }
+  const client = await table();
+  const byRowKey = new Map(tags.map((tag) => [rowKey(tag), tag]));
+  const rowKeys = [...byRowKey.keys()];
+  const groups: string[][] = [];
+  for (let i = 0; i < rowKeys.length; i += MAX_KEYS_PER_QUERY) {
+    groups.push(rowKeys.slice(i, i + MAX_KEYS_PER_QUERY));
+  }
+  // base64url holds no quote characters, so the keys need no escaping in the filter.
+  await Promise.all(
+    groups.map(async (group) => {
+      const filter = `PartitionKey eq '${partition()}' and (${group.map((k) => `RowKey eq '${k}'`).join(" or ")})`;
+      for await (const entity of client.listEntities<TagEntity>({ queryOptions: { filter } })) {
+        const tag = byRowKey.get(entity.rowKey as string);
+        if (tag !== undefined) found.set(tag, entity as TagEntity);
+      }
+    }),
+  );
+  for (const tag of tags) if (!found.has(tag)) found.set(tag, null);
+  return found;
+}
+
 async function anyEntity(tags: string[], predicate: (e: TagEntity) => boolean): Promise<boolean> {
   const store = globalThis.__openNextAls?.getStore();
   const cache: Map<string, TagEntity | null> | undefined =
     store?.requestCache?.getOrCreate("azure-table:tags");
-  const entities = await Promise.all(
-    tags.map(async (tag) => {
-      if (cache?.has(tag)) return cache.get(tag) ?? null;
-      const entity = await getEntity(tag);
-      cache?.set(tag, entity);
-      return entity;
-    }),
-  );
-  return entities.some((e) => e && predicate(e));
+  const unique = [...new Set(tags)];
+  const missing = unique.filter((tag) => !cache?.has(tag));
+  const fetched =
+    missing.length > 0 ? await getEntities(missing) : new Map<string, TagEntity | null>();
+  for (const [tag, entity] of fetched) cache?.set(tag, entity);
+  return unique.some((tag) => {
+    const entity = fetched.has(tag) ? fetched.get(tag) : cache?.get(tag);
+    return !!entity && predicate(entity);
+  });
 }
 
 const tagCache: NextModeTagCache = {

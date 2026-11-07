@@ -57,6 +57,15 @@ describe("incremental cache on Blob Storage", () => {
 });
 
 describe("tag cache on Table Storage", () => {
+  it("reads 40 tags in batched queries against the real service and finds the revalidated one", async () => {
+    const cache = (await import("../../../open-next-azure/src/overrides/tag-cache.js")).default;
+    const tags = Array.from({ length: 40 }, (_, i) => `it-many/${i}?x#y`);
+    expect(await cache.hasBeenRevalidated(tags, 0)).toBe(false);
+    await cache.writeTags([tags[33] as string]);
+    expect(await cache.hasBeenRevalidated(tags, Date.now() - 5_000)).toBe(true);
+    expect(await cache.hasBeenRevalidated(tags, Date.now() + 5_000)).toBe(false);
+  });
+
   it("accepts tags containing every character Table Storage forbids in keys (B4, against the real service)", async () => {
     const tag = "_N_T_/blog/a?x=1#frag\\back";
     const cache = (await import("../../../open-next-azure/src/overrides/tag-cache.js")).default;

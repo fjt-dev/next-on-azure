@@ -95,6 +95,21 @@ export function fakeTable() {
       if (!row) throw error(404, "ResourceNotFound");
       return { ...row };
     },
+    queries: [] as string[],
+    /** Like the service, more than 15 comparisons in a filter is a 400. Understands `PartitionKey eq` and `RowKey eq`. */
+    async *listEntities(options?: { queryOptions?: { filter?: string } }) {
+      const filter = options?.queryOptions?.filter ?? "";
+      client.queries.push(filter);
+      const comparisons = filter.match(/\b(eq|ne|gt|ge|lt|le)\b/g)?.length ?? 0;
+      if (comparisons > 15) throw error(400, "InvalidInput");
+      const partition = /PartitionKey eq '([^']*)'/.exec(filter)?.[1];
+      const keys = [...filter.matchAll(/RowKey eq '([^']*)'/g)].map((m) => m[1]);
+      for (const row of rows.values()) {
+        if (partition !== undefined && row.partitionKey !== partition) continue;
+        if (keys.length > 0 && !keys.includes(row.rowKey)) continue;
+        yield { ...row };
+      }
+    },
     async upsertEntity(entity: Entity, mode: unknown) {
       upserts.push({ entity, mode });
       rows.set(key(entity.partitionKey, entity.rowKey), { ...entity, etag: `W/"${++version}"` });

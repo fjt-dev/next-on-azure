@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
-// @ts-expect-error plain ES module without types
 const { scanLine } = (await import(path.join(root, "scripts/secret-rules.mjs"))) as {
   scanLine: (line: string) => string[];
 };

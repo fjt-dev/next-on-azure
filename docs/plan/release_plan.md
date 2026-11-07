@@ -14,9 +14,9 @@ Written 2026-11-07. It extends Phase 4 of the [roadmap](./roadmap.md) with stage
 
 ## 2. Finding: the planned name is taken, and there is prior art
 
-- `opennextjs-azure` (the placeholder name of this package, ADR-0005) **is already published on npm** by another maintainer: version 0.2.0 (2026-08-30), MIT, repository `zpg6/opennextjs-azure`, "True serverless Next.js on Azure Functions", built on `@opennextjs/aws` 3.x. Read from the npm registry metadata and README only; its code was not read and its behavior was not tested.
+- `opennextjs-azure` (the placeholder name of this package, ADR-0005) **is already published on npm** by another maintainer: version 0.2.0 (2026-08-30), MIT, repository `zpg6/opennextjs-azure`, "True serverless Next.js on Azure Functions", built on `@opennextjs/aws` 3.x. On 2026-11-07 the assistant read the npm registry metadata and the first part of its README. **Its code, tarball and repository were not read and it was not run.** Nothing in this project was changed because of what was read.
 - So the name cannot be used, and users will find two projects with similar goals. `opennext-azure` and a few other names were free on 2026-11-07 (`npm view` returned 404); that can change at any time.
-- This is a positioning question before it is a naming question. Options: (A) publish separately under another name and state the differences plainly; (B) propose merging or contributing to the existing project; (C) offer this work to the OpenNext organization as the Azure adapter. The choice is the maintainer's. Whatever it is, first learn what the other project does and verifies (task P1).
+- This is a positioning question before it is a naming question. Options: (A) publish separately under another name and state the differences plainly; (B) propose merging or contributing to the existing project; (C) offer this work to the OpenNext organization as the Azure adapter. The choice is the maintainer's. This project does not look at, copy or run the other project's code (maintainer's rule, see `AGENTS.md`), so options B and C, which need a close look at it, are on hold until the maintainer decides otherwise. What stays possible is to state this project's own differences and to contact the other maintainer.
 
 ## 3. Stages
 
@@ -24,7 +24,7 @@ Written 2026-11-07. It extends Phase 4 of the [roadmap](./roadmap.md) with stage
 
 | # | Task | Size | Who | Notes |
 | --- | --- | --- | --- | --- |
-| P1 | Compare with `zpg6/opennextjs-azure`: features, supported Next.js versions, tests, what is verified on Azure, license, activity. Read its code and run it on the Azure for Students subscription only if the maintainer agrees to the cost | M | assistant, maintainer decides on any Azure run | Output: a short comparison page and the A/B/C choice |
+| P1 | Record independence. Write a short provenance note: this project was designed and written without reading the other project's code (first commit and design records are dated; the only things read are the registry metadata and the first part of its README on 2026-11-07). Describe this project's own differences from its own facts only (Flex Consumption, one Function app, what is verified and how). No comparison table of the other project's internals, no running it | S | assistant | Output: a "how this project relates to other Azure adapters" paragraph in the README |
 | P2 | Decide the package name and scope (ADR-0015, proposed). Candidates to check: `opennext-azure`, `@<npm-user>/opennext-azure`, a name that does not contain `opennextjs` (ADR-0005) | S | maintainer | Check availability again on the day |
 | P3 | Decide public versus private and when. Public gives unlimited free Actions minutes for standard runners (GitHub policy, to be confirmed), branch protection and environment reviewers on a free plan, and is needed for npm provenance | S | maintainer | See the checklist in Stage 1 |
 | P4 | Decide the audience and promise of `0.1.0`: "experimental, App Router, Linux/macOS build machines" is the suggested wording | S | maintainer | The README must list the **Unverified** items |
@@ -101,7 +101,8 @@ Gate: the promises below are stated and tested.
 - **Upstream changes.** `@opennextjs/aws` and Next.js release often; Dependabot PRs and the CI matrix (15 and 16) are the early warning. The Next.js Adapter API may replace the approach later (ADR-0012).
 - **Unverified Azure behavior** listed in [Compatibility](../compatibility.md): the release notes must repeat it.
 - **Cost surprises for users** (always-ready instances, Front Door, storage transactions): the cost guide (B9) before `1.0`, a short warning in the README at `0.1.0`.
-- **Claims about the other package** are based on its npm metadata and README only.
+- **Claims about the other package** are based on its npm metadata and the first part of its README only, and are kept to a minimum.
+- **Independence.** Anyone can ask whether this project derived from the other. The provenance note (P1), dated commits and decision records, and the rule not to read the other's code are the answer.
 
 ## 8. What only the maintainer can do
 

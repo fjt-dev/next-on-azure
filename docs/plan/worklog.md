@@ -13,9 +13,13 @@ Newest entry first. One entry per working session: what was done, what was verif
 - Wrote [the release plan](./release_plan.md): starting point, the name finding, three stages with gates, sizes and verification, fixed dates, order, Azure budget, risks, maintainer-only actions. [ADR-0015](./decisions.md#adr-0015-the-placeholder-package-name-is-taken-the-name-and-the-positioning-are-open-proposed) (proposed).
 - Found two identifiers to scrub before the repository goes public: a real client id in a test sample, and the federated credential subject in the Azure E2E guide.
 
+### Rule from the maintainer
+
+- Do not refer to the code (or repository, tarball) of the existing `opennextjs-azure`: this project must not be a copy. Recorded in `AGENTS.md` and in the release plan (task P1 changed to an independence record). Before the rule, the assistant had read the registry metadata and the first part of the README (no code); nothing in this project was changed because of it.
+
 ### Not verified
 
-- What the other package does; GitHub's current policy on free Actions minutes for public repositories; the free names on npm (can change).
+- What the other package does (and it will not be checked by reading its code); GitHub's current policy on free Actions minutes for public repositories; the free names on npm (can change).
 
 ---
 

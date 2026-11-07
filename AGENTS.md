@@ -22,6 +22,7 @@ A pnpm + Turborepo monorepo. The published package is `packages/open-next-azure`
 - **Package name is a placeholder.** Do not hard-code it in source (ADR-0005).
 - **Override modules must not import `@azure/*` statically** (ADR-0007).
 - **Never run `npm install` inside an OpenNext bundle** (ADR-0008).
+- **Do not read, copy or run the code of other Azure adapters for OpenNext, in particular the npm package `opennextjs-azure` (zpg6).** This includes its repository, its tarball and its documentation beyond the registry listing. The maintainer wants this project to stay independent. Use only official sources (OpenNext, Next.js, Microsoft Learn). Do not paste their snippets into this repository. Reason: ADR-0015.
 - Follow OpenNext conventions; the upstream repository is `opennextjs/opennextjs-aws`.
 
 ## Commands

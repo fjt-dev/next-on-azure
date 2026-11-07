@@ -92,7 +92,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 ## Phase 3: Feature parity and hardening
 
 - [ ] Next.js version policy: supported ranges enforced by a guard that refuses others; engine choice per Next.js major; version matrix in CI
-- [ ] Pages Router, `app-pages-router`, middleware (including external middleware)
+- [~] Pages Router and middleware: SSR, static page, API route, and middleware redirect/rewrite/header are covered by local E2E (Verified (local)). Open: Azure, Pages Router ISR and `fallback`, `app-pages-router`, external middleware
 - [ ] Server Actions, including the stable encryption key guidance (B12), `next/image` remote patterns, streaming/Suspense, PPR where supported
 - [ ] Image optimization hardening: private cache container, cache rules, refuse non-Linux-x64 artifacts (B11)
 - [ ] Static assets served from an exact-path manifest instead of name patterns (B10)

@@ -4,6 +4,24 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 13): Pages Router and middleware in the example
+
+### Done
+
+- Pushed the three earlier commits (`3c1acd9`); the `check` result is for the maintainer to report.
+- `examples/app-router` now also has `pages/pages-ssr` (getServerSideProps), `pages/pages-static` (getStaticProps), `pages/api/hello` and a `middleware.js` for `/mw/*` (header, redirect, rewrite).
+- New E2E file `pages-router.test.ts` (6 tests). No adapter code had to change: all of it worked on the first run except one test assertion (React puts comment markers between adjacent text nodes).
+
+### Verified (local)
+
+- Local E2E 35 + 10; lint. Nothing on Azure.
+
+### Open
+
+- Pages Router ISR and `fallback`, `app-pages-router`, external middleware, and all of this on Azure (it adds routes to the example that the next Azure E2E run will exercise).
+
+---
+
 ## 2026-11-07 (session 12): missing image 404 and bodyless responses
 
 ### Done

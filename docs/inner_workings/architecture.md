@@ -34,7 +34,7 @@ This page describes how a Next.js app runs on Azure with this package. It assume
 | Image optimization function | Function `image` on route `_next/image` | Next's image optimizer with `sharp`; reads source images from the `assets` container. |
 | Revalidation function | Function `revalidation` (queue trigger) | Sends a `HEAD` request to the page with the preview-mode revalidation header so the server regenerates it. |
 | ISR and fetch cache | Blob `cache` container | Key layout: `[__fetch/]<buildId>/<key>[.<ext>]`. |
-| Tag cache | Table `tagcache` | See [Overrides](../config/overrides.md#tag-cache-layout). |
+| Tag cache | Table `tagcache` | See [Tag cache](../config/overrides/tag_cache.md). |
 | CDN | Optional Front Door Standard | Caches `/_next/static/*` only; the dynamic route is not cached. |
 | Warmer | Not used | Flex Consumption "always ready" instances replace it (`alwaysReadyInstances` in Bicep). |
 | Initializer / dynamodb-provider | Not used | The `nextMode` tag cache needs no seeding. |

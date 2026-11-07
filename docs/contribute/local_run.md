@@ -43,7 +43,7 @@ curl -sk -X POST https://localhost:7071/api/revalidate   # revalidateTag("demo-t
 
 The example app has routes that exist to test specific behavior: `/isr` (5 second ISR), `/slow` (streaming), `/tagged` + `/api/revalidate` (tag cache), `/api/after` (`after()` / `waitUntil`), `/blog/a` (static + ISR).
 
-Requires `openssl` and the dev dependencies installed by `pnpm install` (Core Tools and Azurite). See [Common issues](../common_issues.md) if `func` is missing.
+Requires `openssl` and the dev dependencies installed by `pnpm install` (Core Tools and Azurite). See [Troubleshooting](../troubleshooting.md) if `func` is missing.
 
 ## Useful commands
 

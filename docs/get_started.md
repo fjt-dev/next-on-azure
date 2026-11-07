@@ -1,8 +1,8 @@
-# Get started
+# Getting started
 
-> **Status: experimental.** The package builds and runs locally. Deployment to Azure has not been verified yet; see [Compatibility](./compatibility.md).
+> **Status: experimental, pre-release.** The package is not published to npm yet, so the install step below works from a checkout of this repository only. A deployment to Azure has been run and tested (see [Compatibility](./compatibility.md) for what is verified).
 
-This guide deploys a Next.js app to one Azure Functions app (Flex Consumption) with Blob, Table and Queue Storage. Azure Front Door is optional.
+This guide deploys a Next.js app to one Azure Functions app (Flex Consumption) with Blob, Table and Queue Storage. Azure Front Door is optional. It uses the `opennext-azure` CLI of this package; other deployment tools (Terraform, CDK, Pulumi and so on) are not provided. The Bicep template in `infra/main.bicep` is the reference if you want to build one.
 
 ## Prerequisites
 
@@ -61,7 +61,7 @@ const config = {
 export default config;
 ```
 
-See [Overrides](./config/overrides.md) for what each override does.
+See [Configuration](./config/README.md) for what each override does.
 
 ## 3. Build
 
@@ -87,7 +87,6 @@ Options:
 | `--full-telemetry` | off | Turns Application Insights sampling off, so every trace and dependency is recorded (requests are never sampled). Costs more with traffic; use it for a measurement. By default the platform's own sampling applies (before 2026-11-07 the template disabled it) |
 | `--always-ready <n>` | `0` | Keeps `n` instance(s) of the HTTP function group running, so a request does not wait for a cold start (measured without it: about 4.1 to 4.5 s, up to 25.7 s right after a package deployment). Billed continuously for the memory of each instance (2 GB by default), with no free grant, and counted against the regional core quota. Not measured with it on Azure. See [ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet) |
 | `--revalidation-always-ready <n>` | `0` | Keeps `n` instance(s) of the queue-triggered revalidation function running (billed continuously). With `0` a stale page can wait minutes for its regeneration, see [ADR-0010](./plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group) |
-
 | `--revalidation-dedupe-seconds <n>` | `60` | How long one stale request holds the right to enqueue a page's revalidation; the other requests for that page enqueue nothing meanwhile. `0` turns it off |
 | `--revalidation-polling-seconds <1-60>` | `60` | Longest wait between polls of an empty revalidation queue (the platform default is 60). Lower = shorter wait for a stale page, a few more storage transactions. Not measured on Azure |
 | `--alert-queue-backlog <messages>` | off | Creates an Azure Monitor alert when the queues hold more than this many messages on average over one hour |
@@ -122,4 +121,4 @@ Front Door Standard has a base fee of 35 USD per month per profile (list price, 
 ## Next steps
 
 - [Architecture](./inner_workings/architecture.md)
-- [Common issues](./common_issues.md)
+- [Troubleshooting](./troubleshooting.md)

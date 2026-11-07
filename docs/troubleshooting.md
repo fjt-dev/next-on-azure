@@ -1,4 +1,4 @@
-# Common issues
+# Troubleshooting
 
 Issues observed during development, with causes and fixes. Add new ones here as they are found.
 

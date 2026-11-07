@@ -100,7 +100,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [~] Supply chain and security checks: SHA-pinned actions, read-only token and no privileged triggers are in place for `check` (see [CI](../contribute/ci.md)); production audit gate, own secret scanner (tree, history checked once), license allow-list: done, see [Supply chain checks](../contribute/supply_chain.md). Open: SBOM, npm provenance, a dependency update policy
 - [ ] Rollback and engine switch behavior, documented and tested
 - [ ] Observability: Application Insights wiring, structured logging, documented queries
-- [ ] Revisit known limitations in [Compatibility](../compatibility.md) and [Common issues](../common_issues.md)
+- [ ] Revisit known limitations in [Compatibility](../compatibility.md) and [Troubleshooting](../troubleshooting.md)
 - [ ] Optional: custom domain and certificate support in the Bicep template; Cosmos DB tag cache as an alternative override
 
 ## Comparison with the official adapters (2026-11-07)

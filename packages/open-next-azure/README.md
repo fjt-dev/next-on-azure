@@ -5,6 +5,6 @@ Azure adapter for [OpenNext](https://opennext.js.org/aws): run Next.js on Azure 
 > Experimental, pre-release, not yet published. This is a community adapter and **not an official OpenNext package**.
 
 - [Get started](../../docs/get_started.md)
-- [Overrides reference](../../docs/config/overrides.md)
+- [Configuration and overrides](../../docs/config/README.md)
 - [Architecture](../../docs/inner_workings/architecture.md)
 - [Compatibility and verification status](../../docs/compatibility.md)

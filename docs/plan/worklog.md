@@ -724,7 +724,7 @@ Implement the single-app layout (package, local stack, Bicep with optional Front
 
 ### Done
 
-- Added `azure-functions-core-tools` 4.16.0 and `azurite` as workspace dev dependencies (no global install). The Core Tools postinstall did not unpack its zip under Node 26; unpacked by hand (see [Common issues](../common_issues.md)).
+- Added `azure-functions-core-tools` 4.16.0 and `azurite` as workspace dev dependencies (no global install). The Core Tools postinstall did not unpack its zip under Node 26; unpacked by hand (see [Common issues](../troubleshooting.md)).
 - Wrote `scripts/local-stack.mjs` (`pnpm local:stack`): per-run self-signed certificate, Azurite, storage setup, upload of `.open-next/assets` and `.open-next/cache`, three Function apps over HTTPS, cleanup on exit. On non-Linux hosts the image app runs from a temp copy with host-OS sharp binaries.
 - Extended `examples/app-router` with routes that each test one behavior: `/isr`, `/slow`, `/tagged`, `/api/revalidate`, `/api/after`, and `public/test.png`.
 
@@ -826,7 +826,7 @@ Phase 1a: run the packaged apps with Azure Functions Core Tools + Azurite (needs
 | `open-next build` crashed in config compile (`__dirname` redeclared) | Azure SDKs bundled into the config by esbuild | [ADR-0007](./decisions.md#adr-0007-azure-sdks-are-imported-at-runtime-only) |
 | `import "@opennextjs/aws/types/global"` broke bundling | Side-effect import survived compilation | Use `import type {} from ...` |
 | `sharp` missing from `image.zip` | `npm install` pruned it | [ADR-0008](./decisions.md#adr-0008-packaging-never-runs-npm-install-inside-an-opennext-bundle) |
-| `opennext-azure` bin not linked in the example | pnpm links bins at install time, before `dist` existed | Reinstall after the first build; see [Common issues](../common_issues.md) |
+| `opennext-azure` bin not linked in the example | pnpm links bins at install time, before `dist` existed | Reinstall after the first build; see [Common issues](../troubleshooting.md) |
 
 ### Not verified (carried into Phase 1)
 
@@ -842,3 +842,10 @@ Everything that needs Azure or the Functions host: deployment, streaming through
 - The maintainer picked a name. `nextjs-azure` is taken on npm (0.0.4, another author) and uses the Next.js name. `opennext-azure` is an unpublished name (publishability unknown). Decision: **`opennext-adapter-azure`** (ADR-0015, name accepted; positioning still open). The OpenNext repository is MIT and its README has no naming or trademark policy; whether SST holds a trademark is not checked, so P5 stays recommended before publishing.
 - R1 done: `package.json` names (package, monorepo, example dependency), `open-next.config` examples, docs, README (now states it is not an official OpenNext package), Bicep comment, license check filter. The `opennext-azure` bin name and the directory `packages/open-next-azure` are unchanged. Azure resource tags `purpose=opennextjs-azure-e2e` are unchanged on purpose (the cleanup job finds groups by them).
 - New unit test `name.test.ts` checks the package name and that the old name is not left in the package source, the example or the docs outside the history files.
+
+### Documentation restructured after the OpenNext docs (2026-11-08)
+
+- README rewritten in the style of the `opennextjs-aws` README (description, features checklist, configuration, cold start, contribute, testing, acknowledgements), with the status and "not an official OpenNext package" notice at the top and each feature marked with how far it was checked.
+- `docs/` follows the sidebar of opennext.js.org/aws (only that site and README were read): Overview (`docs/README.md`), Getting started, Compatibility, Configuration (`config/README.md`, `simple_example.md`, `reference.md`, one page per override under `config/overrides/`), Comparison (new), How does it work?, FAQ, Troubleshooting (renamed from `common_issues.md`), Contributing (`contribute/README.md`). `config/overrides.md` was split into the override pages; no content was dropped.
+- Fixed in passing: the options table of `get_started.md` was split by a blank line, and its status note said that no Azure deployment had been verified.
+- Not done: the pages "Routing layer", "Main components", "Migration" and "Reference implementation" of the official site have no counterpart because there is nothing true to say yet.

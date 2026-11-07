@@ -13,7 +13,11 @@
       "default": "./dist/overrides/*.js"
     }
   },
-  "files": ["dist", "infra", "open-next.config.example.ts"],
+  "files": [
+    "dist",
+    "infra",
+    "open-next.config.example.ts"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -30,7 +34,8 @@
     "@azure/storage-queue": "^12.25.0"
   },
   "peerDependencies": {
-    "@opennextjs/aws": "^4.1.0"
+    "@opennextjs/aws": "^4.1.0",
+    "next": ">=15.5.29 <16 || >=16.4.5"
   },
   "devDependencies": {
     "@opennextjs/aws": "catalog:",

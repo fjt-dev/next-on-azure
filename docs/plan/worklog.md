@@ -4,6 +4,20 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 21): Dependabot PRs, tooling upgrades, Next.js policy
+
+### Done
+
+- Investigated the 5 open Dependabot PRs. PRs 2 to 5 failed only because their branches predated the fix of my unused `@ts-expect-error`; PR 1 failed on a download in the `azure-functions-core-tools` postinstall (not reproduced). Tried every update locally in a separate worktree: TypeScript 7.0.2, vitest 5.1.0, Next.js 16.4.5, biome 2.6.4, turbo 2.11.10 and changesets 3.0.3 all work.
+- Applied TypeScript 7, vitest 5, biome 2, turbo and changesets 3. Biome 2: `biome migrate` turned `recommended: true` into `preset: none` (no lint rule would run); set `preset: recommended` explicitly and checked with a probe file. Markdown is excluded from Biome (version 2 would have reformatted about 300 lines of docs). The recommended set found one unused function in `flatten-node-modules.ts`, removed. `noTemplateCurlyInString` is off (generated code and workflow syntax).
+- Next.js policy: [ADR-0011](./decisions.md#adr-0011-nextjs-support-follows-opennextjsaws). `next` peer range added; `check` runs the local E2E on the catalog version and on 16.4.5; Dependabot ignores `next` and `@types/node` majors.
+
+### Verified (local)
+
+- Build, typecheck, lint, unit 213, integration 9, E2E 43 + 10 + 1 on the new tool versions. Next.js 16 passed the same in a trial worktree, not yet through the new CI matrix. Not run on Azure.
+
+---
+
 ## 2026-11-07 (session 20): second Azure E2E run
 
 ### Done

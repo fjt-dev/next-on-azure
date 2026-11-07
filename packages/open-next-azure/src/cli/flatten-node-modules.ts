@@ -38,14 +38,6 @@ export type FlattenResult = {
 
 const MAX_NESTING = 12;
 
-const isSymlink = (p: string) => {
-  try {
-    return fs.lstatSync(p).isSymbolicLink();
-  } catch {
-    return false;
-  }
-};
-
 const real = (p: string) => {
   try {
     return fs.realpathSync(p);

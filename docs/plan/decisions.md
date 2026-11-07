@@ -233,3 +233,17 @@ Together with the earlier 22 s (stampede) and 37 s (first run) this confirms the
 
 The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` stays at the platform default 60 for now; the measurement supports recommending a low value (5 s) for sites where a stale page should be refreshed within seconds. Which default to ship is a decision for the maintainer, not made here. Nothing here is a reason to change the architecture; it is a reason to add dedupe and monitoring.
 
+---
+
+## ADR-0011: Next.js support follows `@opennextjs/aws`
+
+**Date:** 2026-11-07. **Status:** accepted.
+
+**Decision.** This package supports the Next.js versions that the installed `@opennextjs/aws` declares as its `peerDependencies`. For `@opennextjs/aws` 4.1.15 that is `>=15.5.29 <16 || >=16.4.5`, and the package declares the same range for `next`. When `@opennextjs/aws` changes its range, this one changes with it. The catalog in `pnpm-workspace.yaml` stays on the lowest 15.x; CI also runs the local E2E suite with the lowest 16.x (matrix in the `check` workflow). Dependabot does not open major updates of `next`: raising the range is a decision made here, not an automatic update.
+
+**Why.** Behavior should match official OpenNext, which also uses version checks (`compareSemver`) internally. A range of our own would either promise more than OpenNext supports or diverge from it. Running both lines in CI keeps the claim honest: on 2026-11-07, `next` 16.4.5 passed the build and the local E2E suite (43 default, 10 front-door, 1 poison) in a trial, and the Azure E2E has only been run on 15.5.29.
+
+**Rejected.** Moving the example to 16 only (loses the 15 coverage); a stricter range than OpenNext (needs its own justification for each version); no matrix (a Next.js 16 claim without a test).
+
+**Consequences.** Azure has not been run on 16 (Unverified). A guard that refuses an unsupported version at `package` time is still open (roadmap).
+

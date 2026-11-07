@@ -96,9 +96,15 @@ jobs:
         run: node scripts/license-check.mjs
 
   e2e:
-    name: local E2E (Functions host + Azurite)
+    # Next.js versions follow what @opennextjs/aws declares (ADR-0011): the lowest 15.x and the lowest
+    # 16.x it supports. "catalog" is the version pinned in pnpm-workspace.yaml.
+    name: local E2E (Functions host + Azurite, Next.js ${{ matrix.next }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        next: [catalog, "16.4.5"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -113,7 +119,17 @@ jobs:
         run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 
       - name: Install dependencies
+        if: matrix.next == 'catalog'
         run: pnpm install --frozen-lockfile
+
+      # Another Next.js version: change the catalog and let the lockfile follow (not committed).
+      - name: Install dependencies with Next.js ${{ matrix.next }}
+        if: matrix.next != 'catalog'
+        env:
+          NEXT_VERSION: ${{ matrix.next }}
+        run: |
+          sed -i "s/^  next: .*/  next: ${NEXT_VERSION}/" pnpm-workspace.yaml
+          pnpm install --no-frozen-lockfile
 
       - name: End-to-end tests
         run: pnpm e2e:test
@@ -124,7 +140,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: local-stack-logs
+          name: local-stack-logs-next-${{ matrix.next }}
           path: ${{ runner.temp }}/local-stack-logs
           if-no-files-found: ignore
           retention-days: 7

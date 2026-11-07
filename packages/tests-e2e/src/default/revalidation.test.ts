@@ -81,3 +81,18 @@ describe("on-demand revalidation (revalidateTag)", () => {
     expect(timestampIn((await request("/tagged")).text)).toBe(c); // and the new value is cached again
   });
 });
+
+describe("'use cache' (Composable Caching)", () => {
+  it("keeps a cached function result until its tag is revalidated", async () => {
+    const a = timestampIn((await request("/use-cache")).text);
+    expect(a).toBeDefined();
+    expect(timestampIn((await request("/use-cache")).text)).toBe(a);
+
+    const post = await request("/api/revalidate-use-cache", { method: "POST" });
+    expect(post.status).toBe(200);
+
+    const c = timestampIn((await request("/use-cache")).text);
+    expect(c).not.toBe(a);
+    expect(timestampIn((await request("/use-cache")).text)).toBe(c);
+  });
+});

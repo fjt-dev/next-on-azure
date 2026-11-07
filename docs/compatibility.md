@@ -33,7 +33,8 @@ As of 2026-11-06 the rows below marked **Verified (Azure)** were checked by hand
 | Middleware | **Verified (local)**: redirect, rewrite and response header, with a matcher, in the single Function app (internal middleware, not `external`). Azure: Verified (Azure): E2E run on commit 6720a19, 2026-11-07, 35 passed and 2 skipped (log-based tests). Not verified: external (edge) middleware, `matcher` with i18n and `NextResponse.next({ request })` header forwarding are not tested |
 | Pages Router | `getServerSideProps`, `getStaticProps` and an API route: **Verified (Azure)** (35 E2E tests passed on 2026-11-07). `getStaticProps` with `revalidate` (regenerated through the queue), `fallback: "blocking"`, `notFound` and `res.revalidate` from an API route: **Verified (Azure)** (41 E2E tests passed on 2026-11-07, commit a03cfb0). Not tested: `fallback: true`, `app-pages-router` |
 | Server Actions | Verified (local): form post without JavaScript. Azure: Verified (Azure): E2E run on commit 6720a19, 2026-11-07, 35 passed and 2 skipped (log-based tests). A call made like client JavaScript (`Next-Action` header, Flight response): Verified (Azure, 2026-11-07). Not verified: a real browser, encryption key (B12) |
-| Partial Prerendering | Unverified |
+| Composable Caching (`'use cache'`, `cacheTag`, `cacheLife`) | **Verified (local)** on Next.js 15.5.29 and 16.4.5 with `experimental.useCache` (deprecated in 16 in favor of `cacheComponents`, which changes how dynamic data is handled and was not tried): a cached function keeps its value until `revalidateTag`. Not on Azure; `cacheLife` expiry and the `remote` and `private` variants are not tested |
+| Partial Prerendering | Unverified (needs a Next.js canary in 15; in 16 it is part of `cacheComponents`) |
 | Edge runtime | Not supported |
 
 ## Known gaps

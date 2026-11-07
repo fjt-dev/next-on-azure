@@ -4,6 +4,23 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 22): comparison with the official adapters, `'use cache'`
+
+### Done
+
+- Compared this adapter with `@opennextjs/aws` (override types in 4.1.15, docs) and `@opennextjs/cloudflare` (docs, read by a research agent); the result is a new roadmap section with priorities. AWS pages for queue, image loader, asset resolver, origin resolver, warmer, CDN invalidation, initializer and cache interception were not read.
+- Priority 1: `app/use-cache` and `app/api/revalidate-use-cache` in the example, `experimental.useCache` in `next.config.mjs`, one E2E case. It passes on Next.js 15.5.29 and, in a temporary change of the catalog (reverted), on 16.4.5, which warns that `experimental.useCache` and the `middleware` file convention are deprecated.
+
+### Verified (local)
+
+- Local E2E 44 + 10 + 1 on 15.5.29; the same 44 + 10 + 1 on 16.4.5 (temporary). Not run on Azure.
+
+### Next
+
+- Remote images (`remotePatterns`), then the warmer question (always-ready instance first), then `cdnInvalidation`.
+
+---
+
 ## 2026-11-07 (session 21): Dependabot PRs, tooling upgrades, Next.js policy
 
 ### Done

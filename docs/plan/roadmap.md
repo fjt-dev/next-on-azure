@@ -103,6 +103,23 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [ ] Revisit known limitations in [Compatibility](../compatibility.md) and [Common issues](../common_issues.md)
 - [ ] Optional: custom domain and certificate support in the Bicep template; Cosmos DB tag cache as an alternative override
 
+## Comparison with the official adapters (2026-11-07)
+
+Compared with `@opennextjs/aws` (types of 4.1.15 and its docs) and `@opennextjs/cloudflare` (docs). Several AWS override pages were not read (queue, image loader, asset resolver, origin resolver, warmer, CDN invalidation, initializer, cache interception), so entries about them rest on the type definitions. Not every official feature is a goal; each item is a decision.
+
+Priority order:
+
+- [~] Verify `'use cache'` (Composable Caching), PPR and Turbopack: the Cloudflare docs list them as supported. `'use cache'` with `cacheTag` and `revalidateTag` is Verified (local) on Next.js 15.5.29 and 16.4.5 (E2E case in `revalidation.test.ts`). Open: on Azure, `cacheComponents` (16), PPR, Turbopack, and Next.js 16's `proxy` file (the build warns that the `middleware` convention is deprecated)
+- [ ] Remote images (`images.remotePatterns`): the image function only reads the app's own Blob assets and answers 400 for an external URL (Cloudflare supports remote patterns)
+- [ ] Warmer: cold start is about 4 s (measured). Check first whether an always-ready instance on Flex Consumption is enough before building a `warmer` override
+- [ ] `cdnInvalidation` override: purge Front Door on revalidation. Only matters with the optional Front Door
+- [ ] CLI: a local `preview` command (the repository has `pnpm local:stack`; users do not), `populate-cache` as its own step, a way to upload a version without serving it. Cloudflare has `preview`, `populateCache`, `upload`, `migrate`
+- [ ] Decide on: cache interception (`enableCacheInterception`), a Blob/Table dev implementation like `fs-dev`, skew protection (Cloudflare has it, experimental)
+
+Not planned, with the reason: function splitting, external middleware and `originResolver` (single app, [ADR-0009](./decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default)); Edge runtime (not available on Azure Functions).
+
+Where this adapter is ahead: ISR revalidation de-duplication with a load test (ADR-0010), measured `waitUntil` behavior (ADR-0006), identity-based access without shared keys, and an Azure E2E run from CI with automatic teardown.
+
 ## Phase 4: Publish
 
 - [ ] Decide the final npm package name ([ADR-0005](./decisions.md#adr-0005-package-name-is-deferred)); do not use `opennextjs` as a name prefix unless the OpenNext maintainers agree

@@ -63,7 +63,7 @@ function integerOption(
  * opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach]
  *   [--revalidation-always-ready <n>] [--revalidation-dedupe-seconds <n>]
  *   [--revalidation-polling-seconds <1-60>] [--alert-queue-backlog <messages>]
- *   [--deployer-principal-id <object id>] [--output-file <path>]
+ *   [--deployer-principal-id <object id>] [--deployer-principal-type User|ServicePrincipal|Group] [--output-file <path>]
  *
  * Creates the infrastructure with Bicep, uploads static assets and the prerender cache, and
  * deploys `.open-next-azure/app.zip`. Creates billable resources; see docs/contribute/azure_runs.md.
@@ -100,6 +100,10 @@ export function deploy(argv: string[]) {
   // The identity that runs this command uploads static files with its Azure AD login, so it needs
   // a data role. A service principal (CI) cannot be looked up as a "signed-in user": pass its
   // object id with --deployer-principal-id. An empty id simply skips the role assignment.
+  const deployerType = option(argv, "--deployer-principal-type") ?? "User";
+  if (!["User", "ServicePrincipal", "Group"].includes(deployerType)) {
+    throw new Error("--deployer-principal-type must be User, ServicePrincipal or Group");
+  }
   let deployerId = option(argv, "--deployer-principal-id") ?? "";
   if (!deployerId) {
     try {
@@ -129,6 +133,7 @@ export function deploy(argv: string[]) {
       `queueBacklogAlertThreshold=${backlogAlert}`,
       `revalidationAlwaysReady=${revalidationAlwaysReady}`,
       `deployerPrincipalId=${deployerId}`,
+      `deployerPrincipalType=${deployerType}`,
       "--query",
       "properties.outputs",
       "-o",

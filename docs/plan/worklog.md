@@ -23,9 +23,13 @@ Newest entry first. One entry per working session: what was done, what was verif
 - Everything that needs GitHub or Azure: the OIDC sign-in, the role propagation retry, deployment from the runner, the remote E2E over the internet, the cleanup job, `actionlint`. No Azure resource was created.
 - The remote ISR timing (5 s polling should give a few seconds, from the earlier measurement) and the cost of a run.
 
+### Update 2026-11-07: first runs on GitHub
+
+Three runs failed before the fourth passed, all before or at deployment and each fixed: variables scoped to an environment, the OIDC subject with numeric ids (`AADSTS700213`), app name 14 characters against a limit of 12, deployer role principal type (`UnmatchedPrincipalType`). The fourth run (commit `f5e80ec`) succeeded in both jobs (6 min 1 s). Reported by the maintainer from the Actions page; details, cost and the post-run inventory are not yet checked.
+
 ### Next
 
-1. The maintainer does the one-time setup in the guide; then a watched first run (confirm region, cost ceiling and time window first).
+1. (done, see above) The maintainer does the one-time setup in the guide; then a watched first run (confirm region, cost ceiling and time window first).
 2. Read Application Insights from the remote tests to restore the log-based checks.
 
 ---

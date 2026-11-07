@@ -1,6 +1,8 @@
 # Azure E2E in CI
 
-> **Status: written and checked locally, never run.** The workflow `azure-e2e` has not been executed on GitHub and nothing has been created in Azure for it. Treat every statement about its behaviour as **Unverified** until the first run is recorded in the [work log](../plan/worklog.md).
+> **Status: first successful run on 2026-11-07 (Verified on GitHub and Azure, as reported by the maintainer).** Both jobs (`deploy, test, delete` 5 min 37 s, `make sure nothing is left` 18 s) finished green on commit `f5e80ec`. The run's logs were not read by the author: test counts, timings, the actual cost and whether the resource group was gone afterwards are **Unverified**. The maintainer's inventory on 2026-11-07 (`az group list` for `rg-oe2e-*`) returned nothing; the repeat the next day is still to do.
+>
+> Getting there took four runs and three fixes: the repository variables were environment-scoped (not visible without `environment:`), the OIDC subject carries numeric ids (`AADSTS700213`), the app name was longer than the template's 12 characters, and the deployer role needed `principalType` `ServicePrincipal`.
 
 The workflow `.github/workflows/azure-e2e.yml` deploys `examples/app-router` to a real subscription, runs the end-to-end tests against the deployed URL and deletes everything. It follows the rules in [Real Azure runs](./azure_runs.md).
 

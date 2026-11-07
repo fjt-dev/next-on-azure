@@ -14,10 +14,10 @@ This guide deploys a Next.js app to one Azure Functions app (Flex Consumption) w
 ## 1. Install
 
 ```bash
-npm install opennextjs-azure @opennextjs/aws
+npm install opennext-adapter-azure @opennextjs/aws
 ```
 
-`opennextjs-azure` is a placeholder name until the first release (see [ADR-0005](./plan/decisions.md#adr-0005-package-name-is-deferred)).
+The package name is `opennext-adapter-azure` (see ADR-0015 in [decisions](./plan/decisions.md)). It is not published yet, and it is not an official OpenNext package.
 
 ## 2. Configure OpenNext
 
@@ -29,31 +29,31 @@ import type { OpenNextConfig } from "@opennextjs/aws/types/open-next.js";
 const config = {
   default: {
     override: {
-      wrapper: () => import("opennextjs-azure/overrides/wrapper.js").then((m) => m.default),
-      converter: () => import("opennextjs-azure/overrides/converter.js").then((m) => m.default),
-      incrementalCache: () => import("opennextjs-azure/overrides/incremental-cache.js").then((m) => m.default),
-      tagCache: () => import("opennextjs-azure/overrides/tag-cache.js").then((m) => m.default),
-      queue: () => import("opennextjs-azure/overrides/queue.js").then((m) => m.default),
+      wrapper: () => import("opennext-adapter-azure/overrides/wrapper.js").then((m) => m.default),
+      converter: () => import("opennext-adapter-azure/overrides/converter.js").then((m) => m.default),
+      incrementalCache: () => import("opennext-adapter-azure/overrides/incremental-cache.js").then((m) => m.default),
+      tagCache: () => import("opennext-adapter-azure/overrides/tag-cache.js").then((m) => m.default),
+      queue: () => import("opennext-adapter-azure/overrides/queue.js").then((m) => m.default),
     },
   },
   middleware: {
     external: false,
     // Serves /_next/static and public files from Blob Storage (exact paths from assets-manifest.json).
     assetResolver: () =>
-      import("opennextjs-azure/overrides/asset-resolver.js").then((m) => m.default),
+      import("opennext-adapter-azure/overrides/asset-resolver.js").then((m) => m.default),
   },
   imageOptimization: {
     override: {
-      wrapper: () => import("opennextjs-azure/overrides/wrapper.js").then((m) => m.default),
-      converter: () => import("opennextjs-azure/overrides/converter.js").then((m) => m.default),
+      wrapper: () => import("opennext-adapter-azure/overrides/wrapper.js").then((m) => m.default),
+      converter: () => import("opennext-adapter-azure/overrides/converter.js").then((m) => m.default),
     },
-    loader: () => import("opennextjs-azure/overrides/image-loader.js").then((m) => m.default),
+    loader: () => import("opennext-adapter-azure/overrides/image-loader.js").then((m) => m.default),
     install: { packages: ["sharp@0.33.5"], os: "linux", arch: "x64", libc: "glibc" },
   },
   revalidate: {
     override: {
-      wrapper: () => import("opennextjs-azure/overrides/revalidate.js").then((m) => m.revalidateWrapper),
-      converter: () => import("opennextjs-azure/overrides/revalidate.js").then((m) => m.revalidateConverter),
+      wrapper: () => import("opennext-adapter-azure/overrides/revalidate.js").then((m) => m.revalidateWrapper),
+      converter: () => import("opennext-adapter-azure/overrides/revalidate.js").then((m) => m.revalidateConverter),
     },
   },
 } satisfies OpenNextConfig;

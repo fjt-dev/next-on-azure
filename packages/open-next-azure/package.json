@@ -1,5 +1,5 @@
 {
-  "name": "opennextjs-azure",
+  "name": "opennext-adapter-azure",
   "version": "0.0.1",
   "description": "Azure adapter for OpenNext: run Next.js on Azure Functions (Flex Consumption) with Blob, Table and Queue Storage",
   "license": "MIT",

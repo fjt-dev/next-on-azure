@@ -237,7 +237,7 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
       appSettings: concat([
         { name: 'AzureWebJobsStorage__accountName', value: storage.name }
         { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: insights.properties.ConnectionString }
-        // Read by the opennextjs-azure overrides
+        // Read by the opennext-adapter-azure overrides
         { name: 'AZURE_STORAGE_ACCOUNT_NAME', value: storage.name }
         { name: 'CACHE_CONTAINER_NAME', value: cache.name }
         { name: 'ASSETS_CONTAINER_NAME', value: assets.name }

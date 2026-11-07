@@ -4,7 +4,7 @@ This repository is an Azure adapter for OpenNext, developed with Claude Code. Re
 
 ## What this is
 
-A pnpm + Turborepo monorepo. The published package is `packages/open-next-azure` (placeholder name `opennextjs-azure`). It provides OpenNext overrides, a CLI (`package`, `deploy`) and a Bicep template to run Next.js on one Azure Functions app (Flex Consumption) with Blob/Table/Queue Storage; Front Door is optional (ADR-0009). Full context is in `docs/`.
+A pnpm + Turborepo monorepo. The published package is `packages/open-next-azure` (`opennext-adapter-azure`, ADR-0015). It provides OpenNext overrides, a CLI (`package`, `deploy`) and a Bicep template to run Next.js on one Azure Functions app (Flex Consumption) with Blob/Table/Queue Storage; Front Door is optional (ADR-0009). Full context is in `docs/`.
 
 ## Read before working
 

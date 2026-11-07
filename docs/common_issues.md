@@ -21,7 +21,7 @@ Running `npm install` inside an OpenNext bundle prunes packages that are not in 
 
 ## `opennext-azure: command not found` in a pnpm workspace
 
-pnpm creates `node_modules/.bin` links when it installs a workspace package. If `dist/` did not exist yet (first install, which is every fresh checkout and every CI run), the link is skipped. The example app therefore calls the CLI by path (`node ./node_modules/opennextjs-azure/dist/cli/index.js package`), which does not depend on the link. For your own workspace app, either do the same or build the package and reinstall the consumer:
+pnpm creates `node_modules/.bin` links when it installs a workspace package. If `dist/` did not exist yet (first install, which is every fresh checkout and every CI run), the link is skipped. The example app therefore calls the CLI by path (`node ./node_modules/opennext-adapter-azure/dist/cli/index.js package`), which does not depend on the link. For your own workspace app, either do the same or build the package and reinstall the consumer:
 
 ```bash
 pnpm --filter <package> build

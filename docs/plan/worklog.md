@@ -836,3 +836,9 @@ Everything that needs Azure or the Functions host: deployment, streaming through
 
 1. Phase 1: deploy `examples/app-router` to the user's Azure subscription (confirm subscription, region and resource group name first, because this creates billable resources).
 2. Install Azure Functions Core Tools to run the stack locally.
+
+## Session 31 (2026-11-08): package name decided, rename done
+
+- The maintainer picked a name. `nextjs-azure` is taken on npm (0.0.4, another author) and uses the Next.js name. `opennext-azure` is an unpublished name (publishability unknown). Decision: **`opennext-adapter-azure`** (ADR-0015, name accepted; positioning still open). The OpenNext repository is MIT and its README has no naming or trademark policy; whether SST holds a trademark is not checked, so P5 stays recommended before publishing.
+- R1 done: `package.json` names (package, monorepo, example dependency), `open-next.config` examples, docs, README (now states it is not an official OpenNext package), Bicep comment, license check filter. The `opennext-azure` bin name and the directory `packages/open-next-azure` are unchanged. Azure resource tags `purpose=opennextjs-azure-e2e` are unchanged on purpose (the cleanup job finds groups by them).
+- New unit test `name.test.ts` checks the package name and that the old name is not left in the package source, the example or the docs outside the history files.

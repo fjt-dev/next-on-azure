@@ -310,13 +310,15 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 ---
 
-## ADR-0015: The placeholder package name is taken; the name and the positioning are open (proposed)
+## ADR-0015: The package is named `opennext-adapter-azure`; the positioning is open (accepted for the name)
 
-**Date:** 2026-11-07. **Status:** proposed. Follows [ADR-0005](#adr-0005-package-name-is-deferred).
+**Date:** 2026-11-07, name decided 2026-11-08. **Status:** accepted for the name; positioning still open. Follows [ADR-0005](#adr-0005-package-name-is-deferred).
 
-**Finding.** `opennextjs-azure` is already on npm (version 0.2.0, published 2026-08-30 by another maintainer, MIT, repository `zpg6/opennextjs-azure`), with a similar goal: OpenNext on Azure Functions with Blob, Table and Queue Storage. Seen through the npm registry metadata and README only. `opennext-azure` and a few other names returned 404 (free) on 2026-11-07.
+**Finding.** `opennextjs-azure` is already on npm (version 0.2.0, published 2026-08-30 by another maintainer, MIT, repository `zpg6/opennextjs-azure`), with a similar goal: OpenNext on Azure Functions with Blob, Table and Queue Storage. Seen through the npm registry metadata and README only. `opennext-azure` returned 404 on 2026-11-07, but as "Unpublished on 2025-10-29": a name that was unpublished may not be publishable again, so it is not relied on. `opennext-adapter-azure` had never been used (404) on 2026-11-08.
 
-**Open.** The name, and whether to publish separately, contribute to the existing project, or offer this work to the OpenNext organization. See [Release plan](./release_plan.md), tasks P1 to P5. Until decided, the package keeps the placeholder name in the repository and is not published.
+**Decision (name).** The unscoped name `opennext-adapter-azure`, chosen by the maintainer on 2026-11-08 after comparing `nextjs-azure` (taken on npm, and uses the Next.js name), `opennext-azure` (unpublished name, publishability unknown) and scoped names. It says what the package is, does not start with `opennextjs` (ADR-0005) and is spelled differently from the existing package. The README states that it is not an official OpenNext package. The OpenNext code is MIT licensed and the OpenNext README has no naming or trademark policy; other community packages use `opennext` in their names. Whether SST holds a trademark was not checked, so P5 (ask the OpenNext maintainers) stays recommended before publishing. Availability must be checked again on the publish day (P2).
+
+**Open.** Whether to publish separately, contribute to the existing project, or offer this work to the OpenNext organization. See [Release plan](./release_plan.md), tasks P1 to P5. The package is renamed in the repository and is not published.
 
 The code of other Azure adapters is not read while developing this project (rule in `AGENTS.md`). Contributing to or merging with the existing package, which would need a closer look, is not pursued for now.
 

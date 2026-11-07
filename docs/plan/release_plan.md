@@ -25,7 +25,7 @@ Written 2026-11-07. It extends Phase 4 of the [roadmap](./roadmap.md) with stage
 | # | Task | Size | Who | Notes |
 | --- | --- | --- | --- | --- |
 | P1 | Decide the positioning (A, B or C above) and write the one paragraph in the README that says how this project differs, from this project's own facts (Flex Consumption, one Function app, what is verified and how) | S | maintainer decides, assistant drafts | No comparison of the other project's internals |
-| P2 | Decide the package name and scope (ADR-0015, proposed). Candidates to check: `opennext-azure`, `@<npm-user>/opennext-azure`, a name that does not contain `opennextjs` (ADR-0005) | S | maintainer | Check availability again on the day |
+| P2 | **Decided 2026-11-08: `opennext-adapter-azure`** (ADR-0015). Remaining: check availability again on the publish day | S | maintainer | Check availability again on the day |
 | P3 | Decide public versus private and when. Public gives unlimited free Actions minutes for standard runners (GitHub policy, to be confirmed), branch protection and environment reviewers on a free plan, and is needed for npm provenance | S | maintainer | See the checklist in Stage 1 |
 | P4 | Decide the audience and promise of `0.1.0`: "experimental, App Router, Linux/macOS build machines" is the suggested wording | S | maintainer | The README must list the **Unverified** items |
 | P5 | Contact the OpenNext maintainers (Discord or an issue) about listing a community Azure adapter and the use of the name | S | maintainer | Not required to publish; recommended |
@@ -36,7 +36,7 @@ Gate: all items done and one full Azure E2E run green on the release commit.
 
 | # | Task | Size | Verification |
 | --- | --- | --- | --- |
-| R1 | Rename the package everywhere (69 occurrences of the old name: package metadata, `open-next.config` examples, docs, CLI help). The code must not hard-code it (ADR-0005); keep one constant | M | unit test that greps for the old name; CI |
+| R1 | **Done 2026-11-08** (package metadata, `open-next.config` examples, docs, README). The code does not hard-code the name (ADR-0005); a unit test greps for the old name | M | unit test that greps for the old name; CI |
 | R2 | README for the package and the repository: what it is, not an official OpenNext package, status table, install, one-page quick start, how it differs from other Azure adapters, in one paragraph (P1) | M | review |
 | R3 | `SECURITY.md` (how to report, a contact), `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue and pull request templates, `CODEOWNERS` | S | review |
 | R4 | Scrub the repository before it becomes public: the test sample with a real client id (`secret-scan.test.ts`), the federated credential subject in `azure_e2e.md`, any other identifier. Run the history scan again; decide whether the history needs rewriting (it has only the maintainer's noreply address) | S | `scripts/secret-scan.mjs --history` |
@@ -84,7 +84,7 @@ Gate: the promises below are stated and tested.
 
 ## 5. Order and parallel work
 
-1. P1 to P5 first; R1 cannot start before P2.
+1. P1 to P5 first; R1 is done (P2 decided 2026-11-08).
 2. R3, R4, R7 can run while R1 and R2 are written. R5 and R6 depend on R1.
 3. R8 is the last step before tagging (it needs the final name and the release commit).
 4. Stage 2 items are independent of each other; B1, B2, B5 and B6 are local only and can start right after Stage 0. Items marked Azure share runs: plan them in one session to save time and cost.

@@ -54,7 +54,7 @@ Requires `openssl` and the dev dependencies installed by `pnpm install` (Core To
 | `pnpm lint` | Biome check |
 | `pnpm test` / `pnpm test:integration` / `pnpm e2e:test` | Unit, Azurite integration and local-stack E2E tests, see [Testing](./testing.md) |
 | `pnpm local:stack` | Azurite + the single Function app over HTTPS |
-| `pnpm --filter opennextjs-azure bicep:build` | Compile the Bicep template (needs Azure CLI) |
+| `pnpm --filter opennext-adapter-azure bicep:build` | Compile the Bicep template (needs Azure CLI) |
 
 ## Conventions
 

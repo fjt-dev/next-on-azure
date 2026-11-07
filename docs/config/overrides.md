@@ -1,6 +1,6 @@
 # Overrides
 
-OpenNext lets you replace each platform-specific piece of the runtime with an *override*. This package provides the Azure implementations. Each is imported from `opennextjs-azure/overrides/<name>.js` in `open-next.config.ts` (see [Get started](../get_started.md)).
+OpenNext lets you replace each platform-specific piece of the runtime with an *override*. This package provides the Azure implementations. Each is imported from `opennext-adapter-azure/overrides/<name>.js` in `open-next.config.ts` (see [Get started](../get_started.md)).
 
 | Override | Module | OpenNext slot | Azure service |
 | --- | --- | --- | --- |

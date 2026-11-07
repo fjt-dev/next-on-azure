@@ -56,7 +56,7 @@ importers:
       next:
         specifier: 'catalog:'
         version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      opennextjs-azure:
+      opennext-adapter-azure:
         specifier: workspace:*
         version: link:../../packages/open-next-azure
       react:

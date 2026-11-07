@@ -6,13 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "openbuild": "open-next build",
-    "package": "node ./node_modules/opennextjs-azure/dist/cli/index.js package"
+    "package": "node ./node_modules/opennext-adapter-azure/dist/cli/index.js package"
   },
   "dependencies": {
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "opennextjs-azure": "workspace:*"
+    "opennext-adapter-azure": "workspace:*"
   },
   "devDependencies": {
     "@opennextjs/aws": "catalog:"

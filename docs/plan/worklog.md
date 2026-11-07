@@ -22,11 +22,11 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ### Azure
 
-- The maintainer ran the Azure E2E workflow after the push and reported it passed (the `check` workflow was also green). The log was not shown, so passed/skipped counts and cost are unrecorded.
+- Azure E2E run on `6720a19` (2026-11-07, started 04:55 UTC, deployment, tests and delete finished about 6.5 minutes later): 8 test files, 35 passed, 2 skipped (the failed-revalidation and stampede tests, which read host logs). The group `rg-oe2e-42340530662-1` was deleted by the job; the `cleanup` job issued its own delete (the group was still listed right after, as the delete runs with `--no-wait`). Cost of the run is still unknown. The `check` workflow was also green.
 
 ### Next
 
-- Record the counts and cost from that run; next-day inventory.
+- Next-day inventory and the cost of the run.
 
 ---
 

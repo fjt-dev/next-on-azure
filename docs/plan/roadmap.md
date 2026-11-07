@@ -127,14 +127,6 @@ Not planned, with the reason: function splitting, external middleware and `origi
 
 Where this adapter is ahead: ISR revalidation de-duplication with a load test (ADR-0010), measured `waitUntil` behavior (ADR-0006), identity-based access without shared keys, and an Azure E2E run from CI with automatic teardown.
 
-## Phase 3b: Next.js adapter without OpenNext (proposed, [ADR-0016](./decisions.md#adr-0016-build-a-nextjs-adapter-on-the-official-nextjs-interfaces-not-on-opennext-proposed))
-
-The maintainer's goal (2026-11-08): a Next.js adapter, not an OpenNext adapter. Nothing is built yet.
-
-- [ ] Spike: Next.js standalone server in an Azure Function with streaming (local)
-- [ ] Spike: `cacheHandler` and `cacheHandlers` on Blob and Table (Azurite): ISR, `revalidateTag`, `revalidatePath`, `'use cache'`
-- [ ] Decide Next.js 15 handling and the final name; accept, change or drop ADR-0016
-
 ## Phase 4: Publish
 
 The stages, gates and order are in the [Release plan](./release_plan.md). Finding of 2026-11-07: the placeholder name is already taken on npm ([ADR-0015](./decisions.md#adr-0015-the-placeholder-package-name-is-taken-the-name-and-the-positioning-are-open-proposed)).

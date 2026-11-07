@@ -87,7 +87,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [ ] Evaluate reusing the example apps and E2E specs from `opennextjs/opennextjs-aws` as a conformance suite
 - [x] CI (GitHub Actions): `check` workflow (lint, typecheck, build, unit, integration, Bicep, local E2E; SHA-pinned actions, read-only token, Dependabot) ran on GitHub and passed on 2026-11-06 ([CI](../contribute/ci.md)). Still to do: Azure E2E on demand and nightly; `actionlint` was never run
 - [ ] Poison-queue end-to-end test (B3 beyond the converter): a malformed message must reach `revalidation-poison` after 3 attempts
-- [ ] `npm pack` contents check (exports, CLI entry, Bicep, notices) and a clean-install test on Node 22 and 24 on macOS, Linux and Windows
+- [~] `npm pack` contents check is done (unit test: CLI entry and shebang, Bicep, LICENSE, overrides with types, no sources or maps; it found that the package had no LICENSE). Open: third-party notices and a clean-install test on Node 22 and 24 on macOS, Linux and Windows
 
 ## Phase 3: Feature parity and hardening
 

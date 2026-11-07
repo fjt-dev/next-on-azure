@@ -4,6 +4,19 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 17): npm pack contents check
+
+### Done
+
+- `packages/tests-unit/src/unit/pack.test.ts` runs `npm pack --dry-run --json` and checks the file list: CLI entry with a node shebang, `infra/main.bicep`, README, LICENSE, every override with its `.d.ts`, nothing from `src`, tests, source maps or `node_modules`, and nothing outside `dist`, `infra` and the known top-level files.
+- It found a real gap: the package had no `LICENSE` (npm does not copy the repository root file). Added `packages/open-next-azure/LICENSE`; the test requires it to equal the root one.
+
+### Verified (local)
+
+- Unit tests 205 pass; lint passes. Not verified: a clean install of the packed tarball.
+
+---
+
 ## 2026-11-07 (session 16): res.revalidate and client-style Server Action call
 
 ### Done

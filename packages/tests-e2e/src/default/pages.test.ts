@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { header, request } from "../http.js";
+import { cacheStatus, header, request } from "../http.js";
 
 describe("pages", () => {
   it("renders a dynamic page on the server", async () => {
@@ -15,7 +15,7 @@ describe("pages", () => {
     const res = await request("/blog/a");
     expect(res.status).toBe(200);
     expect(res.text).toMatch(/<h1>post (<!-- -->)?a<\/h1>/); // React separates text nodes with comments
-    expect(header(res, "x-nextjs-cache")).toBe("HIT");
+    expect(cacheStatus(res)).toBe("HIT");
     expect(header(res, "cache-control")).toContain("s-maxage=60");
   });
 

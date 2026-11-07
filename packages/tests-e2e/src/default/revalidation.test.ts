@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { eventually, hasHostLog, header, hostLog, request, sleep, timestampIn } from "../http.js";
+import {
+  cacheStatus,
+  eventually,
+  hasHostLog,
+  hostLog,
+  request,
+  sleep,
+  timestampIn,
+} from "../http.js";
 
 const consumerRuns = () =>
   (hostLog().match(/Executed 'Functions\.revalidation' \(Succeeded/g) ?? []).length;
@@ -14,7 +22,7 @@ describe("ISR through the revalidation queue (B1, B2)", () => {
     const runsBefore = hasHostLog() ? consumerRuns() : 0;
 
     const stale = await request("/isr");
-    expect(header(stale, "x-nextjs-cache")).toBe("STALE");
+    expect(cacheStatus(stale)).toBe("STALE");
     expect(timestampIn(stale.text)).toBe(firstStamp); // the stale page is served immediately
 
     // The queue consumer must run and succeed: it only does if the server answered its HEAD request
@@ -31,7 +39,7 @@ describe("ISR through the revalidation queue (B1, B2)", () => {
       hasHostLog() ? 500 : 3000,
     );
     expect(timestampIn(fresh.text)).not.toBe(firstStamp);
-    expect(["HIT", "STALE"]).toContain(header(fresh, "x-nextjs-cache"));
+    expect(["HIT", "STALE"]).toContain(cacheStatus(fresh));
   });
 
   it.skipIf(!hasHostLog())("does not leave failed revalidations behind", async () => {

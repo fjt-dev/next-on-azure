@@ -74,6 +74,13 @@ export const header = (r: Response, name: string) => {
   return Array.isArray(v) ? v.join(", ") : v;
 };
 
+/**
+ * Cache status of a page: Next.js sets `x-nextjs-cache`; with `dangerous.enableCacheInterception`
+ * OpenNext answers from the cache itself and sets `x-opennext-cache` instead.
+ */
+export const cacheStatus = (r: Response) =>
+  header(r, "x-nextjs-cache") ?? header(r, "x-opennext-cache");
+
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /** Polls until `check` returns a truthy value or the timeout passes. */

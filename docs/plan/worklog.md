@@ -4,6 +4,20 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 28): comparison with the official source
+
+### Done
+
+- Three research agents read the OpenNext AWS docs (inner workings, config and overrides pages) and the `opennextjs-aws` source of the overrides and core cache code. Compared with our overrides: the layouts and semantics agree (details in the roadmap section "Comparison with the official adapters"). No behavior had to change.
+- Experiment: `dangerous.enableCacheInterception: true` in the example: 48 of 50 E2E cases passed, the two failures only asserted the header name; with the new helper `cacheStatus` (accepts `x-nextjs-cache` and `x-opennext-cache`) all 50 pass. Reverted to the official default (off).
+- Open item found: the tag cache reads one entity per tag.
+
+### Verified (local)
+
+- E2E 50 + 10 + 1 with interception on; lint and typecheck. The default configuration was rerun after the helper change: 50 + 10 + 1.
+
+---
+
 ## 2026-11-07 (session 27): image cache investigation
 
 ### Done

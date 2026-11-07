@@ -19,6 +19,9 @@ updates:
     groups:
       dev-tooling:
         dependency-type: development
+      # react and react-dom must have exactly the same version, so they are updated in one pull request.
+      react:
+        patterns: ["react", "react-dom"]
     ignore:
       # The Next.js version is a support decision (ADR-0011), not an automatic update.
       - dependency-name: "next"

@@ -860,3 +860,4 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - Tests: 6 unit tests (batch size, 150 tags, request cache, failure not hidden) with a fake table that rejects filters over 15 comparisons, and 1 integration test with 40 tags on Azurite. Unit 233, integration 10 pass; local E2E run below.
 - **Unverified:** speed against point reads on Azure. A query with OR on row keys may cost more than 14 point reads; measure before claiming a gain.
 - CI check on `ae2bf59` passed. The two Dependabot PRs for react and react-dom 19.3.1 fail their `check` run (not yet looked at).
+- react and react-dom 19.1.0 to 19.3.1 together (catalog). The two Dependabot PRs failed because each bumped only one of the pair ("Incompatible React versions" at build). `dependabot.yml` now groups `react` and `react-dom`. Verified (local): build, unit 233, local E2E 50 + 10 + 1 on Next.js 15.5.29. Not run on Next.js 16 locally or on Azure.

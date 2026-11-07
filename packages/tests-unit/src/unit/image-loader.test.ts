@@ -42,4 +42,17 @@ describe("image loader", () => {
       "The specified image does not exist.",
     );
   });
+
+  it("records a missing source image for the wrapper, which answers 404", async () => {
+    const loader = await load(fakeBlobService());
+    // Import after load(): it resets the module registry, and the loader's instance must be the one used.
+    const { requestContext } = await import(
+      "../../../open-next-azure/src/overrides/request-context.js"
+    );
+    const ctx = { sourceImageMissing: false };
+    await requestContext.run(ctx, async () => {
+      await expect(loader.load("/nope.png")).rejects.toThrow();
+    });
+    expect(ctx.sourceImageMissing).toBe(true);
+  });
 });

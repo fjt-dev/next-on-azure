@@ -72,7 +72,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [ ] Decide the `WAIT_UNTIL_MODE` default with more data than one run ([ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream))
 - [ ] Limit the instance count for small sites: a 200-request burst started 17 instances, 16 of which served one or two requests
 - [x] Make `tests-e2e` run against a deployed URL (`E2E_BASE_URL`, project `remote`; log-based tests are skipped there). Verified (local): typecheck and lint; not yet run against a deployment
-- [ ] A missing source image answers 500 instead of 404 (seen locally and on Azure)
+- [x] A missing source image answers 404 instead of 500: the loader records it per request, the wrapper corrects the adapter's 500 (OpenNext's image adapter turns every loader error into 500). Verified (local): unit and E2E; not yet on Azure
 - [ ] Verify the three-app layout against the single app on Azure, then close or supersede [ADR-0009](./decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default)
 - [ ] Deploy the Front Door variant once (`--front-door`), including the access restriction on Flex
 - [ ] Verify npm and Yarn layouts of `node_modules` on Azure; extend the flattening or the guard if a layout other than pnpm's needs it
@@ -96,7 +96,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [ ] Server Actions, including the stable encryption key guidance (B12), `next/image` remote patterns, streaming/Suspense, PPR where supported
 - [ ] Image optimization hardening: private cache container, cache rules, refuse non-Linux-x64 artifacts (B11)
 - [ ] Static assets served from an exact-path manifest instead of name patterns (B10)
-- [ ] Security hardening of responses: error detail only when `NODE_ENV` is `development`, cookie sanitizing, no body on HEAD/204/205/304/101, drop `Content-Length` on streamed responses
+- [~] Security hardening of responses: no body on HEAD/204/205/304/101 is done (Verified (local); the body is still read so `waitUntil` work is held). Open: error detail only when `NODE_ENV` is `development`, cookie sanitizing. Dropping `Content-Length` on streamed responses was tried and reverted: static assets stream with an exact length and the E2E tests need it; revisit only with a case where the length is wrong
 - [~] Supply chain and security checks: SHA-pinned actions, read-only token and no privileged triggers are in place for `check` (see [CI](../contribute/ci.md)); dependency audit, secret scan, license allow-list with a third-party notices file are not
 - [ ] Rollback and engine switch behavior, documented and tested
 - [ ] Observability: Application Insights wiring, structured logging, documented queries

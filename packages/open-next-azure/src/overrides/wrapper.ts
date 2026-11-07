@@ -3,6 +3,7 @@ import { PassThrough, Readable } from "node:stream";
 import type { HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import type { InternalResult, StreamCreator } from "@opennextjs/aws/types/open-next";
 import type { Wrapper, WrapperHandler } from "@opennextjs/aws/types/overrides";
+import { type RequestContext, requestContext } from "./request-context.js";
 
 type Prelude = Parameters<StreamCreator["writeHeaders"]>[0];
 
@@ -38,6 +39,17 @@ export function isFrontDoorRequestAllowed(
   const a = Buffer.from(expected.toLowerCase());
   const b = Buffer.from(received.trim().toLowerCase());
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/** Statuses that never carry a body (RFC 9110). */
+const NO_BODY_STATUSES = new Set([101, 204, 205, 304]);
+
+/**
+ * Whether the response must be sent without a body: HEAD requests and statuses that never have one.
+ * The body is still read to its end, so deferred work held by `waitUntil` is not cut short.
+ */
+export function isBodyless(method: string, status: number): boolean {
+  return method.toUpperCase() === "HEAD" || NO_BODY_STATUSES.has(status);
 }
 
 /**
@@ -84,9 +96,10 @@ const wrapper: WrapperHandler = async (handler, converter) => {
 
     // Either the handler streams (writeHeaders is called) or it returns a
     // plain InternalResult (e.g. responses built by routing/middleware).
-    const done = handler(event, { streamCreator, waitUntil }).then((result: InternalResult) => ({
-      result,
-    }));
+    const context: RequestContext = { sourceImageMissing: false };
+    const done = requestContext
+      .run(context, () => handler(event, { streamCreator, waitUntil }))
+      .then((result: InternalResult) => ({ result }));
     const first = await Promise.race([preludeReady.then((prelude) => ({ prelude })), done]);
 
     // A handler that streams without awaiting anything can finish before the race above looks at
@@ -114,6 +127,10 @@ const wrapper: WrapperHandler = async (handler, converter) => {
       source = Readable.fromWeb(result.body as never);
     }
 
+    // The image adapter answers 500 for any loader error; a missing source image is a 404.
+    if (status === 500 && context.sourceImageMissing) status = 404;
+
+    const bodyless = isBodyless(req.method, status);
     const out = new Headers();
     for (const [k, v] of Object.entries(headers)) {
       if (Array.isArray(v)) for (const x of v) out.append(k, x);
@@ -121,7 +138,7 @@ const wrapper: WrapperHandler = async (handler, converter) => {
     }
 
     async function* body() {
-      for await (const chunk of source) yield chunk as Uint8Array;
+      for await (const chunk of source) if (!bodyless) yield chunk as Uint8Array;
       await done.catch(() => undefined);
       if (waitUntilMode() === "detach") {
         // Close the response now; deferred work keeps running in this process. Whether the platform

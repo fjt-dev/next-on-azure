@@ -36,3 +36,12 @@ describe("pages", () => {
     expect(res.body.length).toBe(0);
   });
 });
+
+describe("responses without a body", () => {
+  it("answers HEAD with the headers of the page and no body", async () => {
+    const res = await request("/", { method: "HEAD" });
+    expect(res.status).toBe(200);
+    expect(header(res, "content-type")).toMatch(/text\/html/);
+    expect(res.body.length).toBe(0);
+  });
+});

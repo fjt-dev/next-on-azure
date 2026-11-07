@@ -1,6 +1,7 @@
 import type { Readable } from "node:stream";
 import type { ImageLoader } from "@opennextjs/aws/types/overrides";
 import { getBlobService } from "./clients.js";
+import { markSourceImageMissing } from "./request-context.js";
 
 /** Loads source images for `/_next/image` from the static assets container. */
 const imageLoader: ImageLoader = {
@@ -22,6 +23,7 @@ const imageLoader: ImageLoader = {
       };
     } catch (e) {
       if ((e as { statusCode?: number }).statusCode === 404) {
+        markSourceImageMissing();
         throw new Error("The specified image does not exist.");
       }
       throw e;

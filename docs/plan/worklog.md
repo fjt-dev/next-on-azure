@@ -4,6 +4,24 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 12): missing image 404 and bodyless responses
+
+### Done
+
+- A missing source image now answers 404. OpenNext's image adapter turns every loader error into a 500, so the loader records the miss in a per-request `AsyncLocalStorage` (`request-context.ts`) and the wrapper corrects the status. The E2E case that was `it.fails` is now a normal test.
+- The wrapper sends no body for HEAD and for 101/204/205/304, while still reading the body to its end so `waitUntil` work (the HEAD revalidation) is held.
+- Tried and reverted: dropping `Content-Length` from streamed responses. It broke two E2E tests, because static assets stream with an exact length; the roadmap item stays open for a case where the length is really wrong.
+
+### Verified (local)
+
+- 197 unit tests, lint, type check; local E2E 29 + 10.
+
+### Unverified
+
+- Both changes on Azure; the 404 for a missing image only matters if the deployed image function reaches the same code path (it should, the same bundle).
+
+---
+
 ## 2026-11-06 (session 11): Azure E2E in CI (written, not run)
 
 ### Done

@@ -28,7 +28,7 @@ As of 2026-11-06 the rows below marked **Verified (Azure)** were checked by hand
 | Response streaming | Verified (local, Functions host): first bytes at 0.15 s, slow Suspense part at 3.0 s, separate chunks. **Verified (Azure)**, directly on the Function app: headers and early content at 37 ms, late content at 3032 ms, 4 chunks. Through Front Door Unverified |
 | `revalidateTag` | Verified (local, Functions host): cached value stable, new value after `revalidateTag` (Blob + Table). **Verified (Azure)** |
 | `revalidatePath` | Unverified |
-| Image optimization (`next/image`) | Verified (local, Functions host, sharp for the host OS): resize, WebP negotiation, 400 for disallowed width and remote URL. **Verified (Azure)** with the Linux x64 `sharp` binaries: 64 px WebP (250 bytes), resized PNG, 400 for a disallowed width and a remote URL. Missing source image returns 500 (should be 404) |
+| Image optimization (`next/image`) | Verified (local, Functions host, sharp for the host OS): resize, WebP negotiation, 400 for disallowed width and remote URL. **Verified (Azure)** with the Linux x64 `sharp` binaries: 64 px WebP (250 bytes), resized PNG, 400 for a disallowed width and a remote URL. Missing source image returns 404 (Verified (local) only; on Azure it was 500 before this fix) |
 | Static files (`/_next/static`, `public/`) | Verified (local, Functions host): served from Blob through the asset resolver with correct types and cache headers; `HEAD`, `If-None-Match` (304), byte ranges (206, 416) and unlisted paths (404) behave as designed. **Verified (Azure)**: same results, including exact bytes for ranges. Cost of serving them through the function is unmeasured |
 | Middleware | Unverified |
 | Pages Router | Unverified |

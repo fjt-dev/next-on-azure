@@ -29,9 +29,7 @@ describe("image optimization on /_next/image (B11)", () => {
     expect((await image("url=https%3A%2F%2Fexample.com%2Fa.png&w=64&q=75")).status).toBe(400);
   });
 
-  // Known gap (docs/compatibility.md): a missing source image currently produces 500. This test is
-  // expected to fail until it is fixed; when it starts passing, vitest reports it so `.fails` can go.
-  it.fails("answers 404 for a source image that does not exist", async () => {
+  it("answers 404 for a source image that does not exist", async () => {
     expect((await image("url=%2Fmissing.png&w=64&q=75")).status).toBe(404);
   });
 });

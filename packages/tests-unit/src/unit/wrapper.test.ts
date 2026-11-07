@@ -1,7 +1,9 @@
 import { HttpRequest } from "@azure/functions";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import converter from "../../../open-next-azure/src/overrides/converter.js";
+import { markSourceImageMissing } from "../../../open-next-azure/src/overrides/request-context.js";
 import azure, {
+  isBodyless,
   isFrontDoorRequestAllowed,
   waitUntilMode,
 } from "../../../open-next-azure/src/overrides/wrapper.js";
@@ -232,5 +234,94 @@ describe("waitUntil mode (WAIT_UNTIL_MODE)", () => {
     work.resolve();
     await sleep(10);
     expect(finished).toBe(true); // the deferred work was not cancelled
+  });
+});
+
+describe("missing source image (the image adapter answers 500 for any loader error)", () => {
+  it("turns that 500 into a 404", async () => {
+    const fn = await build(async () => {
+      markSourceImageMissing();
+      return coreResult({ statusCode: 500, body: webStream("Internal server error") });
+    });
+    const res = await fn(request());
+    expect(res.status).toBe(404);
+  });
+
+  it("leaves a 500 alone when no image was missing, and does not leak between requests", async () => {
+    let missing = true;
+    const fn = await build(async () => {
+      if (missing) markSourceImageMissing();
+      return coreResult({ statusCode: 500, body: webStream("boom") });
+    });
+    expect((await fn(request())).status).toBe(404);
+    missing = false;
+    expect((await fn(request())).status).toBe(500);
+  });
+
+  it("does not touch other statuses", async () => {
+    const fn = await build(async () => {
+      markSourceImageMissing();
+      return coreResult({ statusCode: 200 });
+    });
+    expect((await fn(request())).status).toBe(200);
+  });
+});
+
+describe("responses without a body", () => {
+  const head = () =>
+    new HttpRequest({ method: "HEAD", url: "https://f.net/p", headers: {}, query: {}, params: {} });
+
+  it("knows which responses never have a body", () => {
+    for (const status of [101, 204, 205, 304]) expect(isBodyless("GET", status)).toBe(true);
+    expect(isBodyless("HEAD", 200)).toBe(true);
+    expect(isBodyless("head", 200)).toBe(true);
+    expect(isBodyless("GET", 200)).toBe(false);
+    expect(isBodyless("POST", 404)).toBe(false);
+  });
+
+  it("sends no body for HEAD, but keeps the headers", async () => {
+    const fn = await build(async () =>
+      coreResult({ headers: { "x-nextjs-cache": "HIT" }, body: webStream("page") }),
+    );
+    const res = await fn(head());
+    expect(res.status).toBe(200);
+    expect((res.headers as Headers).get("x-nextjs-cache")).toBe("HIT");
+    expect(await readAll(res.body as never)).toBe("");
+  });
+
+  it("sends no body for a 304", async () => {
+    const fn = await build(async () => coreResult({ statusCode: 304, body: webStream("x") }));
+    expect(await readAll((await fn(request())).body as never)).toBe("");
+  });
+
+  it("still holds a bodyless response open until deferred work settles (HEAD revalidation)", async () => {
+    const gate = deferred<void>();
+    let ended = false;
+    const fn = await build(async (_event, options) => {
+      (options as never as { waitUntil: (p: Promise<void>) => void }).waitUntil(gate.promise);
+      return coreResult();
+    });
+    const res = await fn(head());
+    const reading = readAll(res.body as never).then(() => {
+      ended = true;
+    });
+    await sleep(20);
+    expect(ended).toBe(false);
+    gate.resolve();
+    await reading;
+    expect(ended).toBe(true);
+  });
+
+  it("keeps a Content-Length that the handler declared (static assets stream with an exact one)", async () => {
+    const fn = await build(async (_e, { streamCreator }: never) => {
+      const out = asStreamCreator(streamCreator).writeHeaders({
+        statusCode: 200,
+        headers: { "content-length": "5" },
+        cookies: [],
+      });
+      out.end("hello");
+      return coreResult();
+    });
+    expect(((await fn(request())).headers as Headers).get("content-length")).toBe("5");
   });
 });

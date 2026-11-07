@@ -4,6 +4,20 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 16): res.revalidate and client-style Server Action call
+
+### Done
+
+- Pushed `3401292`; `check` was green.
+- `pages/pages-ondemand.js` (revalidate 3600) and `pages/api/revalidate-page.js` (`res.revalidate`); E2E case: the page stays until the API route is called.
+- E2E case for a Server Action called as client JavaScript does (`Next-Action` header, `text/x-component` response); the maintainer chose to batch Azure runs to save GitHub Actions minutes.
+
+### Verified (local)
+
+- Local E2E: 43 default + 10 front-door; lint passes. Not run on Azure.
+
+---
+
 ## 2026-11-07 (session 15): Pages Router ISR and fallback in the example
 
 ### Done

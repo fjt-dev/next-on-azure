@@ -85,3 +85,15 @@ describe("Pages Router static generation", () => {
     expect(timestampIn(fresh.text)).not.toBe(first);
   });
 });
+
+describe("Pages Router on-demand revalidation (res.revalidate)", () => {
+  it("keeps a page until res.revalidate is called, then renders a new one", async () => {
+    const a = timestampIn((await request("/pages-ondemand")).text);
+    expect(timestampIn((await request("/pages-ondemand")).text)).toBe(a);
+    const post = await request("/api/revalidate-page", { method: "POST" });
+    expect(post.status).toBe(200);
+    const c = timestampIn((await request("/pages-ondemand")).text);
+    expect(c).not.toBe(a);
+    expect(timestampIn((await request("/pages-ondemand")).text)).toBe(c);
+  });
+});

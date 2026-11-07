@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { request, timestampIn } from "../http.js";
 
 /** Posts the form without JavaScript: multipart with the hidden action id field. */
+async function actionId(): Promise<string> {
+  const page = await request("/actions");
+  const id = /name="\$ACTION_ID_([0-9a-f]+)"/.exec(page.text)?.[1];
+  if (!id) throw new Error("no Server Action id in the form");
+  return id;
+}
+
 async function submitRefreshForm(): Promise<number> {
   const page = await request("/actions");
   const name = /name="(\$ACTION_ID_[0-9a-f]+)"/.exec(page.text)?.[1];
@@ -39,5 +46,21 @@ describe("Server Actions and revalidatePath", () => {
       body: "[]",
     });
     expect(res.status).toBeLessThan(500);
+  });
+
+  it("runs an action called the way client JavaScript does (Next-Action header, Flight response)", async () => {
+    const a = timestampIn((await request("/actions/data")).text);
+    const res = await request("/actions", {
+      method: "POST",
+      headers: {
+        "next-action": await actionId(),
+        "content-type": "text/plain;charset=UTF-8",
+        accept: "text/x-component",
+      },
+      body: "[]",
+    });
+    expect(res.status).toBe(200);
+    expect(String(res.headers["content-type"])).toContain("text/x-component");
+    expect(timestampIn((await request("/actions/data")).text)).not.toBe(a);
   });
 });

@@ -36,10 +36,12 @@ az ad sp create --id <appId> --query id -o tsv
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "github-main-branch",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:fjt-dev/opennextjs-azure-fjtd:ref:refs/heads/main",
+  "subject": "repo:fjt-dev@157100279/opennextjs-azure-fjtd@1448297244:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 ```
+
+The `subject` must equal the token's `sub` claim exactly. This repository sends its immutable form with numeric ids (`repo:<owner>@<owner id>/<repo>@<repo id>:ref:...`), not the plain `repo:<owner>/<repo>:...`; the first run failed with `AADSTS700213` until the credential used the form shown in the error message. For another repository, copy the subject from that error or from the repository's OIDC settings.
 
 Grant the service principal (use the object id printed by `az ad sp create`, not the app id):
 

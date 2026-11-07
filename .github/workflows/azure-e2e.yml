@@ -74,7 +74,8 @@ jobs:
         working-directory: examples/app-router
         run: |
           # Five-second polling keeps the ISR checks short; the name is unique per run.
-          name="oe2e$(printf '%s' "${{ github.run_id }}" | tail -c 9)${{ github.run_attempt }}"
+          # main.bicep limits the name to 12 characters: "oe" + 8 digits + the attempt number.
+          name="oe$(printf '%s' "${{ github.run_id }}" | tail -c 8)${{ github.run_attempt }}"
           node ../../packages/open-next-azure/dist/cli/index.js deploy \
             -g "$RESOURCE_GROUP" -n "$name" \
             --deployer-principal-id "$AZURE_PRINCIPAL_ID" \

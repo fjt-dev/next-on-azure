@@ -20,9 +20,13 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 - Azure. Server Actions called from client JavaScript (`Next-Action` header with a React Flight body), the stable encryption key guidance (B12), and `revalidatePath` of a dynamic segment or `layout` type.
 
+### Azure
+
+- The maintainer ran the Azure E2E workflow after the push and reported it passed (the `check` workflow was also green). The log was not shown, so passed/skipped counts and cost are unrecorded.
+
 ### Next
 
-- Run the Azure E2E workflow once for all changes since the first green run, then record the counts.
+- Record the counts and cost from that run; next-day inventory.
 
 ---
 

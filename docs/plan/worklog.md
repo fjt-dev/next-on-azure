@@ -4,6 +4,28 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 14): Server Actions and revalidatePath in the example
+
+### Done
+
+- Pushed the Pages Router and middleware commit (`6b47363`).
+- `examples/app-router`: `app/actions` (a form whose Server Action calls `revalidatePath("/actions/data")`) and `app/actions/data` (a `force-static` page that shows its render time).
+- `packages/tests-e2e/src/default/server-actions.test.ts`: the prerendered page keeps its time until the form (posted without JavaScript, with the hidden action id) is submitted, then renders a new one that is cached again; an unknown action id does not give a 5xx.
+
+### Verified (local)
+
+- Local E2E: 37 default + 10 front-door tests pass; lint and typecheck pass.
+
+### Not verified
+
+- Azure. Server Actions called from client JavaScript (`Next-Action` header with a React Flight body), the stable encryption key guidance (B12), and `revalidatePath` of a dynamic segment or `layout` type.
+
+### Next
+
+- Run the Azure E2E workflow once for all changes since the first green run, then record the counts.
+
+---
+
 ## 2026-11-07 (session 13): Pages Router and middleware in the example
 
 ### Done

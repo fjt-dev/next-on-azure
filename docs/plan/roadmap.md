@@ -23,7 +23,7 @@ Most real defects are expected to show up under the real Functions host running 
 ### 1a. Local Functions stack (no Azure resources)
 
 - [x] Run the packaged apps with Azure Functions Core Tools + Azurite; one command starts the stack (`pnpm local:stack`)
-- [~] Verify on it: streaming (done), queue-triggered ISR regeneration (done), `revalidateTag` (done), `/_next/image` (done), `waitUntil` (completion done; client latency is a problem, see [ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream)), `revalidatePath` (not done)
+- [~] Verify on it: streaming (done), queue-triggered ISR regeneration (done), `revalidateTag` (done), `/_next/image` (done), `waitUntil` (completion done; client latency is a problem, see [ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream)), `revalidatePath` (done)
 - [x] HTTPS local run with a self-signed certificate created for the run and deleted afterwards (B14)
 - [ ] Add a Pages Router fixture next to `examples/app-router`
 - [~] Fix whatever the above uncovers: extension bundle, sharp native binaries and a packaging guard fixed; `waitUntil` latency, missing-image status code (500 instead of 404) and `Content-Length` handling open; see the [work log](./worklog.md)
@@ -93,7 +93,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 
 - [ ] Next.js version policy: supported ranges enforced by a guard that refuses others; engine choice per Next.js major; version matrix in CI
 - [~] Pages Router and middleware: SSR, static page, API route, and middleware redirect/rewrite/header are covered by local E2E (Verified (local)). Open: Azure, Pages Router ISR and `fallback`, `app-pages-router`, external middleware
-- [ ] Server Actions, including the stable encryption key guidance (B12), `next/image` remote patterns, streaming/Suspense, PPR where supported
+- [~] Server Actions: form post and `revalidatePath` are covered by local E2E. Open: client-side calls, the stable encryption key guidance (B12), Azure. Also open: `next/image` remote patterns, streaming/Suspense, PPR where supported
 - [ ] Image optimization hardening: private cache container, cache rules, refuse non-Linux-x64 artifacts (B11)
 - [ ] Static assets served from an exact-path manifest instead of name patterns (B10)
 - [~] Security hardening of responses: no body on HEAD/204/205/304/101 is done (Verified (local); the body is still read so `waitUntil` work is held). Error detail only when `NODE_ENV` is `development` is done for failures before the first byte (generic 500, detail in the log; Verified (local), unit only); a failure after streaming started still just ends the stream. Open: cookie sanitizing. Dropping `Content-Length` on streamed responses was tried and reverted: static assets stream with an exact length and the E2E tests need it; revisit only with a case where the length is wrong

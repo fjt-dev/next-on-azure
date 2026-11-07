@@ -4,6 +4,24 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 29): Azure-specific optimizations, first two
+
+### Done
+
+- Application Insights sampling: the generated `host.json` had disabled it, so every telemetry item was sent and the ingestion cost grew with traffic. It now uses the platform default (sampling on, requests excluded from it); `deploy --full-telemetry` (Bicep parameter `fullTelemetry`, app setting `AzureFunctionsJobHost__logging__applicationInsights__samplingSettings__isEnabled=false`) restores the old behavior for measurements. Why it was off is not recorded; probably to count invocations in Application Insights (requests stay unsampled).
+- Warm-up after deployment: `deploy` requests `/` until it answers below 500 (up to 5 minutes), and prints the time. `deploy` is now async. `--no-warm-up` skips it. The first request after a deployment was measured at up to 25.7 s (Azure notes, item 19).
+- Tests: 3 for `warmUp` (accepts 403 and 404, retries after 5xx and network errors, gives up with the last error), 1 for `host.json`.
+
+### Verified (local)
+
+- Unit 225, lint, typecheck, Bicep compiles, the CLI starts. **Unverified:** the warm-up against a real deployment, and that the app setting overrides the sampling in `host.json` on Flex.
+
+### Next
+
+- Measure the module load time of the server bundle locally (Azure SDKs versus lighter clients), then an Azure run for the HTTP per-instance concurrency and `--always-ready 1`.
+
+---
+
 ## 2026-11-07 (session 28): comparison with the official source
 
 ### Done

@@ -59,7 +59,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [x] Verify ISR regeneration is executed by the queue consumer, not by an in-process fallback: 34 `revalidation` invocations recorded in Application Insights, each followed by a `HEAD` request to the page ([ADR-0010](./decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group))
 - [x] Verify managed identity RBAC: no shared keys, Blob/Queue/Table roles, host storage role
 - [x] Measure cold start and scale-out: HTTP cold start 4.1 to 4.5 s; 200 requests at 40 in parallel on 17 instances, p95 4.5 s ([Azure notes](../inner_workings/azure_notes.md), items 19 and 20). Not yet: the same on the three-app layout, with Node 24, or with a larger package
-- [ ] Add a post-deployment readiness check: a health route that reports the same release as the local build
+- [~] Post-deployment readiness check: `deploy` now waits for the first answer and reports its time (`warm-up.ts`, unit-tested; not run against a real deployment yet). Open: a health route that reports the same release as the local build
 - [x] Delete everything created and verify it (2026-11-06 07:06 UTC: 0 resources of the run left in the subscription)
 - [ ] **Next-day** read-only inventory of the subscription and a look at the actual cost of the run (usage had not been reported yet when the resources were deleted)
 

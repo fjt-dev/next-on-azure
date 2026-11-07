@@ -97,7 +97,12 @@ export function hostJson() {
       // The revalidation override enqueues plain JSON (not base64)
       queues: { messageEncoding: "none", maxDequeueCount: 3 },
     },
-    logging: { applicationInsights: { samplingSettings: { isEnabled: false } } },
+    // The platform default: telemetry is sampled, requests are not (every request stays visible).
+    // Full, unsampled telemetry costs more with traffic; `deploy --full-telemetry` turns the
+    // sampling off with an app setting (see main.bicep).
+    logging: {
+      applicationInsights: { samplingSettings: { isEnabled: true, excludedTypes: "Request" } },
+    },
   };
 }
 

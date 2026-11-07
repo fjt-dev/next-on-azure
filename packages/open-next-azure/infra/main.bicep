@@ -33,6 +33,9 @@ param instanceMemoryMB int = 2048
 @maxValue(1000)
 param maximumInstanceCount int = 20
 
+@description('Send every telemetry item to Application Insights instead of a sample. Costs more with traffic. Useful when counting invocations in a measurement; requests are never sampled either way.')
+param fullTelemetry bool = false
+
 @description('Always-ready instances for HTTP (0 = scale to zero, with cold starts). Billed continuously.')
 @minValue(0)
 param alwaysReadyInstances int = 0
@@ -251,6 +254,12 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'AzureFunctionsJobHost__extensions__queues__maxPollingInterval'
           value: '00:00:${padLeft(string(revalidationPollingSeconds), 2, '0')}'
+        }
+      ] : [], fullTelemetry ? [
+        // Overrides host.json logging.applicationInsights.samplingSettings.isEnabled
+        {
+          name: 'AzureFunctionsJobHost__logging__applicationInsights__samplingSettings__isEnabled'
+          value: 'false'
         }
       ] : [], frontDoor ? [
         // The wrapper rejects requests whose X-Azure-FDID differs

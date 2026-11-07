@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { run } from "./package-app.js";
+import { warmUp } from "./warm-up.js";
 
 function sleepSync(ms: number) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -61,18 +62,19 @@ function integerOption(
 
 /**
  * opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach]
- *   [--always-ready <n>] [--revalidation-always-ready <n>] [--revalidation-dedupe-seconds <n>]
+ *   [--no-warm-up] [--full-telemetry] [--always-ready <n>] [--revalidation-always-ready <n>] [--revalidation-dedupe-seconds <n>]
  *   [--revalidation-polling-seconds <1-60>] [--alert-queue-backlog <messages>]
  *   [--deployer-principal-id <object id>] [--deployer-principal-type User|ServicePrincipal|Group] [--output-file <path>]
  *
  * Creates the infrastructure with Bicep, uploads static assets and the prerender cache, and
  * deploys `.open-next-azure/app.zip`. Creates billable resources; see docs/contribute/azure_runs.md.
  */
-export function deploy(argv: string[]) {
+export async function deploy(argv: string[]) {
   const rg = option(argv, "--resource-group", "-g");
   const name = option(argv, "--name", "-n");
   const location = option(argv, "--location", "-l");
   const frontDoor = argv.includes("--front-door");
+  const fullTelemetry = argv.includes("--full-telemetry");
   const alwaysReady = integerOption(argv, "--always-ready", 0, 0);
   const revalidationAlwaysReady = Number(option(argv, "--revalidation-always-ready") ?? "0");
   if (!Number.isInteger(revalidationAlwaysReady) || revalidationAlwaysReady < 0) {
@@ -133,6 +135,7 @@ export function deploy(argv: string[]) {
       `revalidationPollingSeconds=${pollingSeconds}`,
       `queueBacklogAlertThreshold=${backlogAlert}`,
       `alwaysReadyInstances=${alwaysReady}`,
+      `fullTelemetry=${fullTelemetry}`,
       `revalidationAlwaysReady=${revalidationAlwaysReady}`,
       `deployerPrincipalId=${deployerId}`,
       `deployerPrincipalType=${deployerType}`,
@@ -179,6 +182,20 @@ export function deploy(argv: string[]) {
     zip,
   ]);
   console.log(`\nDeployed: ${v("url")}`);
+
+  if (!argv.includes("--no-warm-up")) {
+    console.log("Waiting for the first response (the slowest request after a deployment)...");
+    const warm = await warmUp(`${v("url")}/`);
+    if (warm.ok) {
+      console.log(
+        `The app answered with HTTP ${warm.status} after ${(warm.ms / 1000).toFixed(1)} s (${warm.attempts} attempt${warm.attempts === 1 ? "" : "s"}).`,
+      );
+    } else {
+      console.warn(
+        `The app did not answer within ${(warm.ms / 1000).toFixed(0)} s (last: ${warm.lastError}). The deployment itself succeeded; check the app in the portal.`,
+      );
+    }
+  }
 
   const outputFile = option(argv, "--output-file");
   if (outputFile) {

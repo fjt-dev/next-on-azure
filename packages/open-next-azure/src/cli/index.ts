@@ -11,7 +11,7 @@ import { packageApp } from "./package-app.js";
 const [cmd, ...rest] = process.argv.slice(2);
 try {
   if (cmd === "package") packageApp();
-  else if (cmd === "deploy") deploy(rest);
+  else if (cmd === "deploy") await deploy(rest);
   else {
     console.log("usage: opennext-azure <package|deploy>");
     process.exitCode = 1;

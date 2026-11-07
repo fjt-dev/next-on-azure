@@ -84,6 +84,15 @@ describe("hostJson", () => {
   });
 });
 
+describe("hostJson telemetry", () => {
+  it("samples telemetry like the platform default and never samples requests", () => {
+    expect(hostJson().logging.applicationInsights.samplingSettings).toEqual({
+      isEnabled: true,
+      excludedTypes: "Request",
+    });
+  });
+});
+
 describe("assertSharpForAzure", () => {
   let dir: string;
   beforeEach(() => {

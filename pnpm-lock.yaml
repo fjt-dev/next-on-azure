@@ -19,8 +19,8 @@ catalogs:
       specifier: 19.1.0
       version: 19.1.0
     react-dom:
-      specifier: 19.1.0
-      version: 19.1.0
+      specifier: 19.3.1
+      version: 19.3.1
     typescript:
       specifier: ^7.0.2
       version: 7.0.2
@@ -55,7 +55,7 @@ importers:
     dependencies:
       next:
         specifier: 'catalog:'
-        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.1.0))(react@19.1.0)
       opennext-adapter-azure:
         specifier: workspace:*
         version: link:../../packages/open-next-azure
@@ -64,11 +64,11 @@ importers:
         version: 19.1.0
       react-dom:
         specifier: 'catalog:'
-        version: 19.1.0(react@19.1.0)
+        version: 19.3.1(react@19.1.0)
     devDependencies:
       '@opennextjs/aws':
         specifier: 'catalog:'
-        version: 4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        version: 4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.1.0))(react@19.1.0))
 
   packages/open-next-azure:
     dependencies:
@@ -89,11 +89,11 @@ importers:
         version: 12.32.0
       next:
         specifier: '>=15.5.29 <16 || >=16.4.5'
-        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.1.0))(react@19.1.0)
     devDependencies:
       '@opennextjs/aws':
         specifier: 'catalog:'
-        version: 4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        version: 4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.1.0))(react@19.1.0))
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.5
@@ -132,7 +132,7 @@ importers:
         version: 12.32.0
       '@opennextjs/aws':
         specifier: 'catalog:'
-        version: 4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        version: 4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.1.0))(react@19.1.0))
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.5
@@ -2968,10 +2968,10 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
-  react-dom@19.1.0:
-    resolution: {integrity: sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==}
+  react-dom@19.3.1:
+    resolution: {integrity: sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==}
     peerDependencies:
-      react: ^19.1.0
+      react: ^19.3.1
 
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
@@ -3031,8 +3031,8 @@ packages:
     resolution: {integrity: sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==}
     engines: {node: '>=11.0.0'}
 
-  scheduler@0.26.0:
-    resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
+  scheduler@0.28.0:
+    resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
 
   semver@7.8.6:
     resolution: {integrity: sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==}
@@ -4814,7 +4814,7 @@ snapshots:
     dependencies:
       gzip-size: 6.0.0
 
-  '@opennextjs/aws@4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
+  '@opennextjs/aws@4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.1.0))(react@19.1.0))':
     dependencies:
       '@ast-grep/napi': 0.45.3
       '@aws-sdk/client-cloudfront': 3.984.0
@@ -4830,14 +4830,14 @@ snapshots:
       cookie: 1.1.1
       esbuild: 0.28.2
       express: 5.3.0
-      next: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      next: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.1.0))(react@19.1.0)
       path-to-regexp: 6.3.0
       urlpattern-polyfill: 10.1.0
       yaml: 2.9.1
     transitivePeerDependencies:
       - supports-color
 
-  '@opennextjs/aws@4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
+  '@opennextjs/aws@4.1.15(next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.1.0))(react@19.1.0))':
     dependencies:
       '@ast-grep/napi': 0.45.3
       '@aws-sdk/client-cloudfront': 3.984.0
@@ -4853,7 +4853,7 @@ snapshots:
       cookie: 1.1.1
       esbuild: 0.28.2
       express: 5.3.0
-      next: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      next: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.1.0))(react@19.1.0)
       path-to-regexp: 6.3.0
       urlpattern-polyfill: 10.1.0
       yaml: 2.9.1
@@ -6578,14 +6578,14 @@ snapshots:
     dependencies:
       content-type: 2.1.0
 
-  next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.1.0))(react@19.1.0):
     dependencies:
       '@next/env': 15.5.29
       '@swc/helpers': 0.5.15
       caniuse-lite: 1.0.30001820
       postcss: 8.5.32
       react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
+      react-dom: 19.3.1(react@19.1.0)
       styled-jsx: 5.1.6(react@19.1.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.5.29
@@ -6603,14 +6603,14 @@ snapshots:
       - '@types/node'
       - babel-plugin-macros
 
-  next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  next@15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.1.0))(react@19.1.0):
     dependencies:
       '@next/env': 15.5.29
       '@swc/helpers': 0.5.15
       caniuse-lite: 1.0.30001820
       postcss: 8.5.32
       react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
+      react-dom: 19.3.1(react@19.1.0)
       styled-jsx: 5.1.6(react@19.1.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.5.29
@@ -6769,10 +6769,10 @@ snapshots:
       iconv-lite: 0.7.3
       unpipe: 1.0.0
 
-  react-dom@19.1.0(react@19.1.0):
+  react-dom@19.3.1(react@19.1.0):
     dependencies:
       react: 19.1.0
-      scheduler: 0.26.0
+      scheduler: 0.28.0
 
   react@19.1.0: {}
 
@@ -6860,7 +6860,7 @@ snapshots:
 
   sax@1.6.1: {}
 
-  scheduler@0.26.0: {}
+  scheduler@0.28.0: {}
 
   semver@7.8.6: {}
 

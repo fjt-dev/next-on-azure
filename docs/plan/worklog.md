@@ -4,6 +4,21 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 20): second Azure E2E run
+
+### Done
+
+- Installed `gh` (maintainer), started `azure-e2e` on `main` at `a03cfb0` with the maintainer's go-ahead and watched it.
+- Result: success. Deploy, test and delete took about 6 minutes (07:59 to 08:05 UTC); the `cleanup` job succeeded. 8 test files, 41 passed, 2 skipped (the two host-log tests). The `poison` project is local only and not part of the remote run.
+- New on Azure since the first run: Pages Router ISR, `fallback: "blocking"`, `notFound`, `res.revalidate`, a Server Action called like client JavaScript, `revalidatePath` from a form action, missing image 404, middleware.
+
+### Not done
+
+- Inventory: the maintainer reported on 2026-11-07 that no `rg-oe2e-*` group remains after the two CI runs. Cost: the maintainer's Cost Management view by resource group (period not shown) listed `opennextjs-azure` 12 yen, `rg-opennextjs-azure-2` 1 yen, `rg-opennextjs-azure-1c` under 1 yen and two `flex-*` groups 0 yen. No `rg-oe2e-*` group appeared yet, so the CI runs are not in that number (usage is reported with a delay). The subscription has no resource group left (checked read-only with `az group list`).
+- Dependabot PRs for `next` 16, TypeScript 7 and a dev-tooling group fail `check`; not looked at.
+
+---
+
 ## 2026-11-07 (session 19): poison queue end to end
 
 ### Done

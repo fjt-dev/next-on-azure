@@ -12,9 +12,11 @@ Newest entry first. One entry per working session: what was done, what was verif
 - The wrapper sends no body for HEAD and for 101/204/205/304, while still reading the body to its end so `waitUntil` work (the HEAD revalidation) is held.
 - Tried and reverted: dropping `Content-Length` from streamed responses. It broke two E2E tests, because static assets stream with an exact length; the roadmap item stays open for a case where the length is really wrong.
 
+- A handler that fails before sending anything now gives a generic `500 Internal Server Error` (detail in the log, in the body only when `NODE_ENV` is `development`) instead of failing the invocation. The queue consumer's wrapper is separate and still throws, so retries keep working.
+
 ### Verified (local)
 
-- 197 unit tests, lint, type check; local E2E 29 + 10.
+- 199 unit tests, lint, type check; local E2E 29 + 10.
 
 ### Unverified
 

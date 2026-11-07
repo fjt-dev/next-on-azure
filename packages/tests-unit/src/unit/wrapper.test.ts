@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import converter from "../../../open-next-azure/src/overrides/converter.js";
 import { markSourceImageMissing } from "../../../open-next-azure/src/overrides/request-context.js";
 import azure, {
+  errorBody,
   isBodyless,
   isFrontDoorRequestAllowed,
   waitUntilMode,
@@ -323,5 +324,26 @@ describe("responses without a body", () => {
       return coreResult();
     });
     expect(((await fn(request())).headers as Headers).get("content-length")).toBe("5");
+  });
+});
+
+describe("a handler that fails before sending anything", () => {
+  it("answers 500 with a generic body and logs the detail", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const fn = await build(async () => {
+      throw new Error("secret connection string in message");
+    });
+    const res = await fn(request());
+    expect(res.status).toBe(500);
+    expect(res.body).toBe("Internal Server Error");
+    expect(String(res.body)).not.toContain("secret");
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
+  });
+
+  it("shows the detail only in development", () => {
+    expect(errorBody(new Error("boom"), "production")).toBe("Internal Server Error");
+    expect(errorBody(new Error("boom"), undefined)).toBe("Internal Server Error");
+    expect(errorBody(new Error("boom"), "development")).toContain("boom");
   });
 });

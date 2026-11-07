@@ -52,6 +52,13 @@ export function isBodyless(method: string, status: number): boolean {
   return method.toUpperCase() === "HEAD" || NO_BODY_STATUSES.has(status);
 }
 
+/** The text of a 500 response: generic, unless NODE_ENV is "development". */
+export function errorBody(error: unknown, env: string | undefined = process.env.NODE_ENV): string {
+  if (env === "development")
+    return error instanceof Error ? (error.stack ?? error.message) : String(error);
+  return "Internal Server Error";
+}
+
 /**
  * Wrapper for the Azure Functions Node v4 model with HTTP streaming.
  *
@@ -100,7 +107,18 @@ const wrapper: WrapperHandler = async (handler, converter) => {
     const done = requestContext
       .run(context, () => handler(event, { streamCreator, waitUntil }))
       .then((result: InternalResult) => ({ result }));
-    const first = await Promise.race([preludeReady.then((prelude) => ({ prelude })), done]);
+    let first: Awaited<typeof done> | { prelude: Prelude };
+    try {
+      first = await Promise.race([preludeReady.then((prelude) => ({ prelude })), done]);
+    } catch (error) {
+      // Nothing was sent yet. The detail goes to the log; the client only gets it in development.
+      console.error("Request handler failed", error);
+      return {
+        status: 500,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+        body: errorBody(error),
+      };
+    }
 
     // A handler that streams without awaiting anything can finish before the race above looks at
     // the prelude, so `first` may be its (empty) return value. Whether headers were written is

@@ -4,6 +4,23 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 24): remote images
+
+### Done
+
+- Added `images.remotePatterns` (`https://localhost:8443`) to the example and three E2E cases: an image from a listed origin is fetched and resized, an unlisted origin is refused (400), a missing remote image answers an error status. The test serves the image itself over HTTPS with the run's certificate; it is skipped against a deployment.
+- Correction: the roadmap item "remote images" assumed a gap. There is none: OpenNext's image adapter validates against `remotePatterns` and fetches the URL itself; the earlier 400 came from an empty `remotePatterns`.
+
+### Verified (local)
+
+- Local E2E 47 + 10 + 1. Not run on Azure.
+
+### Next
+
+- Warmer: check whether an always-ready instance on Flex Consumption removes the cold start before building a `warmer` override; then `cdnInvalidation`.
+
+---
+
 ## 2026-11-07 (session 23): Next.js Adapter API
 
 ### Done

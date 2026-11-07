@@ -26,4 +26,4 @@ You can run the built handlers against Azurite today; see [Local development](./
 
 ## What does it cost?
 
-Flex Consumption bills per execution and memory, Storage per use, and Front Door Standard has a base fee per profile. Always-ready instances (`serverAlwaysReady`) are billed continuously. Check current Azure pricing for your region.
+Flex Consumption bills per execution and memory, Storage per use, and Front Door Standard has a base fee per profile. Always-ready instances (`--always-ready`, `--revalidation-always-ready`) are billed continuously; see [ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet). Check current Azure pricing for your region.

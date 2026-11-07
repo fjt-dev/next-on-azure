@@ -83,6 +83,7 @@ Options:
 | --- | --- | --- |
 | `--front-door` | off | Creates Azure Front Door in front of the app (recurring fee). The app then rejects requests that did not pass through it |
 | `--wait-until hold\|detach` | `hold` | What happens to deferred work such as `after()` when the response is complete. `hold` makes the client wait for it; `detach` answers at once, which is safe for short work only (an idle instance is removed after about 1.5 to 3.5 minutes) |
+| `--always-ready <n>` | `0` | Keeps `n` instance(s) of the HTTP function group running, so a request does not wait for a cold start (measured without it: about 4.1 to 4.5 s, up to 25.7 s right after a package deployment). Billed continuously for the memory of each instance (2 GB by default), with no free grant, and counted against the regional core quota. Not measured with it on Azure. See [ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet) |
 | `--revalidation-always-ready <n>` | `0` | Keeps `n` instance(s) of the queue-triggered revalidation function running (billed continuously). With `0` a stale page can wait minutes for its regeneration, see [ADR-0010](./plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group) |
 
 | `--revalidation-dedupe-seconds <n>` | `60` | How long one stale request holds the right to enqueue a page's revalidation; the other requests for that page enqueue nothing meanwhile. `0` turns it off |

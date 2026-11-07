@@ -61,7 +61,7 @@ function integerOption(
 
 /**
  * opennext-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach]
- *   [--revalidation-always-ready <n>] [--revalidation-dedupe-seconds <n>]
+ *   [--always-ready <n>] [--revalidation-always-ready <n>] [--revalidation-dedupe-seconds <n>]
  *   [--revalidation-polling-seconds <1-60>] [--alert-queue-backlog <messages>]
  *   [--deployer-principal-id <object id>] [--deployer-principal-type User|ServicePrincipal|Group] [--output-file <path>]
  *
@@ -73,6 +73,7 @@ export function deploy(argv: string[]) {
   const name = option(argv, "--name", "-n");
   const location = option(argv, "--location", "-l");
   const frontDoor = argv.includes("--front-door");
+  const alwaysReady = integerOption(argv, "--always-ready", 0, 0);
   const revalidationAlwaysReady = Number(option(argv, "--revalidation-always-ready") ?? "0");
   if (!Number.isInteger(revalidationAlwaysReady) || revalidationAlwaysReady < 0) {
     throw new Error("--revalidation-always-ready must be a non-negative integer");
@@ -131,6 +132,7 @@ export function deploy(argv: string[]) {
       `revalidationDedupeSeconds=${dedupeSeconds}`,
       `revalidationPollingSeconds=${pollingSeconds}`,
       `queueBacklogAlertThreshold=${backlogAlert}`,
+      `alwaysReadyInstances=${alwaysReady}`,
       `revalidationAlwaysReady=${revalidationAlwaysReady}`,
       `deployerPrincipalId=${deployerId}`,
       `deployerPrincipalType=${deployerType}`,

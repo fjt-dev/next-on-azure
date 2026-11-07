@@ -4,6 +4,24 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 25): warmer
+
+### Done
+
+- Read the Microsoft Learn pages on Flex Consumption (always-ready instances, billing, quota) and the Functions pricing page (numbers are not rendered there).
+- Found that the Bicep template already had `alwaysReadyInstances` for the `http` group but the CLI could not set it, and `docs/faq.md` named a setting that does not exist. Added `deploy --always-ready <n>`; fixed the FAQ; documented in Get started.
+- [ADR-0013](./decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet): no `warmer` override, always-ready first, a timer ping not built (unverified on Flex, does not help bursts).
+
+### Verified (local)
+
+- Typecheck, lint and unit tests. The flag is passed to `az deployment group create` only on a deployment, which was not run: **Unverified** on Azure, as is the effect on cold start.
+
+### Next
+
+- A paid Azure run with `--always-ready 1`: cold start, first request after a deployment, and the real cost.
+
+---
+
 ## 2026-11-07 (session 24): remote images
 
 ### Done

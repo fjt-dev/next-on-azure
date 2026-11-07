@@ -268,3 +268,24 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 **Not read.** The adapter sub-pages on PPR, routing and static assets, the feature matrix, the RFC (`vercel/next.js` discussion 77740), and `opennextjs-aws` issues beyond the first page.
 
+---
+
+## ADR-0013: Cold start: always-ready instances first, no timer warmer yet
+
+**Date:** 2026-11-07. **Status:** accepted.
+
+**Context.** `@opennextjs/aws` has a `warmer` override: a scheduled invocation that keeps Lambda instances warm. On Flex Consumption the platform has its own feature, always-ready instances per scale group (`http` for the HTTP function). Measured on Azure without it (Azure notes, items 19 and 20): HTTP cold start 4.1 to 4.5 s, up to 25.7 s for the first request after a package deployment, warm requests 25 to 60 ms.
+
+**Decision.** There is no `warmer` override. Cold start is handled by the platform: the Bicep parameter `alwaysReadyInstances` (group `http`) is now reachable from the CLI as `deploy --always-ready <n>`; the default stays 0. A timer-triggered self-ping is not built.
+
+**Why.**
+
+- Microsoft documents always-ready instances as the Flex Consumption mitigation for cold starts; the warm-up trigger and prewarmed instances are Premium features (Microsoft Learn, read on 2026-11-07).
+- Billing, per the same pages: on-demand instances are billed only while executing, with a monthly free grant of 100,000 GB-s and 250,000 executions per subscription (paid subscriptions only). Always-ready instances are billed for their memory all the time (baseline, in GB-s) plus execution time and executions, with no free grant. One 2 GB instance is about 5.2 million GB-s in a 30-day month, roughly 50 times that free grant. Prices were not readable on the pricing page; use the Azure pricing calculator.
+- Always-ready instances count against the regional core quota (15 cores on Azure for Students and Free Trial subscriptions).
+- A ping from a timer function would only keep an instance from being removed after idling (about 1.5 to 3.5 minutes, measured). It does not help when a burst needs new instances, it needs its own scale group to run in, and nothing here shows it works on Flex. It is cheap in theory (about 2 GB-s per execution at the 1 s minimum) but unverified.
+
+**Rejected.** A `warmer` override that mimics the AWS one (different platform mechanism); always-ready by default (a continuous cost for every site, including the E2E runs).
+
+**Open.** Measure the cold start and the first request after a deployment with `--always-ready 1` on Azure (needs a paid run; compare with items 19 and 20). Decide then whether to recommend it in Get started. Test a timer ping only if always-ready turns out too expensive for small sites. Pricing numbers for the cost section of the docs.
+

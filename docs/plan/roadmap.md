@@ -97,7 +97,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [ ] Image optimization hardening: private cache container, cache rules, refuse non-Linux-x64 artifacts (B11)
 - [ ] Static assets served from an exact-path manifest instead of name patterns (B10)
 - [~] Security hardening of responses: no body on HEAD/204/205/304/101 is done (Verified (local); the body is still read so `waitUntil` work is held). Error detail only when `NODE_ENV` is `development` is done for failures before the first byte (generic 500, detail in the log; Verified (local), unit only); a failure after streaming started still just ends the stream. Open: cookie sanitizing. Dropping `Content-Length` on streamed responses was tried and reverted: static assets stream with an exact length and the E2E tests need it; revisit only with a case where the length is wrong
-- [~] Supply chain and security checks: SHA-pinned actions, read-only token and no privileged triggers are in place for `check` (see [CI](../contribute/ci.md)); dependency audit, secret scan, license allow-list with a third-party notices file are not
+- [~] Supply chain and security checks: SHA-pinned actions, read-only token and no privileged triggers are in place for `check` (see [CI](../contribute/ci.md)); production audit gate, own secret scanner (tree, history checked once), license allow-list: done, see [Supply chain checks](../contribute/supply_chain.md). Open: SBOM, npm provenance, a dependency update policy
 - [ ] Rollback and engine switch behavior, documented and tested
 - [ ] Observability: Application Insights wiring, structured logging, documented queries
 - [ ] Revisit known limitations in [Compatibility](../compatibility.md) and [Common issues](../common_issues.md)

@@ -4,6 +4,21 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 18): supply chain checks
+
+### Done
+
+- `pnpm audit --prod` found 4 advisories, all in the `postcss` that Next.js pins. Fixed with an `overrides` entry (the lockfile had to be regenerated with `--lockfile-only`); production audit is clean, build and local E2E pass.
+- `scripts/secret-scan.mjs` (+ `secret-rules.mjs`): tracked files and full history, no findings; the Azurite public key is allow-listed. Unit tests for the rules and the tree.
+- `scripts/license-check.mjs`: allow-list for the package, two documented exceptions for the example.
+- New `supply-chain` job in `check` (production audit gate, report-only full audit, secret scan, licenses); new doc [Supply chain checks](../contribute/supply_chain.md).
+
+### Verified (local)
+
+- Unit tests 213 pass; lint passes; the new CI job has not run on GitHub yet. The full audit still lists development-tool advisories (2 critical, 5 high at the start): not fixed, report only.
+
+---
+
 ## 2026-11-07 (session 17): npm pack contents check
 
 ### Done

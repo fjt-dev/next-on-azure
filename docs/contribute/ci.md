@@ -62,3 +62,7 @@ cd /tmp/clean-copy
 pnpm install --frozen-lockfile && pnpm lint && pnpm build && pnpm typecheck \
   && pnpm test && pnpm test:integration && pnpm e2e:test
 ```
+
+## Supply chain job
+
+The `supply-chain` job runs the production audit, the secret scan and the license check; see [Supply chain checks](./supply_chain.md).

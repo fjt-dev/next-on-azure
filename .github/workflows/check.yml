@@ -61,6 +61,40 @@ jobs:
       - name: Bicep compiles
         run: az bicep build --file packages/open-next-azure/infra/main.bicep --stdout > /dev/null
 
+  supply-chain:
+    name: audit, secrets, licenses
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Production dependencies must have no known high or critical advisory. Development tools are
+      # reported but do not fail the build (see docs/contribute/supply_chain.md).
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
+      - name: Audit all dependencies (report only)
+        run: pnpm audit || true
+
+      - name: Secret scan
+        run: node scripts/secret-scan.mjs
+
+      - name: License allow-list
+        run: node scripts/license-check.mjs
+
   e2e:
     name: local E2E (Functions host + Azurite)
     runs-on: ubuntu-latest

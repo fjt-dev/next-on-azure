@@ -16,6 +16,9 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "turbo run build && changeset publish",
+    "audit:prod": "pnpm audit --prod --audit-level high",
+    "secret-scan": "node scripts/secret-scan.mjs",
+    "license-check": "node scripts/license-check.mjs",
     "local:stack": "node scripts/local-stack.mjs"
   },
   "devDependencies": {

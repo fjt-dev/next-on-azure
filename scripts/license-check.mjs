@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 // Fails when a production dependency of the published package uses a license outside the allow-list.
-// The example app is checked against a second, documented list of known exceptions (see
-// docs/contribute/supply_chain.md): they end up in the app zip of a user, not in our package.
+// Two licenses are accepted as known exceptions (docs/contribute/supply_chain.md): they come from
+// the peer dependency `next` (sharp's libvips, caniuse-lite data), which the user installs, not
+// from code that this package contains or depends on directly.
 import { execFileSync } from "node:child_process";
 
 const allowed = new Set(["MIT", "ISC", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "0BSD"]);
-const exampleExceptions = new Set(["LGPL-3.0-or-later", "CC-BY-4.0"]);
+// By package name, so a new package with such a license still fails.
+const peerExceptions = (name) => name.startsWith("@img/sharp-libvips-") || name === "caniuse-lite";
 
 const list = (filter) =>
   JSON.parse(
@@ -20,13 +22,12 @@ const list = (filter) =>
   );
 
 const problems = [];
-for (const [license, pkgs] of Object.entries(list("opennextjs-azure"))) {
-  if (!allowed.has(license))
-    problems.push(`package: ${license}: ${pkgs.map((p) => p.name).join(", ")}`);
-}
-for (const [license, pkgs] of Object.entries(list())) {
-  if (!allowed.has(license) && !exampleExceptions.has(license)) {
-    problems.push(`workspace: ${license}: ${pkgs.map((p) => p.name).join(", ")}`);
+for (const filter of ["opennextjs-azure", undefined]) {
+  const label = filter ? "package" : "workspace";
+  for (const [license, pkgs] of Object.entries(list(filter))) {
+    if (allowed.has(license)) continue;
+    const bad = pkgs.map((p) => p.name).filter((name) => !peerExceptions(name));
+    if (bad.length > 0) problems.push(`${label}: ${license}: ${bad.join(", ")}`);
   }
 }
 if (problems.length > 0) {

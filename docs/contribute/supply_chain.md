@@ -16,10 +16,12 @@ Run with `--history` on 2026-11-07: nothing found. Limits: pattern based, so it 
 
 ## Licenses
 
-`node scripts/license-check.mjs` fails when a production dependency of the published package uses a license other than MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause or 0BSD. For the whole workspace it also accepts two known exceptions of the example app:
+`node scripts/license-check.mjs` fails when a production dependency of the published package, or of the workspace, uses a license other than MIT, ISC, Apache-2.0, BSD-2-Clause, BSD-3-Clause or 0BSD. Two known exceptions are accepted by package name:
 
-- `LGPL-3.0-or-later`: the prebuilt `libvips` binaries that `sharp` ships. They end up in `image.zip` of a user's app, not in this package.
-- `CC-BY-4.0`: `caniuse-lite` (data used by Next.js).
+- `@img/sharp-libvips-*` (`LGPL-3.0-or-later`): the prebuilt `libvips` binaries that `sharp` ships.
+- `caniuse-lite` (`CC-BY-4.0`): browser data used by Next.js.
+
+Both come from the peer dependency `next`, which the user installs (since the `next` peer range was added in ADR-0011, `pnpm` lists them for the package as well). They end up in the app zip of a user, not in this package. A new package with a non-allowed license fails the check.
 
 Because the package contains only its own code (`dist`, `infra`), it needs no third-party notices file; what the user's app zip contains is the user's responsibility, and this note lists what the example brings.
 

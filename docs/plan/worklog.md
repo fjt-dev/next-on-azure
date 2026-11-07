@@ -15,11 +15,11 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ### Rule from the maintainer
 
-- Do not refer to the code (or repository, tarball) of the existing `opennextjs-azure`: this project must not be a copy. Recorded in `AGENTS.md` and in the release plan (task P1 changed to an independence record). Before the rule, the assistant had read the registry metadata and the first part of the README (no code); nothing in this project was changed because of it.
+- The assistant does not read the code of other Azure adapters (including the existing `opennextjs-azure`), to avoid being influenced by it. Recorded in `AGENTS.md`. The maintainer does not want a public statement about independence; none is written. Before the rule, the assistant had read the registry metadata and the first part of that README (no code).
 
 ### Not verified
 
-- What the other package does (and it will not be checked by reading its code); GitHub's current policy on free Actions minutes for public repositories; the free names on npm (can change).
+- What the other package does (it will not be checked by reading its code); GitHub's current policy on free Actions minutes for public repositories; the free names on npm (can change).
 
 ---
 

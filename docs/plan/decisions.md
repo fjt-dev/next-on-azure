@@ -318,5 +318,5 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 **Open.** The name, and whether to publish separately, contribute to the existing project, or offer this work to the OpenNext organization. See [Release plan](./release_plan.md), tasks P1 to P5. Until decided, the package keeps the placeholder name in the repository and is not published.
 
-**Rule (maintainer, 2026-11-07).** The code of the existing package is not read, copied or run, and this project must not become a copy of it. Contributing to or merging with it, which would need that, is not pursued for now. See `AGENTS.md`.
+The code of other Azure adapters is not read while developing this project (rule in `AGENTS.md`). Contributing to or merging with the existing package, which would need a closer look, is not pursued for now.
 

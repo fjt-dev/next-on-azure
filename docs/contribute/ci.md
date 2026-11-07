@@ -13,7 +13,7 @@ Triggers: every pull request and every push to `main`. Cancels superseded runs o
 
 ## Security rules for workflows
 
-- `permissions: contents: read` for the whole workflow. No job needs more. Do not add `id-token` or any write permission to this workflow; the Azure E2E workflow will be separate (see below).
+- `permissions: contents: read` for the whole workflow. No job needs more. Do not add `id-token` or any write permission to this workflow; the Azure E2E workflow is separate ([Azure E2E in CI](./azure_e2e.md)) and is the only one with `id-token: write`; a unit test pins this.
 - Never use `pull_request_target` or `workflow_run` here: they run with a privileged token against code from forks.
 - `actions/checkout` runs with `persist-credentials: false`.
 - **Every action is pinned to a full commit SHA**, with the release tag in a trailing comment. Currently: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/upload-artifact` v7.0.2.
@@ -47,7 +47,7 @@ Not verified:
 
 ## Not in CI yet
 
-- Azure E2E against a real deployment. It must be a separate workflow: GitHub OIDC federation to a dedicated test subscription, a new resource group per run, deletion of the resources afterwards, a cost ceiling ([Real Azure runs](./azure_runs.md)). Triggered manually and nightly, never on pull requests from forks.
+- Azure E2E against a real deployment: the workflow `azure-e2e` exists but has **never run** and needs a one-time Azure and GitHub setup ([Azure E2E in CI](./azure_e2e.md)).
 - Dependency audit, secret scan, license allow-list and third-party notices, `npm pack` contents check, clean-install tests on macOS and Windows ([roadmap](../plan/roadmap.md) Phases 2 to 3).
 - Release automation (Changesets, npm provenance), Phase 4.
 

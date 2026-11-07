@@ -4,6 +4,32 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-06 (session 11): Azure E2E in CI (written, not run)
+
+### Done
+
+- `tests-e2e`: new project `remote` (`E2E_BASE_URL`, script `e2e:remote`). Normal TLS verification against a deployed app; tests that read the local host log (consumer succeeded, no failed revalidation, stampede count, `AFTER_DONE`) are skipped there, and the ISR test waits longer.
+- CLI `deploy`: `--deployer-principal-id` (a service principal cannot use `az ad signed-in-user`), `--output-file` (url, app, storage account, group), and the blob upload retries authorization errors while a new role assignment propagates.
+- `.github/workflows/azure-e2e.yml` and `scripts/ci/azure-login.sh`: manual (and optional weekly) trigger restricted to `main` (no GitHub environment: required reviewers need a paid plan for private repos), OIDC sign-in without a third-party action, per-run resource group with tags, deploy, remote E2E, delete, plus a `cleanup` job that also removes tagged groups older than three hours.
+- Unit test pinning the workflow rules (SHA pins, no privileged triggers, `id-token` only in this workflow, always-delete, no secrets).
+- Guide with the one-time setup: [Azure E2E in CI](../contribute/azure_e2e.md).
+
+### Verified (local)
+
+- Lint, type check, build; 188 unit tests; local E2E 28 + 10 pass. The workflow YAML parses and every `run:` block passes `bash -n`; all actions are SHA-pinned.
+
+### Unverified
+
+- Everything that needs GitHub or Azure: the OIDC sign-in, the role propagation retry, deployment from the runner, the remote E2E over the internet, the cleanup job, `actionlint`. No Azure resource was created.
+- The remote ISR timing (5 s polling should give a few seconds, from the earlier measurement) and the cost of a run.
+
+### Next
+
+1. The maintainer does the one-time setup in the guide; then a watched first run (confirm region, cost ceiling and time window first).
+2. Read Application Insights from the remote tests to restore the log-based checks.
+
+---
+
 ## 2026-11-06 (session 10): first push and first CI run
 
 ### Done

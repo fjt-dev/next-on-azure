@@ -25,13 +25,16 @@ export function request(
   options: { method?: string; headers?: Record<string, string>; body?: string } = {},
 ): Promise<Response> {
   const base = new URL(inject("baseUrl"));
-  const ca = fs.readFileSync(path.join(inject("runDir"), "cert.pem"));
+  // A remote deployment has a certificate from a public CA; only the local stack needs its own.
+  const ca = inject("remote")
+    ? undefined
+    : fs.readFileSync(path.join(inject("runDir"), "cert.pem"));
   const started = performance.now();
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
         host: base.hostname,
-        port: base.port,
+        port: base.port || 443,
         path: pathAndQuery,
         method: options.method ?? "GET",
         headers: options.headers,
@@ -91,7 +94,12 @@ export async function eventually<T>(
 /** The ISO timestamp rendered by the example pages (`isr`, `tagged`). */
 export const timestampIn = (html: string) => /20\d\d-\d\d-\d\dT[\d:.]+Z/.exec(html)?.[0];
 
+/** false when the target is a deployed app: its host log is not a local file. */
+export const hasHostLog = () => !inject("remote");
+
 /** All lines of the Function host log of this run. */
 export function hostLog(): string {
+  if (!hasHostLog())
+    throw new Error("no host log in remote mode; guard the test with hasHostLog()");
   return fs.readFileSync(path.join(inject("runDir"), "app.log"), "utf8");
 }

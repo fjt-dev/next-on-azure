@@ -14,6 +14,17 @@ export default defineConfig({
         },
       },
       {
+        // The same tests against a deployed app (E2E_BASE_URL). Tests that read the local host
+        // log are skipped. ISR waits are long because the queue consumer polls with backoff.
+        test: {
+          name: "remote",
+          include: ["src/default/**/*.test.ts"],
+          globalSetup: ["src/setup-remote.ts"],
+          testTimeout: 180_000,
+          hookTimeout: 60_000,
+        },
+      },
+      {
         // The same stack started with FRONT_DOOR_ID set.
         test: {
           name: "front-door",

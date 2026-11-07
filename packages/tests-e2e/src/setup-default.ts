@@ -7,6 +7,7 @@ export async function setup(project: TestProject) {
   stack = await startStack();
   project.provide("baseUrl", stack.baseUrl);
   project.provide("runDir", stack.runDir);
+  project.provide("remote", false);
 }
 
 export async function teardown() {

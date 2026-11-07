@@ -71,7 +71,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [ ] Find the cause of `Unable to create client for AzureWebJobsStorage` on some new instances (seen on 3 of about 46 host starts in two runs); add an alert on the host health check
 - [ ] Decide the `WAIT_UNTIL_MODE` default with more data than one run ([ADR-0006](./decisions.md#adr-0006-waituntil-via-response-stream))
 - [ ] Limit the instance count for small sites: a 200-request burst started 17 instances, 16 of which served one or two requests
-- [ ] Make `tests-e2e` run against a deployed URL (the probes used on Azure were throwaway scripts): the Azure E2E workflow in Phase 2
+- [x] Make `tests-e2e` run against a deployed URL (`E2E_BASE_URL`, project `remote`; log-based tests are skipped there). Verified (local): typecheck and lint; not yet run against a deployment
 - [ ] A missing source image answers 500 instead of 404 (seen locally and on Azure)
 - [ ] Verify the three-app layout against the single app on Azure, then close or supersede [ADR-0009](./decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default)
 - [ ] Deploy the Front Door variant once (`--front-door`), including the access restriction on Flex
@@ -83,7 +83,7 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 - [x] Integration tests against Azurite (real SDKs, dedicated ports), automating the manual checks done in Phase 0
 - [~] Implement the behavioral test cases listed in [testing](../contribute/testing.md#required-behavioral-test-cases): B1, B2 (partly), B3 (converter level), B4, B5 (partly), B6, B7 (current behaviour), B9 (HEAD), B10, B11 (resize and rejections) are covered; B8, B12, B13, B14-beyond-HTTPS, cookie sanitizing, `Content-Length` removal, optimized-image cache rules are not
 - [x] `packages/tests-e2e` (Vitest + HTTPS, not Playwright): runs against the local Functions + Azurite stack; a browser-driven suite can be added later if UI behaviour needs it
-- [ ] E2E against a real Azure deployment, deployed from CI using OIDC federation (no stored secrets), with automatic teardown
+- [~] E2E against a real Azure deployment, deployed from CI using OIDC federation (no stored secrets), with automatic teardown: workflow and setup guide written ([Azure E2E in CI](../contribute/azure_e2e.md)); needs the one-time Azure/GitHub setup and a first watched run
 - [ ] Evaluate reusing the example apps and E2E specs from `opennextjs/opennextjs-aws` as a conformance suite
 - [x] CI (GitHub Actions): `check` workflow (lint, typecheck, build, unit, integration, Bicep, local E2E; SHA-pinned actions, read-only token, Dependabot) ran on GitHub and passed on 2026-11-06 ([CI](../contribute/ci.md)). Still to do: Azure E2E on demand and nightly; `actionlint` was never run
 - [ ] Poison-queue end-to-end test (B3 beyond the converter): a malformed message must reach `revalidation-poison` after 3 attempts

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventually, hostLog, request } from "../http.js";
+import { eventually, hasHostLog, hostLog, request } from "../http.js";
 
 // ADR-0006: the wrapper holds the response stream open until deferred work is done. These tests
 // pin down the CURRENT behaviour. The latency assertion is expected to change when ADR-0006 is
@@ -9,7 +9,7 @@ describe("after() / waitUntil (B7)", () => {
     const res = await request("/api/after");
     expect(res.status).toBe(200);
     expect(JSON.parse(res.text)).toEqual({ responded: true });
-    await eventually(async () => /AFTER_DONE/.test(hostLog()));
+    if (hasHostLog()) await eventually(async () => /AFTER_DONE/.test(hostLog()));
   });
 
   it("currently makes the client wait for the deferred work (known cost of ADR-0006)", async () => {

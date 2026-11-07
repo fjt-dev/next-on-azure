@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "e2e:test": "vitest run --project default && vitest run --project front-door",
+    "e2e:remote": "vitest run --project remote",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

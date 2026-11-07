@@ -13,6 +13,10 @@ Newest entry first. One entry per working session: what was done, what was verif
 - B5 cookies: a probe route (`/api/cookies`) with several `Set-Cookie` headers showed a **real bug**: only the last cookie reached the client, even when all were valid (the Functions host keeps one value per header name). Fixed in the wrapper: `cookies.ts` turns `Set-Cookie` lines into structured cookies (`HttpResponseInit.cookies`) and drops attributes the platform rejects (unknown `SameSite`, unreadable `Expires`, non-numeric `Max-Age`). `Partitioned` and `Priority` have no field and are dropped.
 - Tests: 8 unit tests for the parser, two wrapper tests updated, two E2E cases (valid cookies, invalid attributes).
 
+### CI finding
+
+- The Next.js 16.4.5 E2E job of `63a5772` failed: Next.js 16 refuses remote images that resolve to a private address (`images.dangerouslyAllowLocalIP`), and the new remote image test serves its image from localhost. My earlier local check on 16 was invalid: `pnpm --filter example-app-router run package` does not rebuild, so it packaged the old Next.js 15 build. Fixed with a version-aware `next.config.mjs` (the option is unknown to 15.5.29 and makes its build fail); verified locally on both versions with a real rebuild (`pnpm e2e:test`). Always switch versions through `pnpm e2e:test`, which rebuilds.
+
 ### Verified (local)
 
 - Unit 221, E2E 49 + 10 + 1, lint, typecheck. Not run on Azure: the behavior of the host with structured cookies in a deployment, and cookie values with unusual characters, are unverified.

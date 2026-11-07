@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   assertNoSymlinks,
   assertSharpForAzure,
@@ -133,6 +133,29 @@ describe("assertSharpForAzure", () => {
 });
 
 describe("packageApp", () => {
+  it("refuses an unsupported Next.js version before it touches the output directory", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "old-next-"));
+    fs.writeFileSync(path.join(root, "package.json"), "{}");
+    fs.mkdirSync(path.join(root, "node_modules", "next"), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, "node_modules", "next", "package.json"),
+      JSON.stringify({ name: "next", version: "14.2.5" }),
+    );
+    fs.mkdirSync(path.join(root, ".open-next", "server-functions", "default"), { recursive: true });
+    const out = path.join(root, "out");
+    fs.mkdirSync(out);
+    const cwd = vi.spyOn(process, "cwd").mockReturnValue(root);
+    try {
+      expect(() => packageApp({ openNextDir: path.join(root, ".open-next"), outDir: out })).toThrow(
+        /Next\.js 14\.2\.5 is not supported/,
+      );
+      expect(fs.existsSync(out)).toBe(true); // not removed
+    } finally {
+      cwd.mockRestore();
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("fails with a clear message when open-next build was not run", () => {
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), "no-build-"));
     try {

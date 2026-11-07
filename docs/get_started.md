@@ -70,6 +70,8 @@ npx open-next build        # produces .open-next/
 npx opennext-azure package # produces .open-next-azure/app.zip (one Function app)
 ```
 
+`package` reads the version of `next` your app resolves and refuses a version outside the `next` peer range of this package (the range of `@opennextjs/aws`, [ADR-0011](./plan/decisions.md#adr-0011-nextjs-support-follows-opennextjsaws)). `--allow-unsupported-next` packages it anyway, with a warning. If the version cannot be read, it only warns.
+
 ## 4. Deploy
 
 ```bash

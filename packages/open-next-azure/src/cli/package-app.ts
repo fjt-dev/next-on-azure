@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildAssetsManifest } from "./assets-manifest.js";
 import { findSymlinks, flattenPnpmNodeModules, removeShims } from "./flatten-node-modules.js";
+import { assertSupportedNext } from "./next-version.js";
 
 /**
  * Builds the single Function app described in ADR-0009 from an OpenNext build:
@@ -185,10 +186,18 @@ export type PackageResult = { appDir: string; zip: string; bundles: BundleName[]
 export function packageApp({
   openNextDir = ".open-next",
   outDir = ".open-next-azure",
+  allowUnsupportedNext = false,
+  checkNext = true,
+}: {
+  openNextDir?: string;
+  outDir?: string;
+  allowUnsupportedNext?: boolean;
+  checkNext?: boolean;
 } = {}): PackageResult {
   if (!fs.existsSync(path.join(openNextDir, BUNDLES.server))) {
     throw new Error(`${openNextDir}/${BUNDLES.server} not found. Run "npx open-next build" first.`);
   }
+  if (checkNext) assertSupportedNext(process.cwd(), { allowUnsupported: allowUnsupportedNext });
   fs.rmSync(outDir, { recursive: true, force: true });
   const appDir = path.join(outDir, "app");
   fs.mkdirSync(appDir, { recursive: true });

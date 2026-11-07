@@ -100,6 +100,9 @@ importers:
 
   packages/tests-e2e:
     devDependencies:
+      '@azure/storage-queue':
+        specifier: ^12.25.0
+        version: 12.32.0
       '@types/node':
         specifier: 'catalog:'
         version: 22.20.5

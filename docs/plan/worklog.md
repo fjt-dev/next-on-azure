@@ -4,6 +4,19 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 19): poison queue end to end
+
+### Done
+
+- New E2E project `poison` (`src/poison/poison-queue.test.ts`, run last by `pnpm e2e:test`): sends a non-JSON message to `revalidation` through Azurite; waits until it appears in `revalidation-poison`; checks it is gone from the main queue and that the host log shows exactly 3 failed executions (`maxDequeueCount: 3`).
+- Separate project and stack on purpose: the default tests assert that no revalidation failed in the host log.
+
+### Verified (local)
+
+- Passes in the full local run (default 43, front-door 10, poison 1); lint and typecheck pass. Not run on Azure; the remote project does not include it.
+
+---
+
 ## 2026-11-07 (session 18): supply chain checks
 
 ### Done

@@ -25,6 +25,17 @@ export default defineConfig({
         },
       },
       {
+        // Own stack: the test makes the queue consumer fail on purpose, which the default tests
+        // forbid in the host log.
+        test: {
+          name: "poison",
+          include: ["src/poison/**/*.test.ts"],
+          globalSetup: ["src/setup-default.ts"],
+          testTimeout: 60_000,
+          hookTimeout: 240_000,
+        },
+      },
+      {
         // The same stack started with FRONT_DOOR_ID set.
         test: {
           name: "front-door",

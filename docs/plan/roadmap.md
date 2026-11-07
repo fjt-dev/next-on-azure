@@ -81,12 +81,12 @@ Follow [Real Azure runs](../contribute/azure_runs.md). Confirm subscription, reg
 
 - [x] `packages/tests-unit` (Vitest): converter, wrapper, asset resolver, caches, queue, revalidation, image loader, manifest and packaging helpers against in-memory fakes
 - [x] Integration tests against Azurite (real SDKs, dedicated ports), automating the manual checks done in Phase 0
-- [~] Implement the behavioral test cases listed in [testing](../contribute/testing.md#required-behavioral-test-cases): B1, B2 (partly), B3 (converter level), B4, B5 (partly), B6, B7 (current behaviour), B9 (HEAD), B10, B11 (resize and rejections) are covered; B8, B12, B13, B14-beyond-HTTPS, cookie sanitizing, `Content-Length` removal, optimized-image cache rules are not
+- [~] Implement the behavioral test cases listed in [testing](../contribute/testing.md#required-behavioral-test-cases): B1, B2 (partly), B3 (converter level and local poison queue), B4, B5 (partly), B6, B7 (current behaviour), B9 (HEAD), B10, B11 (resize and rejections) are covered; B8, B12, B13, B14-beyond-HTTPS, cookie sanitizing, `Content-Length` removal, optimized-image cache rules are not
 - [x] `packages/tests-e2e` (Vitest + HTTPS, not Playwright): runs against the local Functions + Azurite stack; a browser-driven suite can be added later if UI behaviour needs it
 - [x] E2E against a real Azure deployment, deployed from CI using OIDC federation (no stored secrets), with automatic teardown: first run green on 2026-11-07 ([Azure E2E in CI](../contribute/azure_e2e.md)). Still to do: inventory of the subscription, cost of a run, log-based checks via Application Insights
 - [ ] Evaluate reusing the example apps and E2E specs from `opennextjs/opennextjs-aws` as a conformance suite
 - [x] CI (GitHub Actions): `check` workflow (lint, typecheck, build, unit, integration, Bicep, local E2E; SHA-pinned actions, read-only token, Dependabot) ran on GitHub and passed on 2026-11-06 ([CI](../contribute/ci.md)). Still to do: Azure E2E on demand and nightly; `actionlint` was never run
-- [ ] Poison-queue end-to-end test (B3 beyond the converter): a malformed message must reach `revalidation-poison` after 3 attempts
+- [x] Poison-queue end-to-end test (B3 beyond the converter): a malformed message reaches `revalidation-poison` after exactly 3 failed executions (Verified (local); own `poison` project because it makes the consumer fail on purpose). Not run on Azure
 - [~] `npm pack` contents check is done (unit test: CLI entry and shebang, Bicep, LICENSE, overrides with types, no sources or maps; it found that the package had no LICENSE). Open: third-party notices and a clean-install test on Node 22 and 24 on macOS, Linux and Windows
 
 ## Phase 3: Feature parity and hardening

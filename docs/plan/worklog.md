@@ -849,3 +849,7 @@ Everything that needs Azure or the Functions host: deployment, streaming through
 - `docs/` follows the sidebar of opennext.js.org/aws (only that site and README were read): Overview (`docs/README.md`), Getting started, Compatibility, Configuration (`config/README.md`, `simple_example.md`, `reference.md`, one page per override under `config/overrides/`), Comparison (new), How does it work?, FAQ, Troubleshooting (renamed from `common_issues.md`), Contributing (`contribute/README.md`). `config/overrides.md` was split into the override pages; no content was dropped.
 - Fixed in passing: the options table of `get_started.md` was split by a blank line, and its status note said that no Azure deployment had been verified.
 - Not done: the pages "Routing layer", "Main components", "Migration" and "Reference implementation" of the official site have no counterpart because there is nothing true to say yet.
+
+### Direction confirmed (2026-11-08, later)
+
+ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the same day: the maintainer confirmed that the goal is the **Azure version of `opennextjs-aws`**, to use Next.js on Azure. The project stays an OpenNext adapter built on `@opennextjs/aws`; ADR-0011, ADR-0012 and ADR-0015 stand, and the docs keep the OpenNext structure. The earlier wish not to "depend on" OpenNext was a misunderstanding on my side; it should not be read as dropping `@opennextjs/aws`.

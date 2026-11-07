@@ -3,6 +3,7 @@ import { PassThrough, Readable } from "node:stream";
 import type { HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import type { InternalResult, StreamCreator } from "@opennextjs/aws/types/open-next";
 import type { Wrapper, WrapperHandler } from "@opennextjs/aws/types/overrides";
+import { takeCookies } from "./cookies.js";
 import { type RequestContext, requestContext } from "./request-context.js";
 
 type Prelude = Parameters<StreamCreator["writeHeaders"]>[0];
@@ -149,6 +150,7 @@ const wrapper: WrapperHandler = async (handler, converter) => {
     if (status === 500 && context.sourceImageMissing) status = 404;
 
     const bodyless = isBodyless(req.method, status);
+    const cookies = takeCookies(headers);
     const out = new Headers();
     for (const [k, v] of Object.entries(headers)) {
       if (Array.isArray(v)) for (const x of v) out.append(k, x);
@@ -170,6 +172,7 @@ const wrapper: WrapperHandler = async (handler, converter) => {
     return {
       status,
       headers: out,
+      cookies,
       body: Readable.toWeb(Readable.from(body())) as never,
     };
   };

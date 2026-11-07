@@ -45,3 +45,23 @@ describe("responses without a body", () => {
     expect(res.body.length).toBe(0);
   });
 });
+
+describe("cookies (B5)", () => {
+  it("sends each valid Set-Cookie as its own header", async () => {
+    const res = await request("/api/cookies?valid");
+    const cookies = ([] as string[]).concat(res.headers["set-cookie"] ?? []);
+    expect(cookies.map((c) => c.split("=")[0]).sort()).toEqual(["a", "b"]);
+    const b = cookies.find((c) => c.startsWith("b=")) ?? "";
+    expect(b).toMatch(/^b=2;/);
+    expect(b).toMatch(/Secure/i);
+    expect(b).toMatch(/Max-Age=60/i);
+  });
+
+  it("sends every Set-Cookie as its own header, also when an attribute is invalid", async () => {
+    const res = await request("/api/cookies");
+    expect(res.status).toBe(200);
+    const cookies = ([] as string[]).concat(res.headers["set-cookie"] ?? []);
+    expect(cookies.map((c) => c.split("=")[0]).sort()).toEqual(["a", "b", "c", "d", "e"]);
+    expect(cookies.find((c) => c.startsWith("a="))).toContain("HttpOnly");
+  });
+});

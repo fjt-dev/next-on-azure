@@ -4,6 +4,21 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 26): cookies lost, `cdnInvalidation` not needed
+
+### Done
+
+- Pushed up to `63a5772`.
+- `cdnInvalidation`: not needed. Front Door caches only `/_next/static/*`; there is nothing to purge on revalidation.
+- B5 cookies: a probe route (`/api/cookies`) with several `Set-Cookie` headers showed a **real bug**: only the last cookie reached the client, even when all were valid (the Functions host keeps one value per header name). Fixed in the wrapper: `cookies.ts` turns `Set-Cookie` lines into structured cookies (`HttpResponseInit.cookies`) and drops attributes the platform rejects (unknown `SameSite`, unreadable `Expires`, non-numeric `Max-Age`). `Partitioned` and `Priority` have no field and are dropped.
+- Tests: 8 unit tests for the parser, two wrapper tests updated, two E2E cases (valid cookies, invalid attributes).
+
+### Verified (local)
+
+- Unit 221, E2E 49 + 10 + 1, lint, typecheck. Not run on Azure: the behavior of the host with structured cookies in a deployment, and cookie values with unusual characters, are unverified.
+
+---
+
 ## 2026-11-07 (session 25): warmer
 
 ### Done

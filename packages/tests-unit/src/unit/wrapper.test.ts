@@ -91,7 +91,12 @@ describe("streaming responses", () => {
       return coreResult();
     });
     const res = await fn(request());
-    expect((res.headers as Headers).getSetCookie()).toEqual(["a=1; Path=/", "b=2; Path=/; Secure"]);
+    // Several cookies only survive the Functions host as structured values, not as headers.
+    expect((res.headers as Headers).getSetCookie()).toEqual([]);
+    expect(res.cookies).toEqual([
+      { name: "a", value: "1", path: "/" },
+      { name: "b", value: "2", path: "/", secure: true },
+    ]);
     await readAll(res.body as never);
   });
 
@@ -123,7 +128,10 @@ describe("plain results (routing, redirects, middleware)", () => {
     const res = await fn(request());
     expect(res.status).toBe(302);
     expect((res.headers as Headers).get("location")).toBe("/next");
-    expect((res.headers as Headers).getSetCookie()).toEqual(["a=1", "b=2"]);
+    expect(res.cookies).toEqual([
+      { name: "a", value: "1" },
+      { name: "b", value: "2" },
+    ]);
     expect(await readAll(res.body as never)).toBe("redirecting");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { header, request, timestampIn } from "../http.js";
+import { eventually, hasHostLog, header, request, sleep, timestampIn } from "../http.js";
 
 describe("Pages Router", () => {
   it("renders getServerSideProps on every request", async () => {
@@ -45,5 +45,43 @@ describe("middleware", () => {
   it("does not run for paths outside its matcher", async () => {
     const res = await request("/pages-static");
     expect(header(res, "x-example-middleware")).toBeUndefined();
+  });
+});
+
+describe("Pages Router static generation", () => {
+  it("renders an unknown path on first request (fallback: blocking), then serves it from the cache", async () => {
+    const slug = `post-${Date.now()}`;
+    const a = await request(`/pages-blog/${slug}`);
+    expect(a.status).toBe(200);
+    expect(a.text.replaceAll("<!-- -->", "")).toContain(`Post ${slug}`);
+    const b = await request(`/pages-blog/${slug}`);
+    expect(timestampIn(b.text)).toBe(timestampIn(a.text));
+  });
+
+  it("serves a path built ahead of time", async () => {
+    const res = await request("/pages-blog/known");
+    expect(res.status).toBe(200);
+    expect(res.text.replaceAll("<!-- -->", "")).toContain("Post known");
+  });
+
+  it("answers 404 for notFound from getStaticProps", async () => {
+    expect((await request("/pages-blog/missing")).status).toBe(404);
+  });
+
+  it("regenerates a page with revalidate after it went stale (queue)", async () => {
+    const first = timestampIn((await request("/pages-isr")).text);
+    expect(first).toBeDefined();
+    await sleep(6500);
+    const stale = await request("/pages-isr");
+    expect(timestampIn(stale.text)).toBe(first); // stale copy is served at once
+    const fresh = await eventually(
+      async () => {
+        const res = await request("/pages-isr");
+        return timestampIn(res.text) !== first ? res : false;
+      },
+      hasHostLog() ? 20_000 : 150_000,
+      hasHostLog() ? 500 : 3000,
+    );
+    expect(timestampIn(fresh.text)).not.toBe(first);
   });
 });

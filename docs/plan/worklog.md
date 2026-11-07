@@ -4,6 +4,24 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 15): Pages Router ISR and fallback in the example
+
+### Done
+
+- Pushed `58077bb` (Azure E2E counts: 35 passed, 2 skipped on `6720a19`).
+- `examples/app-router`: `pages/pages-isr.js` (`revalidate: 5`) and `pages/pages-blog/[slug].js` (`fallback: "blocking"`, `notFound` for `missing`).
+- Four E2E cases in `pages-router.test.ts`: unknown path rendered on first request then cached, prebuilt path, 404 from `notFound`, stale page regenerated through the queue.
+
+### Verified (local)
+
+- Local E2E: 41 default + 10 front-door pass; lint and typecheck pass. Not run on Azure yet.
+
+### Next
+
+- The next Azure E2E run will cover these cases; then `fallback: true`, `res.revalidate`, Server Actions called from client JavaScript.
+
+---
+
 ## 2026-11-07 (session 14): Server Actions and revalidatePath in the example
 
 ### Done

@@ -129,6 +129,8 @@ Where this adapter is ahead: ISR revalidation de-duplication with a load test (A
 
 ## Phase 4: Publish
 
+The stages, gates and order are in the [Release plan](./release_plan.md). Finding of 2026-11-07: the placeholder name is already taken on npm ([ADR-0015](./decisions.md#adr-0015-the-placeholder-package-name-is-taken-the-name-and-the-positioning-are-open-proposed)).
+
 - [ ] Decide the final npm package name ([ADR-0005](./decisions.md#adr-0005-package-name-is-deferred)); do not use `opennextjs` as a name prefix unless the OpenNext maintainers agree
 - [ ] Attribution wording in README and package metadata: not an official OpenNext package
 - [ ] Repository settings, branch protection, `CONTRIBUTING.md`, `SECURITY.md`

@@ -4,6 +4,21 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 ---
 
+## 2026-11-07 (session 30): release plan
+
+### Done
+
+- Pushed up to `74dc394`; `check` green (all five jobs).
+- Checked the npm registry (read-only): **`opennextjs-azure` is already published by someone else** (0.2.0, MIT, Azure Functions with Blob, Table and Queue Storage, built on `@opennextjs/aws` 3.x). Read from the registry metadata and README only. `opennext-azure` and a few other names were free.
+- Wrote [the release plan](./release_plan.md): starting point, the name finding, three stages with gates, sizes and verification, fixed dates, order, Azure budget, risks, maintainer-only actions. [ADR-0015](./decisions.md#adr-0015-the-placeholder-package-name-is-taken-the-name-and-the-positioning-are-open-proposed) (proposed).
+- Found two identifiers to scrub before the repository goes public: a real client id in a test sample, and the federated credential subject in the Azure E2E guide.
+
+### Not verified
+
+- What the other package does; GitHub's current policy on free Actions minutes for public repositories; the free names on npm (can change).
+
+---
+
 ## 2026-11-07 (session 29): Azure-specific optimizations, first two
 
 ### Done

@@ -308,3 +308,13 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 **Not measured.** The time of `sharp` on Azure for realistic images (locally 30 to 50 ms for a 128 px source); how often visitors with a cold browser cache request the same image.
 
+---
+
+## ADR-0015: The placeholder package name is taken; the name and the positioning are open (proposed)
+
+**Date:** 2026-11-07. **Status:** proposed. Follows [ADR-0005](#adr-0005-package-name-is-deferred).
+
+**Finding.** `opennextjs-azure` is already on npm (version 0.2.0, published 2026-08-30 by another maintainer, MIT, repository `zpg6/opennextjs-azure`), with a similar goal: OpenNext on Azure Functions with Blob, Table and Queue Storage. Seen through the npm registry metadata and README only. `opennext-azure` and a few other names returned 404 (free) on 2026-11-07.
+
+**Open.** The name, and whether to publish separately, contribute to the existing project, or offer this work to the OpenNext organization. See [Release plan](./release_plan.md), tasks P1 to P5. Until decided, the package keeps the placeholder name in the repository and is not published.
+

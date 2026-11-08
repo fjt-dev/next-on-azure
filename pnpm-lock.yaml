@@ -72,6 +72,21 @@ importers:
 
   examples/standalone:
     dependencies:
+      next:
+        specifier: 'catalog:'
+        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      next-on-azure:
+        specifier: workspace:*
+        version: link:../../packages/next-on-azure
+      react:
+        specifier: 'catalog:'
+        version: 19.3.1
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.1(react@19.3.1)
+
+  packages/next-on-azure:
+    dependencies:
       '@azure/data-tables':
         specifier: ^13.3.0
         version: 13.3.2
@@ -85,14 +100,15 @@ importers:
         specifier: ^12.26.0
         version: 12.34.0
       next:
+        specifier: '>=15.5.29 <16 || >=16.4.5'
+        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+    devDependencies:
+      '@types/node':
         specifier: 'catalog:'
-        version: 15.5.29(@opentelemetry/api@1.10.0)(@types/node@25.9.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react:
+        version: 22.20.5
+      typescript:
         specifier: 'catalog:'
-        version: 19.3.1
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.3.1(react@19.3.1)
+        version: 7.0.2
 
   packages/open-next-azure:
     dependencies:

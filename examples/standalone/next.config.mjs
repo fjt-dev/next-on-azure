@@ -1,22 +1,6 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { withAzure } from "next-on-azure/config";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-
-// Spike (ADR-0016): the Next.js server runs as it is; only the cache is replaced.
-export default {
-  output: "standalone",
-  // The workspace root, so that the files pnpm links into node_modules are traced and copied.
-  outputFileTracingRoot: path.join(here, "../.."),
-  cacheHandler: path.join(here, "cache-handler.cjs"),
-  compress: false, // the Functions host and a CDN compress; a compressed body would break the forward
-  cacheMaxMemorySize: 0, // no per-instance memory cache: every instance sees the same state
-  // The app directory is read-only on Azure: no disk cache for optimized images (it would fail with
-  // EACCES on every first request of an image).
-  images: { maximumDiskCacheSize: 0 },
-  experimental: {
-    isrFlushToDisk: false,
-    useCache: true,
-    cacheHandlers: { default: path.join(here, "cache-handlers.cjs") },
-  },
-};
+// withAzure() sets output, the cache handlers and the settings Azure needs (ADR-0017).
+export default withAzure({
+  experimental: { useCache: true },
+});

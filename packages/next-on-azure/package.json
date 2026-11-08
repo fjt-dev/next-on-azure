@@ -1,0 +1,44 @@
+{
+  "name": "next-on-azure",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Run Next.js on one Azure Function (Flex Consumption) with Blob and Table Storage. Provisional name, not published (ADR-0017).",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "next-on-azure": "./dist/cli/index.js"
+  },
+  "exports": {
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    },
+    "./cache-handler": "./dist/runtime/cache-handler.cjs",
+    "./cache-handlers": "./dist/runtime/cache-handlers.cjs"
+  },
+  "files": [
+    "dist",
+    "infra"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-runtime.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "bicep:build": "az bicep build --file infra/main.bicep --stdout > /dev/null"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0",
+    "@azure/functions": "^4.7.0",
+    "@azure/identity": "^4.5.0",
+    "@azure/storage-blob": "^12.26.0"
+  },
+  "peerDependencies": {
+    "next": ">=15.5.29 <16 || >=16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -11,7 +11,7 @@ import { takeCookies } from "./cookies.mjs";
 app.setup({ enableHttpStream: true });
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const dir = path.join(root, "standalone", "__APP_SUB__");
+const dir = path.join(root, "standalone", "__APP_SUB__"); // filled in by `package`
 const PORT = Number(process.env.NEXT_INTERNAL_PORT ?? 3000);
 const BODYLESS = new Set(["GET", "HEAD"]);
 

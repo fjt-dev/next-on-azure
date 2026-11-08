@@ -10,3 +10,4 @@ dist
 local.settings.json
 
 .azure-app
+.next-azure

@@ -3,15 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "standalone": "next build && node build-app.mjs"
+    "standalone": "next build && node ./node_modules/next-on-azure/dist/cli/index.js package --target local",
+    "standalone:azure": "next build && node ./node_modules/next-on-azure/dist/cli/index.js package",
+    "prime": "node ./node_modules/next-on-azure/dist/cli/index.js prime"
   },
   "dependencies": {
     "next": "catalog:",
+    "next-on-azure": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "@azure/data-tables": "^13.3.0",
-    "@azure/functions": "^4.7.0",
-    "@azure/identity": "^4.5.0",
-    "@azure/storage-blob": "^12.26.0"
+    "react-dom": "catalog:"
   }
 }

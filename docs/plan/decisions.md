@@ -372,3 +372,17 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 - **Concurrent regeneration:** after `revalidateTag`, parallel requests can each regenerate; they converge on the last write. Not changed.
 - **Next.js 16.4.5 (local, Node 26):** the same E2E suite gives **45 passed, 2 failed, 5 skipped**; the 2 failures are the `public/` header expectations. Needed on 16: (1) the cache handler modules must not `require("node:...")`, because Turbopack bundles them into the proxy bundle and every proxied request fails with "Unsupported external type Url for commonjs reference" (reproduced with `next start` too); (2) the whole `sharp` package must be copied into the app, because the traced copy lacks `dist/index.cjs` and the image optimizer then silently returns the original. `experimental.cacheHandlers` and `experimental.useCache` still work on 16 with deprecation warnings (moved to `cacheHandlers` and `cacheComponents`); the `middleware` file convention is deprecated. Not run on Azure.
 - **Next.js 15.5.29 (local) after these changes:** 44 passed, 3 failed (a missing source image answers 400, the two `public/` header expectations), 5 skipped.
+
+---
+
+## ADR-0017: Migrate to the standalone design in a new package; provisional name `next-on-azure`
+
+**Date:** 2026-11-08. **Status:** accepted by the maintainer's instruction to migrate ("移行を進めてください"); the name is provisional.
+
+**Decision.** The runtime validated by the spike ([ADR-0016](#adr-0016-run-nextjs-on-azure-without-opennextjsaws-start-with-a-spike-accepted-for-the-spike)) becomes a package of its own, `packages/next-on-azure`, with the provisional name `next-on-azure` (not published; `next-on-azure`, `next-azure-adapter`, `nextjs-on-azure` and `azure-next-adapter` were free on npm on 2026-11-08). It does not depend on `@opennextjs/aws`. The old package `packages/open-next-azure` stays untouched, with its tests and CI, until the new one reaches parity (the same E2E suite, an Azure run, docs). Then the old package is removed in a separate change. The name and the positioning are decided before publishing (ADR-0015 is superseded in spirit: `opennext-adapter-azure` no longer describes the project).
+
+**Contents of the new package.** Runtime: cache handlers (`cache-handler`, `cache-handlers`) on Blob and Table, the Functions entry that forwards to the Next.js server, the cookie conversion. Build side: `withAzure(nextConfig)` (sets `output: "standalone"`, the handlers, and the settings the spike found necessary), a CLI with `package`, `prime` and `deploy`, a Bicep template without the OpenNext pieces. Code that is still good is moved from the old package by copy (flattening of pnpm trees, version and Server Actions key checks, warm-up).
+
+**Stages.** (1) the package with runtime, config helper and CLI `package`/`prime`, unit and integration tests, the example using it, local E2E; (2) simplified Bicep and `deploy`, Azure run; (3) CI jobs; (4) docs rewrite and the choice of name; (5) removal of the old package.
+
+**Not decided.** Static files from Blob (today Next.js serves them from the package), Front Door, always-ready defaults, a Next.js Adapter API path for 16.2+.

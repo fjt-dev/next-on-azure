@@ -10,6 +10,11 @@ const connectionString = () => process.env.AZURE_STORAGE_CONNECTION_STRING;
 const account = () => process.env.AZURE_STORAGE_ACCOUNT_NAME;
 
 let clients;
+/** Tests replace the storage clients (the handlers are CommonJS, so a module mock does not reach them). */
+function setClientsForTest(value) {
+  clients = value === undefined ? undefined : Promise.resolve(value);
+}
+
 async function getClients() {
   clients ??= (async () => {
     const { BlobServiceClient } = require("@azure/storage-blob");
@@ -63,4 +68,4 @@ function readBuildId(serverDistDir) {
  */
 const inBuild = () => process.env.NEXT_PHASE === "phase-production-build";
 
-module.exports = { getClients, rowKey, sha, readBuildId, inBuild };
+module.exports = { getClients, setClientsForTest, rowKey, sha, readBuildId, inBuild };

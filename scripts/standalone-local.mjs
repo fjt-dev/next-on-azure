@@ -8,10 +8,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const app = path.join(root, "examples/standalone/.azure-app");
+const app = path.join(root, "examples/standalone/.next-azure/app");
 if (!fs.existsSync(path.join(app, "main.mjs"))) {
   console.error(
-    "examples/standalone/.azure-app not found. Run: pnpm --filter example-standalone run standalone",
+    "examples/standalone/.next-azure/app not found. Run: pnpm --filter example-standalone run standalone",
   );
   process.exit(1);
 }

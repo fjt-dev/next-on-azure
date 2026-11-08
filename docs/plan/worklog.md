@@ -925,3 +925,11 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 - Added: `waitUntil` through Next.js's request context with a hold; `prime.mjs`; a complete `sharp` copy; `require` without `node:`. Details and numbers: ADR-0016, "Follow-up of the same day".
 - Next.js 16.4.5 trial in a temporary worktree (removed afterwards): found the Turbopack `node:fs` failure and the incomplete `sharp` trace. Mistakes on the way: the worktree had no Functions Core Tools binary (copied from the main checkout) and `webpack` as a builder did not build this app (`node:crypto` unhandled scheme), which I did not pursue.
+
+## Session 42 (2026-11-08): migration, stage 1 (ADR-0017)
+
+- New package `packages/next-on-azure` (provisional name, private): `withAzure()` config helper, cache handlers (`cache-handler`, `cache-handlers`) and the Functions entry as runtime files, CLI `package` and `prime`; code moved by copy from the old package (flattening, version check, Server Actions key check, warm-up, cookies). The old package and its tests are untouched.
+- `examples/standalone` now uses the package (its local copies are deleted); `scripts/standalone-local.mjs` runs `.next-azure/app`.
+- Tests: ported unit tests for the moved modules (47), new unit tests for `withAzure`, the packaging helpers, `prime` and both handlers with a fake storage (checked by breaking the tag comparison: 4 tests failed, restored: all pass), and an integration test of both handlers on Azurite. Totals: unit 343, integration 13. Local E2E against the package-built example: 44 passed, 3 failed (the same Next.js behavior differences as the spike), 5 skipped. The existing OpenNext E2E still passes (52 + 10 + 1).
+- Lint findings handled: a function named `useLinuxSharp` was read as a React hook (renamed); the `node:` prefix rule is switched off for the runtime `.cjs` files on purpose (see `azure-storage.cjs`).
+- Not done in this stage: Bicep template and `deploy` for the new layout (stage 2), CI jobs (3), docs and name (4), removal of the old package (5).

@@ -28,7 +28,7 @@ describe("secret rules", () => {
 
   it("does not flag ordinary text, ids or placeholders", () => {
     for (const line of [
-      "AZURE_CLIENT_ID: c90787be-986b-40e0-9692-d1b0ea1df22a",
+      "AZURE_CLIENT_ID: 00000000-0000-4000-8000-000000000000",
       "const password = process.env.PASSWORD;",
       'password: "${{ secrets.X }}"',
       "Use AccountKey=<key> in the connection string",

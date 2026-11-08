@@ -986,3 +986,10 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 - The maintainer renamed the repository to `fjt-dev/next-on-azure` (private; the numeric repository id 1448297244 did not change) and created `fjt-dev/docs-next-on-azure` (**public**, empty) for the documentation site. The remote of this checkout points to the new URL; the local directory name is unchanged.
 - The OIDC `subject` in `docs/contribute/azure_e2e.md` now names the new repository. The federated credential in Azure (app registration `opennextjs-azure-e2e`, credential `github-main-branch`) had the old subject; changed on 2026-11-08 with the maintainer's approval ("実行してください") to `repo:fjt-dev@157100279/next-on-azure@1448297244:ref:refs/heads/main`, and read back. **Not tested by a workflow run** (a run creates billable resources). The app registration keeps its old display name.
+
+## Session 50 (2026-11-08): small clean-ups
+
+- Biome 2.6.4 to 2.6.5 (the open Dependabot pull request: patch update, same checks green locally and in its own run).
+- The release plan was rewritten for the design without OpenNext (the old one described the OpenNext-based package and its name search).
+- R2 of the release plan, first part: the real Azure client id in the sample of `secret-scan.test.ts` was replaced with an all-zero GUID (the test only needs a GUID that is not flagged as a secret). Still in the repository, left on purpose: the GitHub user and repository ids in the OIDC subject example, and the names of Azure resources that were deleted (work log).
+- R1 (`SECURITY.md` and the other community files) is blocked on the maintainer's security contact address (P4), so it was not written.

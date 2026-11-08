@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventually, hasHostLog, header, request, sleep, timestampIn } from "../http.js";
+import { eventually, freshPage, hasHostLog, header, request, sleep, timestampIn } from "../http.js";
 
 describe("Pages Router", () => {
   it("renders getServerSideProps on every request", async () => {
@@ -100,7 +100,7 @@ describe("Pages Router static generation", () => {
   });
 
   it("regenerates a page with revalidate after it went stale (queue)", async () => {
-    const first = timestampIn((await request("/pages-isr")).text);
+    const first = timestampIn((await freshPage("/pages-isr")).text);
     expect(first).toBeDefined();
     await sleep(6500);
     const stale = await request("/pages-isr");

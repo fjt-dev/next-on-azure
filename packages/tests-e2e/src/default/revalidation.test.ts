@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   cacheStatus,
   eventually,
+  freshPage,
   hasHostLog,
   hostLog,
   request,
@@ -14,7 +15,7 @@ const consumerRuns = () =>
 
 describe("ISR through the revalidation queue (B1, B2)", () => {
   it("serves a stale page, then regenerates it through the queue trigger", async () => {
-    const first = await request("/isr");
+    const first = await freshPage("/isr");
     const firstStamp = timestampIn(first.text);
     expect(firstStamp).toBeDefined();
 

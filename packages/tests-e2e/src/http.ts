@@ -90,6 +90,20 @@ export const header = (r: Response, name: string) => {
 export const cacheStatus = (r: Response) =>
   header(r, "x-nextjs-cache") ?? header(r, "x-opennext-cache");
 
+/**
+ * A page that is not stale: the first answer of a time-based ISR test must be a page that is still
+ * within its revalidate window. After a deployment whose routes were primed, or when other tests ran
+ * for a few seconds, the first answer can already be STALE and start a regeneration of its own.
+ */
+export async function freshPage(pathAndQuery: string, timeoutMs = 30_000): Promise<Response> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const res = await request(pathAndQuery);
+    if (cacheStatus(res) !== "STALE" || Date.now() > deadline) return res;
+    await sleep(1000);
+  }
+}
+
 export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /** Polls until `check` returns a truthy value or the timeout passes. */

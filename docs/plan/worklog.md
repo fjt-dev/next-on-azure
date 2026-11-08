@@ -946,3 +946,10 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - Three E2E expectations became target-aware (strong or weak ETag, `javascript` content type, `Cache-Control` of `public/` files, 400 or 404 for a missing source image): they are details the Next.js server decides, not behavior of this package. The OpenNext target keeps the strict values.
 - Result: **47 passed, 5 skipped on Next.js 15.5.29 and on 16.4.5** (the 16.4.5 leg in a throwaway worktree, Node 26, local). The skipped cases need the local host log of the OpenNext stack or an HTTPS fixture server.
 - CI: job `standalone-e2e` (matrix: catalog and 16.4.5, Node 22) and a Bicep compile step for the new template. The first CI run on GitHub is still to be seen; Node 22 and Linux differ from this machine.
+
+## Session 45 (2026-11-08): Azure run of the next-on-azure package, plan written before starting
+
+- **Conditions** (stated in my questions after the CI stage and answered "go ahead" by the maintainer, as before): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; it is **kept**, only resources of this run are deleted, by name), no Front Door, Azure for Students subscription, window 3 hours, cost ceiling 500 yen.
+- **Start 15:18 JST. Hard stop 18:18 JST.** Deadlines: provision and deploy by 15:50, verify by 17:00, delete by 17:30, read-only inventory right after and again on 2026-11-09.
+- **Plan:** package `examples/standalone` for Azure (`next-on-azure package`), deploy it with `next-on-azure deploy -g opennextjs-azure-fjtd -n nfjt1` (new Bicep template, warm-up and prime of the CLI), run the HTTP suite with `E2E_TARGET=standalone` against the URL, measure the first request after about 11 minutes idle, read Application Insights for errors, a small load. Not planned: Front Door, always-ready.
+- **Resources created:** see below, recorded as they appear.

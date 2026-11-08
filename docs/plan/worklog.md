@@ -950,6 +950,10 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 ## Session 45 (2026-11-08): Azure run of the next-on-azure package, plan written before starting
 
 - **Conditions** (stated in my questions after the CI stage and answered "go ahead" by the maintainer, as before): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; it is **kept**, only resources of this run are deleted, by name), no Front Door, Azure for Students subscription, window 3 hours, cost ceiling 500 yen.
-- **Start 15:18 JST. Hard stop 18:18 JST.** Deadlines: provision and deploy by 15:50, verify by 17:00, delete by 17:30, read-only inventory right after and again on 2026-11-09.
+- **Start 15:18 JST (the time was read from the clock). Hard stop 18:18 JST.** Deadlines: provision and deploy by 15:50, verify by 17:00, delete by 17:30, read-only inventory right after and again on 2026-11-09.
 - **Plan:** package `examples/standalone` for Azure (`next-on-azure package`), deploy it with `next-on-azure deploy -g opennextjs-azure-fjtd -n nfjt1` (new Bicep template, warm-up and prime of the CLI), run the HTTP suite with `E2E_TARGET=standalone` against the URL, measure the first request after about 11 minutes idle, read Application Insights for errors, a small load. Not planned: Front Door, always-ready.
 - **Resources created:** see below, recorded as they appear.
+- **Created (15:21 JST), in `opennextjs-azure-fjtd`:** `Microsoft.Web/sites` `func-nfjt1-ennwz3ygympuc`, `Microsoft.Web/serverFarms` `plan-nfjt1-ennwz3ygympuc`, `Microsoft.Storage/storageAccounts` `stnfjt1ennwz3yg`, `Microsoft.Insights/components` `appi-nfjt1-ennwz3ygympuc`, `Microsoft.OperationalInsights/workspaces` `log-nfjt1-ennwz3ygympuc`.
+- **Results:** see "Azure run of the package build" in ADR-0016 (suite 47 passed and 5 skipped; cold start after idle 2.4 s; load test; the first deployment of the new Bicep and `deploy` worked).
+- **Deleted (15:35 JST), one by one by name:** the five resources and `Application Insights Smart Detection`. The resource group was kept. Read-only inventory right after: empty (the action group was deleted after the first listing showed it), no role assignment. The inventory of 2026-11-09 and the Cost Management figure are still to do.
+- CI of 04fcd42 was green in all 8 jobs, including both `standalone-e2e` legs.

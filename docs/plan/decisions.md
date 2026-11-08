@@ -386,3 +386,19 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 **Stages.** (1) the package with runtime, config helper and CLI `package`/`prime`, unit and integration tests, the example using it, local E2E; (2) simplified Bicep and `deploy`, Azure run; (3) CI jobs; (4) docs rewrite and the choice of name; (5) removal of the old package.
 
 **Not decided.** Static files from Blob (today Next.js serves them from the package), Front Door, always-ready defaults, a Next.js Adapter API path for 16.2+.
+
+### Azure run of the package build (2026-11-08, `next-on-azure`, new Bicep template and `deploy`)
+
+Deployed with `next-on-azure deploy -g opennextjs-azure-fjtd -n nfjt1` (Flex Consumption, japaneast, Node 22, no always-ready, no Front Door): the new Bicep template deployed at the first try, the zip (17.7 MB, Linux `sharp`) was deployed, the first request after the deployment answered 200 in 0.6 s, and the 9 prerendered routes were primed in 0.6 s. The deployment command took about 3 minutes in all.
+
+The HTTP suite with `E2E_TARGET=standalone` against the URL: **47 passed, 5 skipped** (the 5 skipped need the local host log or a local HTTPS fixture server). A first run had 2 failures in the time-based ISR tests: after priming, the first answer was already STALE, and the tests assumed a fresh page. The tests now wait for a non-stale page (`freshPage`); the behavior itself was correct (a probe every 1.5 s showed STALE then HIT with the new page, in cycles of 5 s).
+
+Measured (one sample each, client in Japan): first request after about 11 minutes idle **2.4 s** (then 0.16 s and 0.55 s for an ISR page); 300 requests at 30 parallel: dynamic page all 200, p50 0.13 s, p95 0.29 s, max 0.34 s; ISR page all 200, p50 0.12 s, p95 0.86 s, max 1.2 s. Application Insights: no error except the expected one of the "unknown action id" test.
+
+`'use cache'` consistency: 60 parallel requests before `revalidateTag` all saw one value; after it, 60 parallel requests saw ten different regenerated values within 70 ms (concurrent regeneration is not coalesced, across or within instances); the cache converges on the last write. Unchanged and unmitigated.
+
+CI (GitHub, commit 04fcd42): all jobs green, including `standalone-e2e` on Next.js 15 and 16.4.5.
+
+Not tested on Azure: Front Door, always-ready, Next.js 16, the Queue Data Contributor role being unnecessary (the template still grants it), a deployment over an older build with and without a stable Server Actions key, scale-out instance count.
+
+Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from Azure Cost Management yet.

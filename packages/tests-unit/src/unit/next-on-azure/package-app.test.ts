@@ -7,6 +7,7 @@ import {
   entrypoint,
   findAppDir,
   hostJson,
+  repointRuntimePaths,
 } from "../../../../next-on-azure/src/cli/package-app.js";
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), "noa-"));
@@ -84,5 +85,80 @@ describe("Front Door check of the entry", () => {
   it("is part of the handler and answers 403 before the Next.js server starts", () => {
     expect(text).toContain("isFrontDoorRequestAllowed(process.env.FRONT_DOOR_ID");
     expect(text.indexOf("status: 403")).toBeLessThan(text.indexOf("await start();"));
+  });
+});
+
+describe("repointRuntimePaths", () => {
+  const id = "next-on-azure@file+vendor+x.tgz_next@15.5.29_abc";
+  const store = `../node_modules/.pnpm/${id}/node_modules/next-on-azure/dist/runtime`;
+
+  function app(appSub: string) {
+    const dir = tmp();
+    const server = path.join(dir, appSub);
+    fs.mkdirSync(path.join(server, ".next"), { recursive: true });
+    const config = JSON.stringify({
+      cacheHandler: `${store}/cache-handler.cjs`,
+      cacheHandlers: { default: `${store}/cache-handlers.cjs` },
+    });
+    fs.writeFileSync(path.join(server, "server.js"), `const nextConfig = ${config};`);
+    fs.writeFileSync(
+      path.join(server, ".next/required-server-files.json"),
+      JSON.stringify({ config: JSON.parse(config) }),
+    );
+    return { dir, server };
+  }
+  const flattened = (dir: string) => {
+    const runtime = path.join(dir, "node_modules/next-on-azure/dist/runtime");
+    fs.mkdirSync(runtime, { recursive: true });
+    for (const f of ["cache-handler.cjs", "cache-handlers.cjs"])
+      fs.writeFileSync(path.join(runtime, f), "");
+  };
+
+  it("points the handler paths at the flattened copy, in both files, for a top-level app", () => {
+    const { dir, server } = app("");
+    flattened(dir);
+    expect(repointRuntimePaths(dir, "")).toBe(4);
+    const text = fs.readFileSync(path.join(server, "server.js"), "utf8");
+    expect(text).toContain('"../node_modules/next-on-azure/dist/runtime/cache-handler.cjs"');
+    expect(text).not.toContain(".pnpm");
+    expect(
+      fs.readFileSync(path.join(server, ".next/required-server-files.json"), "utf8"),
+    ).not.toContain(".pnpm");
+    // The new path resolves from the dist directory.
+    expect(
+      fs.existsSync(
+        path.resolve(
+          server,
+          ".next",
+          "../node_modules/next-on-azure/dist/runtime/cache-handler.cjs",
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it("computes the path from the dist directory of a nested (monorepo) app", () => {
+    const { dir, server } = app("apps/web");
+    flattened(dir);
+    repointRuntimePaths(dir, "apps/web");
+    const text = fs.readFileSync(path.join(server, "server.js"), "utf8");
+    const value = /"cacheHandler":"([^"]+)"/.exec(text)?.[1] ?? "";
+    expect(fs.existsSync(path.resolve(server, ".next", value))).toBe(true);
+  });
+
+  it("leaves a path alone when its file exists, and when there is no flattened copy", () => {
+    const { dir } = app("");
+    expect(repointRuntimePaths(dir, "")).toBe(0); // nothing flattened: kept as it is
+    fs.mkdirSync(
+      path.join(dir, `node_modules/.pnpm/${id}/node_modules/next-on-azure/dist/runtime`),
+      { recursive: true },
+    );
+    for (const f of ["cache-handler.cjs", "cache-handlers.cjs"]) {
+      fs.writeFileSync(
+        path.join(dir, `node_modules/.pnpm/${id}/node_modules/next-on-azure/dist/runtime`, f),
+        "",
+      );
+    }
+    flattened(dir);
+    expect(repointRuntimePaths(dir, "")).toBe(0); // the original files still exist: kept
   });
 });

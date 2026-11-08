@@ -122,6 +122,37 @@ export function installLinuxSharp(targetNodeModules: string) {
   }
 }
 
+/**
+ * Next.js writes the paths of the cache handler files into `server.js` (and `required-server-files.json`)
+ * relative to the dist directory. When the app installed `next-on-azure` from a registry or a tarball
+ * with pnpm, they point into `node_modules/.pnpm/<id>/node_modules/next-on-azure/...`, which the
+ * flattening removes. Point them at the flattened copy, `node_modules/next-on-azure/...`. Paths whose
+ * file exists are left alone. Returns the number of paths changed.
+ */
+export function repointRuntimePaths(standaloneDir: string, appSub: string): number {
+  const server = path.join(standaloneDir, appSub);
+  const distDir = path.join(server, ".next");
+  const pattern =
+    /(?:\.\.\/)+node_modules\/\.pnpm\/[^"']*?\/node_modules\/next-on-azure\/dist\/runtime\/([\w-]+\.cjs)/g;
+  let changed = 0;
+  for (const file of [
+    path.join(server, "server.js"),
+    path.join(server, ".next", "required-server-files.json"),
+  ]) {
+    if (!fs.existsSync(file)) continue;
+    const text = fs.readFileSync(file, "utf8");
+    const out = text.replace(pattern, (match, name: string) => {
+      if (fs.existsSync(path.resolve(distDir, match))) return match;
+      const flattened = path.join(standaloneDir, "node_modules/next-on-azure/dist/runtime", name);
+      if (!fs.existsSync(flattened)) return match;
+      changed++;
+      return path.relative(distDir, flattened).split(path.sep).join("/");
+    });
+    if (out !== text) fs.writeFileSync(file, out);
+  }
+  return changed;
+}
+
 export function assertNoSymlinks(dir: string) {
   const links = findSymlinks(dir);
   if (links.length > 0) {
@@ -169,6 +200,7 @@ export function packageApp(options: PackageOptions = {}): PackageResult {
   if (flat.flattened)
     console.log(`flattened pnpm node_modules: ${flat.packages} packages (${flat.nested} nested)`);
   removeShims(target);
+  repointRuntimePaths(target, appSub);
 
   const server = path.join(target, appSub);
   fs.cpSync(path.join(appRoot, ".next/static"), path.join(server, ".next/static"), {

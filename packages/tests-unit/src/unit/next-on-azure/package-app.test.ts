@@ -78,3 +78,11 @@ describe("assertNoSymlinks", () => {
     expect(() => assertNoSymlinks(dir)).toThrow(/symbolic link.*link/s);
   });
 });
+
+describe("Front Door check of the entry", () => {
+  const text = entrypoint("");
+  it("is part of the handler and answers 403 before the Next.js server starts", () => {
+    expect(text).toContain("isFrontDoorRequestAllowed(process.env.FRONT_DOOR_ID");
+    expect(text.indexOf("status: 403")).toBeLessThan(text.indexOf("await start();"));
+  });
+});

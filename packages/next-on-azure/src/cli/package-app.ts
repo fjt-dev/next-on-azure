@@ -185,6 +185,7 @@ export function packageApp(options: PackageOptions = {}): PackageResult {
 
   fs.writeFileSync(path.join(appDir, "main.mjs"), entrypoint(appSub));
   fs.copyFileSync(path.join(runtimeDir(), "cookies.js"), path.join(appDir, "cookies.mjs"));
+  fs.copyFileSync(path.join(runtimeDir(), "front-door.mjs"), path.join(appDir, "front-door.mjs"));
   fs.writeFileSync(path.join(appDir, "host.json"), JSON.stringify(hostJson(), null, 2));
   const own = JSON.parse(
     fs.readFileSync(path.resolve(runtimeDir(), "../../package.json"), "utf8"),

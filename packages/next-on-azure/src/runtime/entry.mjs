@@ -7,6 +7,7 @@ import { Readable } from "node:stream";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { app } from "@azure/functions";
 import { takeCookies } from "./cookies.mjs";
+import { isFrontDoorRequestAllowed } from "./front-door.mjs";
 
 app.setup({ enableHttpStream: true });
 
@@ -133,6 +134,13 @@ app.http("server", {
   authLevel: "anonymous",
   route: "{*path}",
   handler: async (request) => {
+    // Behind Front Door only: requests that did not pass through the profile are refused before
+    // anything runs (the access restriction of the template is the first line, this the second).
+    if (
+      !isFrontDoorRequestAllowed(process.env.FRONT_DOOR_ID, request.headers.get("x-azure-fdid"))
+    ) {
+      return { status: 403, body: "Forbidden" };
+    }
     await start();
     const url = new URL(request.url);
     let body;

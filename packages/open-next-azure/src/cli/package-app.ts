@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { actionsKeyMessage, checkActionsKey } from "./actions-key.js";
 import { buildAssetsManifest } from "./assets-manifest.js";
 import { findSymlinks, flattenPnpmNodeModules, removeShims } from "./flatten-node-modules.js";
 import { assertSupportedNext } from "./next-version.js";
@@ -198,6 +199,8 @@ export function packageApp({
     throw new Error(`${openNextDir}/${BUNDLES.server} not found. Run "npx open-next build" first.`);
   }
   if (checkNext) assertSupportedNext(process.cwd(), { allowUnsupported: allowUnsupportedNext });
+  const keyMessage = actionsKeyMessage(checkActionsKey(path.join(openNextDir, BUNDLES.server)));
+  if (keyMessage) console.warn(`Warning: ${keyMessage}`);
   fs.rmSync(outDir, { recursive: true, force: true });
   const appDir = path.join(outDir, "app");
   fs.mkdirSync(appDir, { recursive: true });

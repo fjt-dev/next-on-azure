@@ -106,3 +106,17 @@ The revalidation message sits in the `revalidation` queue until the queue-trigge
 ## `deploy` fails with "Evaluation window size must be one of [PT1H, PT6H, PT12H, P1D]"
 
 The queue backlog alert uses the `QueueMessageCount` metric, which Azure Monitor evaluates over windows of at least one hour. The template uses PT1H; a shorter window passes `validate` and `what-if` and fails the deployment. Do not shorten it.
+
+## A Server Action fails after a deployment ("Failed to find Server Action")
+
+Server Actions encrypt the variables a closure captures. By default Next.js makes a new key for every build, so an action can only be invoked against the build that produced it: a page that was open before a deployment fails when it calls an action, and instances built apart do not agree. This is documented for self-hosting by the Next.js team; the behavior on Azure was not reproduced.
+
+Set the same key for every build, at build time (it is embedded in the build output):
+
+```bash
+export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="$(openssl rand -base64 32)"   # keep it in your secret store, not in the repository
+npx open-next build
+npx opennext-azure package
+```
+
+The key is base64 of 16, 24 or 32 bytes. `package` warns when the app has Server Actions and the variable is not set in its environment, and when the value differs from the key embedded in the build. The warning is a hint: if the key was set only for `open-next build`, set it for `package` too to silence it.

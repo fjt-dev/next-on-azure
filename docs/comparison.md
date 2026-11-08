@@ -2,7 +2,7 @@
 
 ## OpenNext (AWS, Cloudflare)
 
-This project started as an OpenNext adapter (its first design is in [Legacy](./legacy-opennext/README.md)) and moved to a design without `@opennextjs/aws` ([ADR-0016](./plan/decisions.md)). The reason is the maintainer's decision; the technical difference is below.
+The first design of this project was an OpenNext adapter ([Legacy](./legacy-opennext/README.md)). This one does not use `@opennextjs/aws` ([ADR-0016](./plan/decisions.md)).
 
 | | OpenNext (`@opennextjs/aws`) | next-on-azure |
 | --- | --- | --- |
@@ -17,11 +17,3 @@ This project started as an OpenNext adapter (its first design is in [Legacy](./l
 | First request after about 11 minutes idle | 4.1 to 4.5 s (earlier measurement, other package) | 2.4 s (one sample) |
 
 Differences that come from Next.js's own server: the `Cache-Control` of `public/` files, `application/javascript` as the JS content type, weak `ETag`s on static files, and 400 for a missing source image. The shared HTTP test suite accepts these when `E2E_TARGET=standalone`.
-
-## The Next.js Adapter API
-
-The Adapter API (`adapterPath`, `onBuildComplete`) is a build-time interface, stable since Next.js 16.2 (read through a research agent in [ADR-0012](./plan/decisions.md), not by the maintainer). This package does not use it: `standalone` and the cache handler options exist on Next.js 15 and 16, and they were enough. Using it on 16.2 and later for the packaging step is an open option.
-
-## What this project does that is Azure-specific
-
-Identity-based access without shared keys, a Bicep template for one Flex Consumption app, the `after()` hold with its measured background ([Azure notes](./inner_workings/azure_notes.md), item 18), priming after a deployment, flattening of the pnpm layout, and an Azure E2E run from CI with automatic teardown (`.github/workflows/azure-e2e.yml`, still written for the OpenNext-based package).

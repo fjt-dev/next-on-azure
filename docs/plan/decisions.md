@@ -385,7 +385,7 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 
 **Stages.** (1) the package with runtime, config helper and CLI `package`/`prime`, unit and integration tests, the example using it, local E2E; (2) simplified Bicep and `deploy`, Azure run; (3) CI jobs; (4) docs rewrite and the choice of name; (5) removal of the old package.
 
-**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now" ("一旦"): the name stays provisional. It was free on npm that day. Whether a name containing "Next" can be used for a published package (Vercel's trademark) has **not** been checked and must be before publishing.
+**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now" ("一旦"): the name stays provisional. It was free on npm that day.
 
 **Not decided.** Static files from Blob (today Next.js serves them from the package), Front Door, always-ready defaults, a Next.js Adapter API path for 16.2+.
 

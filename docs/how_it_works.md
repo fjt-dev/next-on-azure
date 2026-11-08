@@ -8,7 +8,7 @@ client ──▶ Functions front end ──▶ Function `server` ({*path}) ─�
                                                          cache handlers ──▶ Blob (entries) + Table (tags)
 ```
 
-- The Function app has **one function**, `server`, on `{*path}` with streaming enabled (`main.mjs`, from `src/runtime/entry.mjs`). The first request starts the Next.js standalone server (`server.js`) inside the same worker, on `127.0.0.1:3000`, and waits until the port is open. Measured start of that server inside a request: part of the 2.4 s cold start.
+- The Function app has **one function**, `server`, on `{*path}` with streaming enabled (`main.mjs`, from `src/runtime/entry.mjs`). The first request starts the Next.js standalone server (`server.js`) inside the same worker, on `127.0.0.1:3000`, and waits until the port is open.
 - Every request is forwarded to that server with `node:http`. The response is passed on as a stream. `Set-Cookie` values are converted to the structured `cookies` of the Functions response, because the host keeps only one value per header name.
 - `x-forwarded-proto` is not forwarded: with `https`, Next.js stops treating its own loopback address as the same origin and a middleware rewrite fails with a 500. The public scheme is put back into the `Location` header of redirects.
 - Request bodies are buffered before they are forwarded (forwarding the host's request stream hung on POST).

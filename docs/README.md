@@ -1,6 +1,6 @@
 # Documentation
 
-> **Experimental, pre-release, not published.** `next-on-azure` is a provisional name (ADR-0017). It is a community project, not affiliated with Vercel or the Next.js team; Next.js is a trademark of Vercel, Inc.
+> **Experimental, pre-release, not published.** `next-on-azure` is a provisional name (ADR-0017).
 
 `next-on-azure` runs a Next.js app on **one Azure Function (Flex Consumption)**: the Next.js server runs inside the Functions worker, and its caches are kept in Blob and Table Storage. It uses the options Next.js documents for this (`output: "standalone"`, `cacheHandler`, `cacheHandlers`) and does not depend on `@opennextjs/aws`.
 
@@ -18,10 +18,3 @@ Every statement about behavior on Azure is marked **Verified (Azure)**, **Verifi
 | [Contributing](./contribute/README.md) | Run locally, tests, CI, real Azure runs |
 | [Plan](./plan/roadmap.md) | Roadmap, release plan, decision records (ADRs) and the work log |
 | [Legacy](./legacy-opennext/README.md) | Documentation of the first, OpenNext-based package, until it is removed |
-
-## Documentation conventions
-
-- Documentation is written in **English**.
-- Every claim about behavior on Azure must be marked **Verified** or **Unverified**.
-- Update the [work log](./plan/worklog.md) at the end of every working session and the [roadmap](./plan/roadmap.md) when a task changes state.
-- Record every non-obvious design choice as an [ADR](./plan/decisions.md).

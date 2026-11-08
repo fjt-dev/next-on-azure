@@ -9,7 +9,7 @@
 
 ---
 
-> **Status: experimental, pre-release, not published to npm.** `next-on-azure` is a provisional name. This is a community project, not affiliated with Vercel or the Next.js team; Next.js is a trademark of Vercel, Inc. Whether the name can be used for a published package has not been checked.
+> **Experimental, pre-release, not published to npm.** `next-on-azure` is a provisional name.
 
 ## Description
 
@@ -47,19 +47,14 @@ next-on-azure deploy --resource-group <rg> --name <short-name> --location <regio
 
 The package is not published, so this works from a checkout of this repository only (`examples/standalone` is a working app). The full guide is [Get started](./docs/get_started.md).
 
-## Cold start
-
-Without always-ready instances, the first request after about 11 minutes idle took 2.4 s on Azure (one sample, client in Japan); warm responses 0.1 to 0.2 s. `deploy` makes the first request itself and primes the prerendered pages. `--always-ready <n>` keeps instances running and is billed continuously; it has not been measured with this package.
-
 ## Repository layout
 
 | Path | Contents |
 | --- | --- |
 | [`packages/next-on-azure`](./packages/next-on-azure) | The package: config helper, cache handlers, Functions entry, CLI, Bicep template |
-| [`packages/open-next-azure`](./packages/open-next-azure) | The first, OpenNext-based package. Legacy: to be removed |
+| [`packages/open-next-azure`](./packages/open-next-azure) | Legacy OpenNext-based package, to be removed |
 | [`packages/tests-unit`](./packages/tests-unit), [`packages/tests-e2e`](./packages/tests-e2e) | Unit and integration tests; HTTP tests against the local stack or a deployment |
 | [`examples/standalone`](./examples/standalone) | Example app for the new package |
-| [`examples/app-router`](./examples/app-router) | Example app for the legacy package |
 | [`docs`](./docs) | Documentation, roadmap, decision records and work log |
 
 ## Contribute
@@ -82,10 +77,6 @@ pnpm e2e:standalone     # packages the example, starts the local stack, runs the
 ```
 
 How the tests are organized, and the opt-in run against real Azure resources: [Testing](./docs/contribute/testing.md).
-
-## Acknowledgements
-
-The HTTP test cases, the verification vocabulary and many details of caching and revalidation come from the first design of this project, which was built on [OpenNext](https://opennext.js.org/aws) by the SST team and the OpenNext community; thanks to everyone who maintains it.
 
 ## License
 

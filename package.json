@@ -21,7 +21,7 @@
     "e2e:standalone": "node scripts/e2e-standalone.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.4",
+    "@biomejs/biome": "2.6.5",
     "@changesets/cli": "^3.0.3",
     "azure-functions-core-tools": "^4.16.0",
     "azurite": "^3.37.0",

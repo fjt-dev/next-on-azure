@@ -1,5 +1,6 @@
-// Runs examples/standalone (ADR-0016 spike) locally: Azurite with fresh storage, then the Functions
-// host on http://localhost:7071. Stop with Ctrl+C. Needs `pnpm --filter example-standalone run standalone`.
+// Runs a packaged app locally: Azurite with fresh storage, then the Functions host on
+// http://localhost:7071. Stop with Ctrl+C. Default app: examples/standalone (needs
+// `pnpm --filter example-standalone run standalone`); another one: node scripts/standalone-local.mjs <app>/.next-azure/app
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import { createRequire } from "node:module";
@@ -8,10 +9,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const app = path.join(root, "examples/standalone/.next-azure/app");
+const app = path.resolve(process.argv[2] ?? path.join(root, "examples/standalone/.next-azure/app"));
 if (!fs.existsSync(path.join(app, "main.mjs"))) {
   console.error(
-    "examples/standalone/.next-azure/app not found. Run: pnpm --filter example-standalone run standalone",
+    `${app} not found. Package the app first (for the example: pnpm --filter example-standalone run standalone).`,
   );
   process.exit(1);
 }

@@ -9,7 +9,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 | Package | `packages/next-on-azure`, provisional name, private, version 0.0.1 |
 | Verified on Azure | The HTTP suite (47 cases) passes on Next.js 15.5.29: Flex Consumption, japaneast, Node 22; cold start 2.4 s after idle (one sample); see [Compatibility](../compatibility.md) |
 | Verified locally and in CI | Next.js 15.5.29 and 16.4.5 (`pnpm e2e:standalone`), 124 unit and 3 integration tests, lint, audit, secret scan, license allow-list; all CI jobs green |
-| Not verified | Next.js 16 on Azure, Front Door, always-ready, `proxy` and `cacheComponents` with this design, `azure-e2e` workflow after its rewrite |
+| Not verified | Next.js 16 on Azure, Front Door, always-ready, `azure-e2e` workflow after its rewrite |
 | Repository | Private (`fjt-dev/next-on-azure`), one maintainer; the documentation site is a separate private repository (`fjt-dev/docs-next-on-azure`) |
 
 ## 2. Decisions that are the maintainer's
@@ -44,7 +44,7 @@ Gate: every item done, and one Azure run on the release commit with the whole su
 | B3 | Static files are served by the function: Blob or CDN for `/_next/static`, and its cost against the function executions |
 | B4 | Observability: Application Insights queries (invocations, failures, instances), documented |
 | B5 | Rollback and redeploy (Flex has no slots), and a deployment over an older build with and without a stable Server Actions key |
-| B6 | `proxy` and `cacheComponents` (Partial Prerendering) with this design; Next.js 16 on Azure; Node 24 |
+| B6 | Next.js 16 on Azure, and a CI case for `proxy` and `cacheComponents` (both pass locally); Node 24 |
 | B7 | Error after the first byte: decide and test what the client sees |
 | B8 | i18n and base path, a custom domain in the template |
 

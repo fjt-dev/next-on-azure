@@ -920,3 +920,8 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - **Results:** see "Spike results on Azure" in ADR-0016 (E2E 43 passed, 4 differences, 5 skipped; cold start after idle 2.5 s; two Azure-only faults found and fixed).
 - **Deleted (14:00 JST), one by one by name:** the five resources above and `Application Insights Smart Detection` (an action group created by Application Insights). The resource group was kept as agreed. Read-only inventory right after: empty, no role assignment. The inventory of the next day (2026-11-09) and the Cost Management figure are still to do.
 - Mistakes: I first suspected the proxy (`fetch`) for the lost 304, then the wrong thing again for the middleware 500 (I added `Host`, then tried an undocumented `trustHostHeader`) before reproducing it locally with `x-forwarded-proto: https` and reading Next.js's code; my own curl test with a shell variable made several local "400" results that were my command's fault.
+
+## Session 41 (2026-11-08): standalone spike, round 2 (local)
+
+- Added: `waitUntil` through Next.js's request context with a hold; `prime.mjs`; a complete `sharp` copy; `require` without `node:`. Details and numbers: ADR-0016, "Follow-up of the same day".
+- Next.js 16.4.5 trial in a temporary worktree (removed afterwards): found the Turbopack `node:fs` failure and the incomplete `sharp` trace. Mistakes on the way: the worktree had no Functions Core Tools binary (copied from the main checkout) and `webpack` as a builder did not build this app (`node:crypto` unhandled scheme), which I did not pursue.

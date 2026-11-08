@@ -1,7 +1,10 @@
 "use strict";
 // Storage clients shared by the cache handlers (spike, ADR-0016).
-const fs = require("node:fs");
-const path = require("node:path");
+// Built-in modules are required without the `node:` prefix on purpose: Next.js 16 (Turbopack) bundles
+// the cache handlers into the proxy/middleware bundle, and that bundle fails with "Unsupported external
+// type Url for commonjs reference" for `node:fs`, which turns every proxy request into a 500.
+const fs = require("fs");
+const path = require("path");
 
 const connectionString = () => process.env.AZURE_STORAGE_CONNECTION_STRING;
 const account = () => process.env.AZURE_STORAGE_ACCOUNT_NAME;
@@ -40,7 +43,7 @@ async function getClients() {
 }
 
 const rowKey = (tag) => Buffer.from(tag).toString("base64url");
-const sha = (s) => require("node:crypto").createHash("sha256").update(s).digest("hex");
+const sha = (s) => require("crypto").createHash("sha256").update(s).digest("hex");
 
 /** The build id, so that entries of an older build are never read by a newer one. */
 function readBuildId(serverDistDir) {

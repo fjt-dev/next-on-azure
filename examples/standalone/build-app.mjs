@@ -1,6 +1,7 @@
 // Packages the standalone build as one Function app in .azure-app (spike, ADR-0016).
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -55,6 +56,29 @@ fs.writeFileSync(
     2,
   ),
 );
+// File tracing does not copy all files of sharp (Next.js 16 loads `dist/index.cjs` dynamically, and
+// the traced copy lacks it: the image optimizer then silently returns the original image). Copy the
+// whole package, resolved the way Next.js resolves it.
+{
+  const requireFromNext = createRequire(
+    createRequire(import.meta.url).resolve("next/package.json"),
+  );
+  let sharpDir;
+  try {
+    // sharp does not export its package.json: start at its entry point and go up to the package.
+    sharpDir = path.dirname(requireFromNext.resolve("sharp"));
+    while (!fs.existsSync(path.join(sharpDir, "package.json"))) sharpDir = path.dirname(sharpDir);
+  } catch {
+    // sharp is optional; without it Next.js serves images unoptimized, and so does this package.
+  }
+  const target = path.join(out, "standalone/node_modules/sharp");
+  if (sharpDir && fs.existsSync(target)) {
+    fs.rmSync(target, { recursive: true });
+    fs.cpSync(sharpDir, target, { recursive: true, dereference: true });
+    console.log("sharp: complete package copied");
+  }
+}
+
 // For Azure (Linux x64) the build machine's sharp binaries are replaced: `node build-app.mjs --linux`.
 if (process.argv.includes("--linux")) {
   const nmImg = path.join(out, "standalone/node_modules/@img");

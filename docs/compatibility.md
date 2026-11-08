@@ -11,7 +11,7 @@ How far each row has been verified:
 | Version | Status |
 | --- | --- |
 | 15.5.29 | Verified (Azure) and in CI |
-| 16.4.5 | Verified (local, and in CI); **Unverified on Azure** |
+| 16.4.5 | Verified (Azure, 2026-11-09: the HTTP suite, 48 cases, against a deployment with the example on `middleware.js`), and in CI |
 | 15.5.30 and later 15.x | Expected to work (inside the supported range); only 15.5.29 was run |
 | 16.0.0 to 16.4.4 | Not supported (`package` refuses; `--allow-unsupported-next` overrides) |
 | Older than 15.5.29 | Not supported |
@@ -51,9 +51,9 @@ The range is the `next` peer range of the package, inherited from the first desi
 
 ## Known gaps
 
-- A response that fails after its first byte (the Next.js server closes the connection) ends at that point: the client sees a shortened body with a normal end, and the failure is logged. Erroring the stream left the client waiting until the platform's timeout (measured locally). Not measured on Azure.
+- A response that fails after its first byte (the Next.js server closes the connection) ends at that point: the client sees a shortened body with a normal end, and the failure is logged. Erroring the stream left the client waiting until the platform's timeout (measured locally). The case passes against a deployment on Azure (2026-11-09).
 - Concurrent regeneration after a revalidation is not coalesced.
 - `after()` work cannot be tied to one request: a response may also wait for work that other requests started earlier (at most 220 s).
 - Absolute URLs that application code builds from `request.url` in middleware and writes into a response body show the loopback origin (`http://localhost:3000`); a redirect's `Location` header is corrected.
-- Next.js 16 on Azure, Front Door, always-ready and the `proxy` convention with this design are untested.
+- Front Door, the `proxy` convention on Azure and the behavior of always-ready with this package are untested (always-ready was deployed once with `--always-ready 1`, but not measured).
 - The behavior differences against OpenNext that come from Next.js's own server are listed in [Comparison](./comparison.md).

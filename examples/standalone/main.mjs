@@ -57,8 +57,13 @@ function forward(request, url, body) {
     const headers = {};
     for (const [name, value] of request.headers) headers[name] = value;
     delete headers["accept-encoding"];
+    // The public host: Next.js builds absolute URLs (middleware rewrites and redirects) from it.
     headers["x-forwarded-host"] ??= url.host;
-    headers["x-forwarded-proto"] ??= url.protocol.replace(":", "");
+    headers.host = headers["x-forwarded-host"];
+    // Not forwarded: with "https" Next.js stops treating its own loopback address as the same
+    // origin, and a middleware rewrite fails with 500 ("Failed to proxy https://localhost:3000").
+    // The public scheme is put back into Location below.
+    delete headers["x-forwarded-proto"];
     if (body) headers["content-length"] = String(body.length);
     const req = http.request(
       {
@@ -91,6 +96,15 @@ app.http("server", {
     const res = await forward(request, url, body);
     // Several Set-Cookie values are a list in res.headers; takeCookies turns them into cookies.
     const record = { ...res.headers };
+    // Next.js knows only its loopback origin; absolute URLs it builds (middleware redirects) get the
+    // public one. Bodies are not touched: code that writes request.url into a page is not covered.
+    const publicOrigin = `${request.headers.get("x-forwarded-proto") ?? url.protocol.replace(":", "")}://${url.host}`;
+    if (typeof record.location === "string") {
+      record.location = record.location.replace(
+        new RegExp(`^https?://(localhost|127\\.0\\.0\\.1):${PORT}`),
+        publicOrigin,
+      );
+    }
     const cookies = takeCookies(record);
     const out = new Headers();
     for (const [name, value] of Object.entries(record)) {

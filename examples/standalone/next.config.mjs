@@ -11,7 +11,11 @@ export default {
   cacheHandler: path.join(here, "cache-handler.cjs"),
   compress: false, // the Functions host and a CDN compress; a compressed body would break the forward
   cacheMaxMemorySize: 0, // no per-instance memory cache: every instance sees the same state
+  // The app directory is read-only on Azure: no disk cache for optimized images (it would fail with
+  // EACCES on every first request of an image).
+  images: { maximumDiskCacheSize: 0 },
   experimental: {
+    isrFlushToDisk: false,
     useCache: true,
     cacheHandlers: { default: path.join(here, "cache-handlers.cjs") },
   },

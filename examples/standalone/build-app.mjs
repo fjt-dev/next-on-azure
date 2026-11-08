@@ -1,5 +1,7 @@
 // Packages the standalone build as one Function app in .azure-app (spike, ADR-0016).
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -53,6 +55,44 @@ fs.writeFileSync(
     2,
   ),
 );
+// For Azure (Linux x64) the build machine's sharp binaries are replaced: `node build-app.mjs --linux`.
+if (process.argv.includes("--linux")) {
+  const nmImg = path.join(out, "standalone/node_modules/@img");
+  const sharpPkg = path.join(out, "standalone/node_modules/sharp/package.json");
+  if (fs.existsSync(sharpPkg)) {
+    const version = JSON.parse(fs.readFileSync(sharpPkg, "utf8")).version;
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "sharp-linux-"));
+    const r = spawnSync(
+      "npm",
+      [
+        "install",
+        "--no-save",
+        "--no-package-lock",
+        "--no-audit",
+        "--no-fund",
+        "--os=linux",
+        "--cpu=x64",
+        "--libc=glibc",
+        "--prefix",
+        tmp,
+        `sharp@${version}`,
+      ],
+      { stdio: "inherit" },
+    );
+    if (r.status !== 0) throw new Error("npm install of the Linux sharp binaries failed");
+    for (const d of fs.readdirSync(nmImg))
+      if (/^sharp(-libvips)?-(darwin|win32|linuxmusl|linux-arm)/.test(d))
+        fs.rmSync(path.join(nmImg, d), { recursive: true });
+    for (const d of ["sharp-linux-x64", "sharp-libvips-linux-x64"]) {
+      const from = path.join(tmp, "node_modules/@img", d);
+      if (!fs.existsSync(from)) throw new Error(`@img/${d} was not installed`);
+      fs.cpSync(from, path.join(nmImg, d), { recursive: true });
+    }
+    fs.rmSync(tmp, { recursive: true, force: true });
+    console.log("sharp: Linux x64 binaries for", version);
+  }
+}
+
 const links = findSymlinks(out);
 if (links.length) throw new Error(`symbolic links left: ${links.slice(0, 3).join(", ")}`);
 console.log("packaged .azure-app");

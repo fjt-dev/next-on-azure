@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { header, request } from "../http.js";
 
-// The app can run on the OpenNext stack or on the Next.js server itself (next-on-azure, ADR-0016). The
-// two differ in small header details that Next.js decides; the test says which it is talking to.
+// Small header details are decided by the Next.js server itself; E2E_TARGET=standalone is how the
+// suite runs today (the OpenNext-based package that had stricter values was removed).
 const standalone = process.env.E2E_TARGET === "standalone";
 
 let jsPath: string;

@@ -1,7 +1,5 @@
-import fs from "node:fs";
 import http from "node:http";
 import https from "node:https";
-import path from "node:path";
 import { inject } from "vitest";
 
 export type Chunk = { atMs: number; text: string };
@@ -18,20 +16,16 @@ export type Response = {
 };
 
 /**
- * HTTPS request that trusts exactly the certificate created for this stack run, so TLS is verified
- * instead of switched off. Not fetch, because chunk timing is needed to prove streaming.
+ * HTTP(S) request to the app under test. Not fetch, because chunk timing is needed to prove
+ * streaming. A deployment has a certificate from a public CA; plain http is for an app started on
+ * loopback (see scripts/e2e-standalone.mjs).
  */
 export function request(
   pathAndQuery: string,
   options: { method?: string; headers?: Record<string, string>; body?: string } = {},
 ): Promise<Response> {
   const base = new URL(inject("baseUrl"));
-  // A remote deployment has a certificate from a public CA; only the local stack needs its own.
-  const plain = base.protocol === "http:"; // a deployment under test on loopback (the standalone spike)
-  const ca =
-    plain || inject("remote")
-      ? undefined
-      : fs.readFileSync(path.join(inject("runDir"), "cert.pem"));
+  const plain = base.protocol === "http:";
   const started = performance.now();
   return new Promise((resolve, reject) => {
     const req = (plain ? http : https).request(
@@ -47,7 +41,6 @@ export function request(
             : {}),
           ...options.headers,
         },
-        ca,
       },
       (res) => {
         const headersAtMs = performance.now() - started;
@@ -84,11 +77,9 @@ export const header = (r: Response, name: string) => {
 };
 
 /**
- * Cache status of a page: Next.js sets `x-nextjs-cache`; with `dangerous.enableCacheInterception`
- * OpenNext answers from the cache itself and sets `x-opennext-cache` instead.
+ * Cache status of a page: Next.js sets `x-nextjs-cache`.
  */
-export const cacheStatus = (r: Response) =>
-  header(r, "x-nextjs-cache") ?? header(r, "x-opennext-cache");
+export const cacheStatus = (r: Response) => header(r, "x-nextjs-cache");
 
 /**
  * A page that is not stale: the first answer of a time-based ISR test must be a page that is still
@@ -125,11 +116,3 @@ export async function eventually<T>(
 export const timestampIn = (html: string) => /20\d\d-\d\d-\d\dT[\d:.]+Z/.exec(html)?.[0];
 
 /** false when the target is a deployed app: its host log is not a local file. */
-export const hasHostLog = () => !inject("remote");
-
-/** All lines of the Function host log of this run. */
-export function hostLog(): string {
-  if (!hasHostLog())
-    throw new Error("no host log in remote mode; guard the test with hasHostLog()");
-  return fs.readFileSync(path.join(inject("runDir"), "app.log"), "utf8");
-}

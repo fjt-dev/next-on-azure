@@ -2,7 +2,7 @@
 
 ## OpenNext (AWS, Cloudflare)
 
-The first design of this project was an OpenNext adapter ([Legacy](./legacy-opennext/README.md)). This one does not use `@opennextjs/aws` ([ADR-0016](./plan/decisions.md)).
+The first design of this project was an OpenNext adapter. This one does not use `@opennextjs/aws` ([ADR-0016](./plan/decisions.md)).
 
 | | OpenNext (`@opennextjs/aws`) | next-on-azure |
 | --- | --- | --- |

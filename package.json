@@ -1,5 +1,5 @@
 {
-  "name": "opennext-adapter-azure-monorepo",
+  "name": "next-on-azure-monorepo",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -10,7 +10,6 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
-    "e2e:test": "turbo run e2e:test",
     "lint": "biome check",
     "lint:fix": "biome check --fix",
     "changeset": "changeset",
@@ -19,7 +18,6 @@
     "audit:prod": "pnpm audit --prod --audit-level high",
     "secret-scan": "node scripts/secret-scan.mjs",
     "license-check": "node scripts/license-check.mjs",
-    "local:stack": "node scripts/local-stack.mjs",
     "e2e:standalone": "node scripts/e2e-standalone.mjs"
   },
   "devDependencies": {

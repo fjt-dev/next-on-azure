@@ -1,26 +1,18 @@
 # Azure E2E in CI
 
-> **Status: first successful run on 2026-11-07 (Verified on GitHub and Azure, as reported by the maintainer).** Both jobs (`deploy, test, delete` 5 min 37 s, `make sure nothing is left` 18 s) finished green on commit `f5e80ec`. The run's logs were not read by the author: test counts, timings, the actual cost and whether the resource group was gone afterwards are **Unverified**. The maintainer's inventory on 2026-11-07 (`az group list` for `rg-oe2e-*`) returned nothing; the repeat the next day is still to do.
->
-> Getting there took four runs and three fixes: the repository variables were environment-scoped (not visible without `environment:`), the OIDC subject carries numeric ids (`AADSTS700213`), the app name was longer than the template's 12 characters, and the deployer role needed `principalType` `ServicePrincipal`.
-
-The workflow `.github/workflows/azure-e2e.yml` deploys `examples/app-router` to a real subscription, runs the end-to-end tests against the deployed URL and deletes everything. It follows the rules in [Real Azure runs](./azure_runs.md).
+The workflow `.github/workflows/azure-e2e.yml` deploys `examples/standalone` to a real subscription, runs the end-to-end tests against the deployed URL and deletes everything. It follows the rules in [Real Azure runs](./azure_runs.md).
 
 ## How it works
 
 1. Triggers: manual (`workflow_dispatch`, input `location`) and, only when the repository variable `AZURE_E2E_SCHEDULED` is `true`, weekly. Never for pull requests or pushes, so code from forks cannot reach the Azure identity.
 2. No GitHub environment is used (required reviewers are not available for private repositories on the free plan). Instead the Azure credential only accepts tokens from `refs/heads/main` of this repository, and the job also refuses other refs. Only people with write access can start the workflow. If you later move to a plan with environments, switch the credential subject to `environment:<name>` and add a reviewer.
 3. Sign-in is OIDC federation (`scripts/ci/azure-login.sh`): GitHub issues a short-lived token, Azure exchanges it. No secret is stored; only `curl`, `jq` and `az` are used, no third-party action. `id-token: write` exists only in this workflow (pinned by a unit test).
-4. A new resource group `rg-oe2e-<run id>-<attempt>` is created with the tags `purpose=opennextjs-azure-e2e` and `createdAt`.
-5. `opennext-azure deploy` provisions the app (Flex Consumption, no Front Door, queue polling 5 s) and uploads assets and cache. The identity is passed with `--deployer-principal-id` and `--deployer-principal-type ServicePrincipal` (the role assignment fails with `UnmatchedPrincipalType` otherwise); the upload retries while the new role assignment propagates (up to 5 minutes).
-6. The app is polled until it answers, then `pnpm --filter tests-e2e run e2e:remote` runs the same tests as locally, except the ones that read the local host log (they are skipped; see below).
+4. A new resource group `rg-oe2e-<run id>-<attempt>` is created with the tags `purpose=next-on-azure-e2e` and `createdAt`.
+5. `next-on-azure deploy` provisions the app (Flex Consumption, no Front Door), deploys the zip, waits for the first answer and primes the prerendered pages.
+6. `pnpm --filter tests-e2e run e2e:remote` runs the suite against the URL with `E2E_TARGET=standalone`.
 7. The group is deleted at the end of the job (`if: always()`). A second job, `cleanup`, runs even if the first timed out or was cancelled, deletes this run's group and any group with the tag that is older than three hours, and lists what remains.
 
 Hard limits: job timeout 60 minutes, cleanup 15 minutes, one run at a time (`concurrency`). Expected cost is small (Flex Consumption bills per use, plus storage and Application Insights); the previous manual runs have no cost figure yet, so there is **no measured number** to quote. Check the subscription's cost analysis after the first runs and put the figure here.
-
-## What the remote tests do not check
-
-Tests that read the Function host log of the local stack are skipped when `E2E_BASE_URL` is set: the queue consumer ran and succeeded, no failed revalidation, the stampede count (one regeneration for 30 requests) and the `AFTER_DONE` marker. The ISR test still checks over HTTP that a stale page is served and later replaced. Reading these from Application Insights (which lags one to three minutes) is a follow-up.
 
 ## One-time setup (you do this; nothing here is done yet)
 

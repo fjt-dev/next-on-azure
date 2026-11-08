@@ -2,11 +2,9 @@
 
 How far each row has been verified:
 
-- **Verified (Azure)**: run against a real deployment of this package (Flex Consumption, japaneast, Node 22). The record is the HTTP suite of `packages/tests-e2e` with `E2E_TARGET=standalone` (47 passed, 5 skipped on 2026-11-08) and the measurements in ADR-0016; an earlier spike of the same design gave the same results.
+- **Verified (Azure)**: run against a real deployment of this package (Flex Consumption, japaneast, Node 22). The record is the HTTP suite of `packages/tests-e2e` with `E2E_TARGET=standalone` (47 passed on 2026-11-08; five host-log cases that no longer exist were skipped then) and the measurements in ADR-0016; an earlier spike of the same design gave the same results.
 - **Verified (local)**: run with Azurite and the Azure Functions host on a developer machine and in CI (`pnpm e2e:standalone`).
 - **Unverified**: implemented or expected to work, but never run.
-
-The 5 skipped cases need the host log of the local stack or a local HTTPS fixture server; they do not run against a deployment.
 
 ## Next.js
 
@@ -18,7 +16,7 @@ The 5 skipped cases need the host log of the local stack or a local HTTPS fixtur
 | 16.0.0 to 16.4.4 | Not supported (`package` refuses; `--allow-unsupported-next` overrides) |
 | Older than 15.5.29 | Not supported |
 
-The range is the `next` peer range of the package; it is kept from the OpenNext-based design and has not been re-derived for this one.
+The range is the `next` peer range of the package, inherited from the first design and not re-derived.
 
 ## Features
 
@@ -28,9 +26,9 @@ The range is the `next` peer range of the package; it is kept from the OpenNext-
 | Pages Router: `getServerSideProps`, `getStaticProps`, API routes, `fallback: "blocking"` and `true`, `notFound`, `res.revalidate` | Verified (Azure) |
 | Static pages and time-based ISR (`revalidate`) | Verified (Azure): stale page served at once, the next request gets the new one. Regeneration runs in the same process as the stale request (no queue). |
 | `revalidateTag`, `revalidatePath` | Verified (Azure) |
-| `'use cache'` with `cacheTag` and `revalidateTag` | Verified (Azure) on Next.js 15 with `experimental.useCache`. `cacheComponents` (16) with Partial Prerendering: **Unverified** with this design (it worked in a small test with the OpenNext-based package). `cacheLife` expiry and the `remote` and `private` variants: untested. |
+| `'use cache'` with `cacheTag` and `revalidateTag` | Verified (Azure) on Next.js 15 with `experimental.useCache`. `cacheComponents` (16) with Partial Prerendering: **Unverified** with this design. `cacheLife` expiry and the `remote` and `private` variants: untested. |
 | Response streaming (Suspense) | Verified (Azure) |
-| Middleware (redirect, rewrite, headers), including the Next.js 16 `proxy` convention | Verified (Azure) for `middleware`; `proxy`: Verified (local) with the OpenNext-based package, **Unverified** with this design. Edge-runtime middleware: not supported. |
+| Middleware (redirect, rewrite, headers), including the Next.js 16 `proxy` convention | Verified (Azure) for `middleware`; `proxy`: **Unverified**. Edge-runtime middleware: not supported. |
 | Server Actions | Verified (Azure): form post and the `Next-Action` call. `package` warns when no stable `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` is set. A deployment over an older build: **Unverified**. |
 | `after()` | Verified (Azure): the response is held open until the work is done (`--wait-until hold`, the default). `detach`: **Unverified** with this design. |
 | Image optimization (`next/image`) | Verified (Azure): resize, WebP, rejection of bad sizes and remote URLs not allowed, with the Linux `sharp`. A missing source image answers **400** (Next.js's own answer on 15). Next.js's disk cache for optimized images is off (the app directory is read-only), so an optimized image is made again after an instance restarts. |

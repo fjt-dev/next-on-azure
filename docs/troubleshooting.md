@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Problems observed during development, with causes and fixes. The pages of the first, OpenNext-based package are in [Legacy](./legacy-opennext/troubleshooting.md).
+Problems observed during development, with causes and fixes.
 
 ## A Server Action fails after a deployment ("Failed to find Server Action")
 

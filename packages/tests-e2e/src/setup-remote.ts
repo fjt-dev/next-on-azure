@@ -11,6 +11,4 @@ export async function setup(project: TestProject) {
     );
   }
   project.provide("baseUrl", baseUrl);
-  project.provide("runDir", "");
-  project.provide("remote", true);
 }

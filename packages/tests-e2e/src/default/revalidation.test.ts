@@ -1,77 +1,30 @@
 import { describe, expect, it } from "vitest";
-import {
-  cacheStatus,
-  eventually,
-  freshPage,
-  hasHostLog,
-  hostLog,
-  request,
-  sleep,
-  timestampIn,
-} from "../http.js";
+import { cacheStatus, eventually, freshPage, request, sleep, timestampIn } from "../http.js";
 
-const consumerRuns = () =>
-  (hostLog().match(/Executed 'Functions\.revalidation' \(Succeeded/g) ?? []).length;
-
-describe("ISR through the revalidation queue (B1, B2)", () => {
-  it("serves a stale page, then regenerates it through the queue trigger", async () => {
+describe("time-based ISR", () => {
+  it("serves a stale page at once, then the regenerated one", async () => {
     const first = await freshPage("/isr");
     const firstStamp = timestampIn(first.text);
     expect(firstStamp).toBeDefined();
 
     await sleep(6500); // /isr has revalidate = 5
-    const runsBefore = hasHostLog() ? consumerRuns() : 0;
 
     const stale = await request("/isr");
     expect(cacheStatus(stale)).toBe("STALE");
     expect(timestampIn(stale.text)).toBe(firstStamp); // the stale page is served immediately
 
-    // The queue consumer must run and succeed: it only does if the server answered its HEAD request
-    // with the "revalidated" header (otherwise the converter throws and the message is retried).
-    if (hasHostLog()) await eventually(async () => consumerRuns() > runsBefore, 20_000);
-
-    // Remote: the consumer polls with backoff (up to 60 s by default), so wait longer.
+    // The regeneration runs in the same process, after the stale answer.
     const fresh = await eventually(
       async () => {
         const res = await request("/isr");
         return timestampIn(res.text) !== firstStamp ? res : false;
       },
-      hasHostLog() ? 20_000 : 150_000,
-      hasHostLog() ? 500 : 3000,
+      30_000,
+      500,
     );
     expect(timestampIn(fresh.text)).not.toBe(firstStamp);
     expect(["HIT", "STALE"]).toContain(cacheStatus(fresh));
   });
-
-  it.skipIf(!hasHostLog())("does not leave failed revalidations behind", async () => {
-    expect(hostLog()).not.toMatch(/Executed 'Functions\.revalidation' \(Failed/);
-  });
-});
-
-describe("ISR stampede (ADR-0010)", () => {
-  it.skipIf(!hasHostLog())(
-    "30 simultaneous requests for a stale page cause one regeneration, not thirty",
-    async () => {
-      await request("/isr");
-      await sleep(6500); // /isr has revalidate = 5, so it is stale now
-      const before = consumerRuns();
-
-      const responses = await Promise.all(Array.from({ length: 30 }, () => request("/isr")));
-      expect(responses.every((r) => r.status === 200)).toBe(true);
-
-      const stamp = timestampIn(responses[0]?.text ?? "");
-      await eventually(async () => {
-        const r = await request("/isr");
-        return timestampIn(r.text) !== stamp ? r : false;
-      });
-      await sleep(3000); // let any extra message be consumed before counting
-
-      const runs = consumerRuns() - before;
-      // Without the dedupe every one of the 30 requests adds a message and a regeneration.
-      expect(runs).toBeGreaterThanOrEqual(1);
-      expect(runs).toBeLessThanOrEqual(2);
-    },
-  );
 });
 
 describe("on-demand revalidation (revalidateTag)", () => {

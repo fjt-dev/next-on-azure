@@ -30,7 +30,7 @@ describe("next-on-azure main.bicep", () => {
     }
   });
 
-  it("has nothing of the OpenNext design left: no assets container, queue, revalidation settings", () => {
+  it("has nothing of the first design left: no assets container, queue, revalidation settings", () => {
     expect(bicep).not.toMatch(/queueServices|REVALIDATION|ASSETS_|OPENNEXT_|revalidation/i);
   });
 

@@ -965,3 +965,12 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - New pages written for the new design: docs index, get started, compatibility (with the verification status of each row from the Azure suite run), configuration, how it works, comparison, FAQ, troubleshooting; the root README; the contributing pages got short sections for the new scripts. Link check over all Markdown: 0 broken.
 - Wording choices that stay honest: rows without a run are **Unverified** (Next.js 16 on Azure, Front Door, always-ready, `proxy` and `cacheComponents` with this design, `detach`); the supported Next.js range is inherited from the OpenNext-based design and said so.
 - Not done: stage 5 (removal of the old package, `examples/app-router`, the `azure-e2e` workflow and the legacy CI job). The Azure E2E workflow still targets the old package.
+
+## Session 47 (2026-11-08): migration, stage 5 (removal of the OpenNext-based package)
+
+- Removal approved by the maintainer ("削除して良いです"). Deleted: `packages/open-next-azure`, `examples/app-router`, `scripts/local-stack.mjs`, `docs/legacy-opennext`, the stack files and the `front-door` and `poison` projects of `packages/tests-e2e`, and every unit and integration test of the old package (the ported ones remain). `@opennextjs/aws` is gone from the catalog; the dependencies only the old package used were dropped. History stays in git.
+- Dead code of the HTTP suite removed: the host-log helpers, the cases that needed the local host log (queue consumer ran, failed revalidations, stampede count) or an HTTPS fixture (remote images). The suite is now 47 cases, none skipped; the Azure run earlier today (47 passed, 5 skipped) had run the same cases plus those five skipped ones.
+- `azure-e2e.yml` now deploys `examples/standalone` with `next-on-azure deploy` and runs the suite with `E2E_TARGET=standalone`; the tag of its resource groups is `purpose=next-on-azure-e2e`. **It was not run** (the federated credential and the variables exist for the old workflow; the rights of that identity were set for the old template).
+- `check.yml`: the old `e2e` job is gone, `standalone-e2e` is now `e2e`; one Bicep step.
+- Local: lint, typecheck, build, unit 121, integration 3, `pnpm e2e:standalone` 47 passed, license check, secret scan. GitHub CI of this change is still to be seen.
+- AGENTS.md, README, docs and the roadmap note updated; the number of unit tests fell from 370 to 121 because the old package's tests went with it.

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 /**
  * Next.js versions this package supports are the `next` peer range of its own package.json
- * (ADR-0011: it follows `@opennextjs/aws`). `package` refuses an app outside that range, because a
+ * (inherited from the first, OpenNext-based design, ADR-0011). `package` refuses an app outside that range, because a
  * build that was never tested would fail late or in odd ways on Azure.
  */
 

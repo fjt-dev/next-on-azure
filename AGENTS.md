@@ -1,10 +1,10 @@
 # Agent guide
 
-This repository is an Azure adapter for OpenNext, developed with Claude Code. Read this file first.
+This repository runs Next.js on Azure Functions (`next-on-azure`), developed with Claude Code. Read this file first.
 
 ## What this is
 
-A pnpm + Turborepo monorepo. The published package is `packages/open-next-azure` (`opennext-adapter-azure`, ADR-0015). It provides OpenNext overrides, a CLI (`package`, `deploy`) and a Bicep template to run Next.js on one Azure Functions app (Flex Consumption) with Blob/Table/Queue Storage; Front Door is optional (ADR-0009). Full context is in `docs/`.
+A pnpm + Turborepo monorepo. The package is `packages/next-on-azure` (provisional name, ADR-0017): a `withAzure()` config helper, cache handlers on Blob and Table Storage, the Functions entry that forwards requests to the Next.js standalone server, a CLI (`package`, `deploy`, `prime`) and a Bicep template for one Azure Functions app (Flex Consumption); Front Door is optional. It does not use `@opennextjs/aws` (ADR-0016). Full context is in `docs/`.
 
 ## Read before working
 
@@ -19,27 +19,23 @@ A pnpm + Turborepo monorepo. The published package is `packages/open-next-azure`
 - **Tests with every change.** A behavior change needs a test in `packages/tests-unit` (and an E2E case if it is visible over HTTP). Tests that document a known gap use `it.fails` so they flag themselves when the gap is fixed.
 - **Verification honesty.** Never write that something works unless it was run. Mark it **Verified (local)**, **Verified (Azure)** or **Unverified** in `docs/compatibility.md`.
 - **Do not create Azure resources without asking.** Deploying costs money. Follow `docs/contribute/azure_runs.md`: dedicated resource group, time window, cost ceiling, delete by name, next-day inventory. Run the local stack first.
-- **Package name is a placeholder.** Do not hard-code it in source (ADR-0005).
-- **Override modules must not import `@azure/*` statically** (ADR-0007).
-- **Never run `npm install` inside an OpenNext bundle** (ADR-0008).
-- **Do not read the code of other Azure adapters for OpenNext** (for example the npm package `opennextjs-azure` by another author): not the repository, the tarball or its documentation beyond the registry listing. Reading it would influence the design. Use official sources (OpenNext, Next.js, Microsoft Learn) and this project's own measurements.
-- Follow OpenNext conventions; the upstream repository is `opennextjs/opennextjs-aws`.
+- **Package name is provisional.** Do not hard-code it in source (ADR-0005, ADR-0017).
+- **The runtime `.cjs` files must not `require("node:...")`** (Next.js 16 bundles them with Turbopack; see `docs/troubleshooting.md`).
+- **Do not read the code of other Azure adapters for Next.js or OpenNext** (for example the npm package `opennextjs-azure` by another author): not the repository, the tarball or its documentation beyond the registry listing. Reading it would influence the design. Use official sources (Next.js, Microsoft Learn) and this project's own measurements.
 
 ## Commands
 
 ```bash
 pnpm install
-pnpm build        # turbo: build all packages
+pnpm build              # turbo: build all packages
 pnpm typecheck
 pnpm lint
 pnpm test               # unit tests (packages/tests-unit)
-pnpm test:integration   # real Azure SDKs against Azurite
-pnpm e2e:test           # builds + packages the example, runs the local stack, HTTP checks
-pnpm --filter example-app-router run openbuild   # open-next build for the example
-pnpm --filter example-app-router run package     # produce the single Function app zip (.open-next-azure/app.zip)
+pnpm test:integration   # the real Azure SDKs against Azurite
+pnpm e2e:standalone     # packages examples/standalone, starts the local stack, runs the HTTP suite
 ```
 
-See `docs/contribute/local_run.md` for running the local stack (`pnpm local:stack`: Azurite + Functions Core Tools over HTTPS).
+See `docs/contribute/local_run.md` for running the local stack (`node scripts/standalone-local.mjs`: Azurite + the Functions host).
 
 <!-- BEGIN:turborepo-agent-rules -->
 

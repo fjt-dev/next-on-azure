@@ -13,22 +13,10 @@
       "dependsOn": ["^build"],
       "cache": false
     },
-    "e2e:test": {
-      "dependsOn": ["^build", "example-app-router#package"],
-      "cache": false,
-      "passThroughEnv": ["LOCAL_STACK_LOG_DIR"]
-    },
-    "openbuild": {
-      "dependsOn": ["^build"],
-      "outputs": [".open-next/**"]
-    },
-    "package": {
-      "dependsOn": ["openbuild"],
-      "outputs": [".open-next-azure/**"]
-    },
     "test:integration": {
       "dependsOn": ["^build"],
       "cache": false
     }
-  }
+  },
+  "globalPassThroughEnv": ["LOCAL_STACK_LOG_DIR"]
 }

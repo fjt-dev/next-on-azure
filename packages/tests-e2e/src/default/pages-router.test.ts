@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventually, freshPage, hasHostLog, header, request, sleep, timestampIn } from "../http.js";
+import { eventually, freshPage, header, request, sleep, timestampIn } from "../http.js";
 
 describe("Pages Router", () => {
   it("renders getServerSideProps on every request", async () => {
@@ -87,7 +87,7 @@ describe("Pages Router static generation", () => {
         const res = await request(`/pages-fallback/${slug}`);
         return res.text.replaceAll("<!-- -->", "").includes(`Fallback post ${slug}`) ? res : false;
       },
-      hasHostLog() ? 15_000 : 60_000,
+      30_000,
       500,
     );
     expect(page.status).toBe(200);
@@ -99,7 +99,7 @@ describe("Pages Router static generation", () => {
     expect((await request(`/_next/data/${buildId}/pages-fallback/missing.json`)).status).toBe(404);
   });
 
-  it("regenerates a page with revalidate after it went stale (queue)", async () => {
+  it("regenerates a page with revalidate after it went stale", async () => {
     const first = timestampIn((await freshPage("/pages-isr")).text);
     expect(first).toBeDefined();
     await sleep(6500);
@@ -110,8 +110,8 @@ describe("Pages Router static generation", () => {
         const res = await request("/pages-isr");
         return timestampIn(res.text) !== first ? res : false;
       },
-      hasHostLog() ? 20_000 : 150_000,
-      hasHostLog() ? 500 : 3000,
+      30_000,
+      500,
     );
     expect(timestampIn(fresh.text)).not.toBe(first);
   });

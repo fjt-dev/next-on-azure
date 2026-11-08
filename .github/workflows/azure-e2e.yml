@@ -1,6 +1,6 @@
 name: azure-e2e
 
-# Deploys the example app to a real Azure subscription, runs the end-to-end tests against the
+# Deploys examples/standalone (next-on-azure) to a real Azure subscription, runs the end-to-end tests against the
 # deployed URL and deletes everything. It creates billable resources: see docs/contribute/azure_runs.md.
 # Never runs for pull requests, so code from forks cannot reach the Azure identity.
 on:
@@ -25,7 +25,6 @@ env:
   AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
   AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
   AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-  AZURE_PRINCIPAL_ID: ${{ vars.AZURE_PRINCIPAL_ID }}
   RESOURCE_GROUP: rg-oe2e-${{ github.run_id }}-${{ github.run_attempt }}
   LOCATION: ${{ inputs.location || 'japaneast' }}
 
@@ -58,8 +57,7 @@ jobs:
       - name: Build and package the example
         run: |
           pnpm build
-          pnpm --filter example-app-router run openbuild
-          pnpm --filter example-app-router run package
+          pnpm --filter example-standalone run standalone:azure
 
       - name: Sign in to Azure (OIDC)
         run: scripts/ci/azure-login.sh
@@ -67,34 +65,22 @@ jobs:
       - name: Create the resource group
         run: |
           az group create --name "$RESOURCE_GROUP" --location "$LOCATION" --output none \
-            --tags purpose=opennextjs-azure-e2e "createdAt=$(date -u +%Y-%m-%dT%H:%M:%SZ)" "runId=${{ github.run_id }}"
+            --tags purpose=next-on-azure-e2e "createdAt=$(date -u +%Y-%m-%dT%H:%M:%SZ)" "runId=${{ github.run_id }}"
           echo "created resource group $RESOURCE_GROUP in $LOCATION"
 
       - name: Deploy
-        working-directory: examples/app-router
+        working-directory: examples/standalone
         run: |
-          # Five-second polling keeps the ISR checks short; the name is unique per run.
-          # main.bicep limits the name to 12 characters: "oe" + 8 digits + the attempt number.
+          # The name is unique per run; main.bicep limits it to 12 characters: "oe" + 8 digits + the
+          # attempt number. `deploy` waits for the first answer and primes the prerendered pages.
           name="oe$(printf '%s' "${{ github.run_id }}" | tail -c 8)${{ github.run_attempt }}"
-          node ../../packages/open-next-azure/dist/cli/index.js deploy \
+          node ../../packages/next-on-azure/dist/cli/index.js deploy \
             -g "$RESOURCE_GROUP" -n "$name" \
-            --deployer-principal-id "$AZURE_PRINCIPAL_ID" --deployer-principal-type ServicePrincipal \
-            --revalidation-polling-seconds 5 \
             --output-file "$RUNNER_TEMP/deployment.json"
           cat "$RUNNER_TEMP/deployment.json"
 
-      - name: Wait until the app answers
-        run: |
-          url="$(jq -r .url "$RUNNER_TEMP/deployment.json")"
-          for i in $(seq 1 30); do
-            if curl -fsS --max-time 20 -o /dev/null "$url/"; then echo "up after $i attempt(s)"; exit 0; fi
-            sleep 10
-          done
-          echo "the app did not answer within 5 minutes" >&2
-          exit 1
-
       - name: End-to-end tests against the deployment
-        run: E2E_BASE_URL="$(jq -r .url "$RUNNER_TEMP/deployment.json")" pnpm --filter tests-e2e run e2e:remote
+        run: E2E_TARGET=standalone E2E_BASE_URL="$(jq -r .url "$RUNNER_TEMP/deployment.json")" pnpm --filter tests-e2e run e2e:remote
 
       - name: Delete the resource group
         if: always()
@@ -123,7 +109,7 @@ jobs:
         run: |
           cutoff="$(date -u -d '3 hours ago' +%Y-%m-%dT%H:%M:%SZ)"
           # ISO timestamps compare correctly as strings; JMESPath cannot compare strings.
-          az group list --tag purpose=opennextjs-azure-e2e \
+          az group list --tag purpose=next-on-azure-e2e \
             --query "[].[name, tags.createdAt]" --output tsv |
             while IFS=$'\t' read -r group created; do
               [ -n "$group" ] || continue
@@ -133,4 +119,4 @@ jobs:
               fi
             done
           echo "remaining groups of this workflow:"
-          az group list --tag purpose=opennextjs-azure-e2e --query "[].name" --output tsv
+          az group list --tag purpose=next-on-azure-e2e --query "[].name" --output tsv

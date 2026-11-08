@@ -5,8 +5,6 @@
       "**",
       "!**/dist",
       "!**/.next",
-      "!**/.open-next",
-      "!**/.open-next-azure",
       "!**/.azure-app",
       "!**/.next-azure",
       "!**/node_modules",
@@ -33,11 +31,6 @@
       // which cannot load `node:` externals from CommonJS (see azure-storage.cjs).
       "includes": ["**/packages/next-on-azure/src/runtime/*.cjs"],
       "linter": { "rules": { "style": { "useNodejsImportProtocol": "off" } } }
-    },
-    {
-      // OpenNext does not export the revalidate event/result types.
-      "includes": ["**/packages/open-next-azure/src/overrides/revalidate.ts"],
-      "linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
     }
   ]
 }

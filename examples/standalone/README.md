@@ -1,20 +1,11 @@
-# Standalone spike (ADR-0016)
+# Example app
 
-Next.js on one Azure Function **without `@opennextjs/aws`**: the Next.js standalone server runs inside
-the Functions worker, `main.mjs` forwards every request to it over loopback, and the caches are
-replaced through the documented options `cacheHandler` and `experimental.cacheHandlers`
-(`cache-handler.cjs`, `cache-handlers.cjs`, both on Blob and Table Storage).
-
-This is an experiment, not a supported package. Results and open points: ADR-0016 in
-`docs/plan/decisions.md`.
-
-## Run it locally
+The app for `next-on-azure`: App Router and Pages Router routes that exist to test specific behavior (`/isr` with a 5 second revalidate, `/slow` for streaming, `/tagged`, `/use-cache`, `/actions`, `/pages-*`, `/mw/*` for middleware, `/api/after`).
 
 ```bash
-pnpm --filter example-standalone run standalone      # next build + build-app.mjs -> .azure-app/
-node ../../scripts/standalone-local.mjs         # Azurite + the Functions host on http://localhost:7071
-E2E_BASE_URL=http://localhost:7071 pnpm --filter tests-e2e run e2e:remote
+pnpm --filter example-standalone run standalone   # next build + next-on-azure package --target local
+node ../../scripts/standalone-local.mjs           # from this directory: the local stack on http://localhost:7071
+pnpm e2e:standalone                               # all of it, plus the HTTP suite
 ```
 
-Start from empty storage for each E2E run (the script does): ISR cases assume that no entry is older
-than the test.
+`standalone:azure` packages for Azure (Linux x64 `sharp`).

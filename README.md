@@ -17,7 +17,7 @@
 
 ## Features
 
-Each item is marked with how far it was checked; the evidence and the gaps are in [Compatibility](./docs/compatibility.md). "Azure" means the HTTP suite passed on a real deployment (47 passed, 5 skipped, 2026-11-08), "local" means Azurite and the Functions host on a developer machine and in CI.
+Each item is marked with how far it was checked; the evidence and the gaps are in [Compatibility](./docs/compatibility.md). "Azure" means the HTTP suite passed on a real deployment (47 passed, 2026-11-08), "local" means Azurite and the Functions host on a developer machine and in CI.
 
 - [x] App Router and Pages Router, API routes, dynamic routes (Azure)
 - [x] Server-side rendering with response streaming (Azure)
@@ -52,7 +52,6 @@ The package is not published, so this works from a checkout of this repository o
 | Path | Contents |
 | --- | --- |
 | [`packages/next-on-azure`](./packages/next-on-azure) | The package: config helper, cache handlers, Functions entry, CLI, Bicep template |
-| [`packages/open-next-azure`](./packages/open-next-azure) | Legacy OpenNext-based package, to be removed |
 | [`packages/tests-unit`](./packages/tests-unit), [`packages/tests-e2e`](./packages/tests-e2e) | Unit and integration tests; HTTP tests against the local stack or a deployment |
 | [`examples/standalone`](./examples/standalone) | Example app for the new package |
 | [`docs`](./docs) | Documentation, roadmap, decision records and work log |

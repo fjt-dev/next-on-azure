@@ -2,8 +2,6 @@ node_modules
 dist
 .next
 .turbo
-.open-next
-.open-next-azure
 *.tsbuildinfo
 .env*
 !.env.example

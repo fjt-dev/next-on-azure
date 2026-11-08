@@ -13,8 +13,7 @@ Every statement about behavior on Azure is marked **Verified (Azure)**, **Verifi
 | [Configuration](./configuration.md) | `withAzure()`, environment variables, the CLI |
 | [How it works](./how_it_works.md) | The request path, the caches, `after()`, priming, packaging |
 | [Azure notes](./inner_workings/azure_notes.md) | Platform facts that shaped the design, with their source |
-| [Comparison](./comparison.md) | OpenNext (AWS, Cloudflare) and the Next.js Adapter API |
+| [Comparison](./comparison.md) | OpenNext (AWS, Cloudflare) |
 | [FAQ](./faq.md), [Troubleshooting](./troubleshooting.md) | Short answers; known problems and fixes |
 | [Contributing](./contribute/README.md) | Run locally, tests, CI, real Azure runs |
 | [Plan](./plan/roadmap.md) | Roadmap, release plan, decision records (ADRs) and the work log |
-| [Legacy](./legacy-opennext/README.md) | Documentation of the first, OpenNext-based package, until it is removed |

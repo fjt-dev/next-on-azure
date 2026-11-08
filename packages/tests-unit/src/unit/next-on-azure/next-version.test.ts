@@ -33,7 +33,7 @@ describe("satisfies (the next peer range)", () => {
     ["16.4.4", false],
     ["16.4.5", true],
     ["16.5.0", true],
-    ["17.0.0", true], // the range has no upper bound; OpenNext decides when it ends
+    ["17.0.0", true], // the range has no upper bound
     ["16.4.5-canary.1", true],
     ["nonsense", false],
   ])("%s -> %s", (version, expected) => {

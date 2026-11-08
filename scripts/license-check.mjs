@@ -22,7 +22,7 @@ const list = (filter) =>
   );
 
 const problems = [];
-for (const filter of ["opennext-adapter-azure", undefined]) {
+for (const filter of ["next-on-azure", undefined]) {
   const label = filter ? "package" : "workspace";
   for (const [license, pkgs] of Object.entries(list(filter))) {
     if (allowed.has(license)) continue;

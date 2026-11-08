@@ -39,8 +39,7 @@ function waitForPort(port, timeoutMs = 30_000) {
  * `after()` and other deferred work. Next.js asks the platform for `waitUntil` through this global
  * (documented in its source as the "builtin request context"). The work is tracked here, and a
  * response is held open until the work that was registered before it ended has settled, so that the
- * instance is not stopped in the middle of it (the same choice as WAIT_UNTIL_MODE=hold of the
- * OpenNext wrapper, ADR-0006). The work cannot be tied to one request: the call comes from inside
+ * instance is not stopped in the middle of it (ADR-0006). The work cannot be tied to one request: the call comes from inside
  * the Next.js server, which the request reached over loopback.
  */
 const pending = new Set();

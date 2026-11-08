@@ -4,12 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "e2e:test": "vitest run --project default && vitest run --project front-door && vitest run --project poison",
     "e2e:remote": "vitest run --project remote",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@azure/storage-queue": "^12.25.0",
     "@types/node": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

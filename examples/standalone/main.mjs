@@ -34,6 +34,54 @@ function waitForPort(port, timeoutMs = 30_000) {
   });
 }
 
+/**
+ * `after()` and other deferred work. Next.js asks the platform for `waitUntil` through this global
+ * (documented in its source as the "builtin request context"). The work is tracked here, and a
+ * response is held open until the work that was registered before it ended has settled, so that the
+ * instance is not stopped in the middle of it (the same choice as WAIT_UNTIL_MODE=hold of the
+ * OpenNext wrapper, ADR-0006). The work cannot be tied to one request: the call comes from inside
+ * the Next.js server, which the request reached over loopback.
+ */
+const pending = new Set();
+globalThis[Symbol.for("@next/request-context")] = {
+  get: () => ({
+    waitUntil: (promise) => {
+      const tracked = Promise.resolve(promise)
+        .catch((error) => console.error("waitUntil work failed:", error))
+        .finally(() => pending.delete(tracked));
+      pending.add(tracked);
+    },
+  }),
+};
+const HOLD = (process.env.WAIT_UNTIL_MODE ?? "hold") !== "detach";
+const HOLD_MAX_MS = Number(process.env.WAIT_UNTIL_MAX_SECONDS ?? 220) * 1000;
+
+/** Settles when the work registered so far is done, or after the longest hold allowed. */
+function settled() {
+  if (!HOLD || pending.size === 0) return Promise.resolve();
+  const work = Promise.allSettled([...pending]);
+  const limit = new Promise((resolve) => setTimeout(resolve, HOLD_MAX_MS).unref());
+  return Promise.race([work, limit]);
+}
+
+/** The body of a response, closed only after the deferred work has settled. */
+function holdOpen(source) {
+  if (!HOLD) return source;
+  const reader = source?.getReader();
+  return new ReadableStream({
+    async pull(controller) {
+      const { done, value } = reader ? await reader.read() : { done: true };
+      if (!done) {
+        controller.enqueue(value);
+        return;
+      }
+      await settled();
+      controller.close();
+    },
+    cancel: (reason) => reader?.cancel(reason),
+  });
+}
+
 let started;
 function start() {
   started ??= (async () => {
@@ -117,7 +165,7 @@ app.http("server", {
       status: res.statusCode,
       headers: out,
       cookies,
-      body: noBody ? null : Readable.toWeb(res),
+      body: holdOpen(noBody ? null : Readable.toWeb(res)),
     };
   },
 });

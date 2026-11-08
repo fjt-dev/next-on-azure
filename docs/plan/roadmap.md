@@ -2,7 +2,7 @@
 
 Goal: an npm package that deploys Next.js to Azure, built to the same quality bar as [OpenNext for AWS](https://opennext.js.org/aws): documented, tested (unit, integration, E2E) and released with a repeatable process. Official adoption is not a goal in itself, but the project should be good enough to be considered.
 
-> **State on 2026-11-08.** The project runs Next.js on Azure without OpenNext (ADR-0016, ADR-0017): `packages/next-on-azure` is the only package, the OpenNext-based package and its example were removed (migration stage 5). Phases 0 to 3 below were written for the OpenNext-based design and are kept as a record; their checkboxes were not revisited. What is verified now is in [Compatibility](../compatibility.md); what is next is the open list there and in the [release plan](./release_plan.md) (name, Front Door, always-ready, Next.js 16 on Azure).
+> **State on 2026-11-08.** The project runs Next.js on Azure without OpenNext (ADR-0016, ADR-0017): `packages/next-on-azure` is the only package, the OpenNext-based package and its example were removed (migration stage 5). Phases 0 to 3 below were written for the OpenNext-based design and are kept as a record; their checkboxes were not revisited. What is verified now is in [Compatibility](../compatibility.md); what is next is in the [release plan](./release_plan.md).
 
 Status legend: `[x]` done, `[~]` partially done, `[ ]` not started.
 

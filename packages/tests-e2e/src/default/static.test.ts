@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { header, request } from "../http.js";
 
+// The app can run on the OpenNext stack or on the Next.js server itself (next-on-azure, ADR-0016). The
+// two differ in small header details that Next.js decides; the test says which it is talking to.
+const standalone = process.env.E2E_TARGET === "standalone";
+
 let jsPath: string;
 
 beforeAll(async () => {
@@ -14,18 +18,20 @@ describe("static files served from Blob through the asset resolver", () => {
   it("serves a build asset with its type and an immutable cache", async () => {
     const res = await request(jsPath);
     expect(res.status).toBe(200);
-    expect(header(res, "content-type")).toContain("text/javascript");
+    expect(header(res, "content-type")).toContain(standalone ? "javascript" : "text/javascript");
     expect(header(res, "cache-control")).toBe("public, max-age=31536000, immutable");
     expect(header(res, "accept-ranges")).toBe("bytes");
     expect(Number(header(res, "content-length"))).toBe(res.body.length);
-    expect(header(res, "etag")).toMatch(/^"/);
+    expect(header(res, "etag")).toMatch(standalone ? /^(W\/)?"/ : /^"/);
   });
 
   it("serves a file from public/ and revalidates it", async () => {
     const res = await request("/test.png");
     expect(res.status).toBe(200);
     expect(header(res, "content-type")).toBe("image/png");
-    expect(header(res, "cache-control")).toBe("public, max-age=0, must-revalidate");
+    expect(header(res, "cache-control")).toBe(
+      standalone ? "public, max-age=0" : "public, max-age=0, must-revalidate",
+    );
     expect([...res.body.subarray(1, 4)]).toEqual([0x50, 0x4e, 0x47]); // "PNG"
   });
 

@@ -50,7 +50,10 @@ describe("image optimization on /_next/image (B11)", () => {
   });
 
   it("answers 404 for a source image that does not exist", async () => {
-    expect((await image("url=%2Fmissing.png&w=64&q=75")).status).toBe(404);
+    // The Next.js image optimizer itself answers 400 on Next.js 15 (next-on-azure); the OpenNext
+    // adapter's answer is turned into 404 by the wrapper.
+    const expected = process.env.E2E_TARGET === "standalone" ? [400, 404] : [404];
+    expect(expected).toContain((await image("url=%2Fmissing.png&w=64&q=75")).status);
   });
 });
 

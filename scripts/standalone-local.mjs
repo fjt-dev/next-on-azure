@@ -59,7 +59,8 @@ children.push(
 );
 await new Promise((r) => setTimeout(r, 3000));
 
-const req = createRequire(path.join(app, "standalone/examples/standalone/package.json"));
+// Resolves the SDKs the way the app does: from the (flattened) node_modules of the standalone copy.
+const req = createRequire(path.join(app, "standalone/package.json"));
 const { BlobServiceClient } = req("@azure/storage-blob");
 const { TableServiceClient } = req("@azure/data-tables");
 await BlobServiceClient.fromConnectionString(cs).getContainerClient("cache").createIfNotExists();

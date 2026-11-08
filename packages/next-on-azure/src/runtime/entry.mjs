@@ -64,15 +64,28 @@ function settled() {
   return Promise.race([work, limit]);
 }
 
-/** The body of a response, closed only after the deferred work has settled. */
+/**
+ * The body of a response, closed only after the deferred work has settled.
+ *
+ * If the Next.js server breaks the response after the first byte (it closes the connection), the
+ * stream is ended at that point instead of being errored: an errored stream left the client waiting
+ * until the platform's timeout (measured locally, ADR-0016 follow-up). The client then sees a
+ * complete-looking, shortened body; the failure is logged.
+ */
 function holdOpen(source) {
-  if (!HOLD) return source;
   const reader = source?.getReader();
   return new ReadableStream({
     async pull(controller) {
-      const { done, value } = reader ? await reader.read() : { done: true };
-      if (!done) {
-        controller.enqueue(value);
+      let chunk;
+      try {
+        chunk = reader ? await reader.read() : { done: true };
+      } catch (error) {
+        console.error("The response from the Next.js server failed after it had started:", error);
+        controller.close();
+        return;
+      }
+      if (!chunk.done) {
+        controller.enqueue(chunk.value);
         return;
       }
       await settled();

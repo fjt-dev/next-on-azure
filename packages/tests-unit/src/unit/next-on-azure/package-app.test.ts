@@ -80,6 +80,15 @@ describe("assertNoSymlinks", () => {
   });
 });
 
+describe("a response that fails after its first byte", () => {
+  it("ends the stream instead of erroring it, and logs the failure", () => {
+    const text = entrypoint("");
+    expect(text).toMatch(
+      /catch \(error\) \{\s*console\.error\([^)]*after it had started[^)]*\);\s*controller\.close\(\);/,
+    );
+  });
+});
+
 describe("Front Door check of the entry", () => {
   const text = entrypoint("");
   it("is part of the handler and answers 403 before the Next.js server starts", () => {

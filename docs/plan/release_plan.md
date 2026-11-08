@@ -45,7 +45,6 @@ Gate: every item done, and one Azure run on the release commit with the whole su
 | B4 | Observability: Application Insights queries (invocations, failures, instances), documented |
 | B5 | Rollback and redeploy (Flex has no slots), and a deployment over an older build with and without a stable Server Actions key |
 | B6 | Next.js 16 on Azure, and a CI case for `proxy` and `cacheComponents` (both pass locally); Node 24 |
-| B7 | Error after the first byte: decide and test what the client sees |
 | B8 | i18n and base path, a custom domain in the template |
 
 ## 5. Not planned

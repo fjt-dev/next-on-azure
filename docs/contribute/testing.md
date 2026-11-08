@@ -1,5 +1,7 @@
 # Testing strategy
 
+> **next-on-azure (current).** Unit tests of the package are in `packages/tests-unit/src/unit/next-on-azure/` (config helper, packaging helpers, prime, deploy options, Bicep, Front Door check, both cache handlers with a fake storage, pack contents); the integration test `src/integration/next-on-azure.test.ts` runs both handlers against Azurite with the real SDKs. The HTTP suite of `packages/tests-e2e` runs against `examples/standalone` with `pnpm e2e:standalone` (`E2E_TARGET=standalone`), and against a deployment with `E2E_BASE_URL=https://<app>.azurewebsites.net E2E_TARGET=standalone pnpm --filter tests-e2e exec vitest run --project remote`. A handler test was checked by breaking the tag comparison on purpose (4 tests failed). The rest of this page describes the strategy of the legacy package; the layers are the same.
+
 Three layers exist (Phase 2 of the [roadmap](../plan/roadmap.md)); Azure E2E and CI do not yet.
 
 | Layer | Package / command | Runs against | Needs |

@@ -310,7 +310,7 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 ---
 
-## ADR-0015: The package is named `opennext-adapter-azure`; the positioning is open (accepted for the name)
+## ADR-0015: The package is named `opennext-adapter-azure`; the positioning is open (superseded by ADR-0017 for the name)
 
 **Date:** 2026-11-07, name decided 2026-11-08. **Status:** accepted for the name; positioning still open. Follows [ADR-0005](#adr-0005-package-name-is-deferred).
 
@@ -384,6 +384,8 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 **Contents of the new package.** Runtime: cache handlers (`cache-handler`, `cache-handlers`) on Blob and Table, the Functions entry that forwards to the Next.js server, the cookie conversion. Build side: `withAzure(nextConfig)` (sets `output: "standalone"`, the handlers, and the settings the spike found necessary), a CLI with `package`, `prime` and `deploy`, a Bicep template without the OpenNext pieces. Code that is still good is moved from the old package by copy (flattening of pnpm trees, version and Server Actions key checks, warm-up).
 
 **Stages.** (1) the package with runtime, config helper and CLI `package`/`prime`, unit and integration tests, the example using it, local E2E; (2) simplified Bicep and `deploy`, Azure run; (3) CI jobs; (4) docs rewrite and the choice of name; (5) removal of the old package.
+
+**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now" ("一旦"): the name stays provisional. It was free on npm that day. Whether a name containing "Next" can be used for a published package (Vercel's trademark) has **not** been checked and must be before publishing.
 
 **Not decided.** Static files from Blob (today Next.js serves them from the package), Front Door, always-ready defaults, a Next.js Adapter API path for 16.2+.
 

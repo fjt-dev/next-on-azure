@@ -1,5 +1,20 @@
 # Local development
 
+## next-on-azure (current)
+
+```bash
+pnpm install
+pnpm build                                          # builds packages/next-on-azure
+pnpm --filter example-standalone run standalone     # next build + next-on-azure package --target local
+node scripts/standalone-local.mjs                   # Azurite + the Functions host on http://localhost:7071
+```
+
+`standalone-local.mjs` starts Azurite with empty storage on every run and runs `examples/standalone/.next-azure/app`. To run the HTTP suite against it: `pnpm e2e:standalone` (it packages, starts the stack, runs the suite and stops everything), or `E2E_BASE_URL=http://localhost:7071 E2E_TARGET=standalone pnpm --filter tests-e2e exec vitest run --project remote` with the stack already running. Start from empty storage for each run: the time-based ISR cases assume that no entry is older than the test.
+
+To try another Next.js version, change `next` in the catalog of `pnpm-workspace.yaml` and run `pnpm install --no-frozen-lockfile` (CI does this for its Next.js 16 leg). In a git worktree the Functions Core Tools binary may be missing; copy the `bin` directory of `node_modules/azure-functions-core-tools` from another checkout.
+
+## Legacy package (open-next-azure)
+
 ## Setup
 
 ```bash

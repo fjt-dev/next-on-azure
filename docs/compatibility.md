@@ -1,55 +1,60 @@
 # Compatibility
 
-Every row is marked with how far it has been verified:
+How far each row has been verified:
 
-- **Verified (local)**: run locally, including against Azurite, with the result recorded in the [work log](./plan/worklog.md). Since 2026-11-06 this includes running under the real Azure Functions host (Core Tools 4.16.0) over HTTPS, written **(local, Functions host)**.
-- **Verified (Azure)**: run on a real Azure deployment.
+- **Verified (Azure)**: run against a real deployment of this package (Flex Consumption, japaneast, Node 22). The record is the HTTP suite of `packages/tests-e2e` with `E2E_TARGET=standalone` (47 passed, 5 skipped on 2026-11-08) and the measurements in ADR-0016; an earlier spike of the same design gave the same results.
+- **Verified (local)**: run with Azurite and the Azure Functions host on a developer machine and in CI (`pnpm e2e:standalone`).
 - **Unverified**: implemented or expected to work, but never run.
 
-Since 2026-11-06 most **Verified (local, Functions host)** rows are also covered by automated tests (`pnpm test`, `pnpm test:integration`, `pnpm e2e:test`, see [Testing](./contribute/testing.md)): pages, ISR through the queue, `revalidateTag`, streaming, static files, image optimization, `after()` and the Front Door id check. The rest of the local rows were checked by hand only.
-
-As of 2026-11-06 the rows below marked **Verified (Azure)** were checked by hand on one real deployment (Function app on Flex Consumption, japaneast, Node 22, no Front Door; work log, session 7). They are not covered by automated Azure tests yet. That is the goal of [roadmap Phase 1](./plan/roadmap.md).
+The 5 skipped cases need the host log of the local stack or a local HTTPS fixture server; they do not run against a deployment.
 
 ## Next.js
 
 | Version | Status |
 | --- | --- |
-| 15.5.29 | Verified (local, Functions host), App Router only |
-| 15.x other | Unverified |
-| 16.4.5+ | Unverified (accepted by the `@opennextjs/aws` peer range) |
-| Older than 15.5.29 | Not supported by `@opennextjs/aws` 4.1.15 |
+| 15.5.29 | Verified (Azure) and in CI |
+| 16.4.5 | Verified (local, and in CI); **Unverified on Azure** |
+| 15.5.30 and later 15.x | Expected to work (inside the supported range); only 15.5.29 was run |
+| 16.0.0 to 16.4.4 | Not supported (`package` refuses; `--allow-unsupported-next` overrides) |
+| Older than 15.5.29 | Not supported |
+
+The range is the `next` peer range of the package; it is kept from the OpenNext-based design and has not been re-derived for this one.
 
 ## Features
 
 | Feature | Status |
 | --- | --- |
-| App Router, dynamic rendering (SSR) | Verified (local, Functions host); **Verified (Azure)** |
-| Static pages and ISR (`revalidate`) | Verified (local, Functions host), including queue-triggered regeneration (the consumer ran and succeeded, page timestamp advanced). **Verified (Azure)**: cached page `HIT`, a stale page was regenerated through the queue consumer. 30 simultaneous requests for a stale page cause **one** regeneration (message deduplication, [ADR-0010](./plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group)). The wait for the consumer is 44 s on average with the default polling and 2 s with `revalidationPollingSeconds=5` (3 trials each). Not proven on either: that regeneration is done by the queue consumer and not in-process (needs the consumer execution in the logs) |
-| Response streaming | Verified (local, Functions host): first bytes at 0.15 s, slow Suspense part at 3.0 s, separate chunks. **Verified (Azure)**, directly on the Function app: headers and early content at 37 ms, late content at 3032 ms, 4 chunks. Through Front Door Unverified |
-| `revalidateTag` | Verified (local, Functions host): cached value stable, new value after `revalidateTag` (Blob + Table). **Verified (Azure)** |
-| `revalidatePath` | Verified (local): called from a Server Action, a prerendered page renders anew once. Azure: Verified (Azure): E2E run on commit 6720a19, 2026-11-07, 35 passed and 2 skipped (log-based tests) |
-| Image optimization (`next/image`) | Verified (local, Functions host, sharp for the host OS): resize, WebP negotiation, 400 for disallowed width and for a remote URL that is not in `images.remotePatterns`. On Next.js 16 a remote image whose host resolves to a private address is refused (`images.dangerouslyAllowLocalIP`, an SSRF guard; Next.js 15 does not have it and OpenNext's adapter fetches without such a check). Remote images from a listed origin: Verified (local) (the fetch is done by OpenNext's image adapter over `https`; not tested on Azure, with `http:` origins or with redirects). **Verified (Azure)** with the Linux x64 `sharp` binaries: 64 px WebP (250 bytes), resized PNG, 400 for a disallowed width and a remote URL. Missing source image returns 404 (Verified (local); Azure: Verified (Azure): E2E run on commit 6720a19, 2026-11-07, 35 passed and 2 skipped (log-based tests)) |
-| Static files (`/_next/static`, `public/`) | Verified (local, Functions host): served from Blob through the asset resolver with correct types and cache headers; `HEAD`, `If-None-Match` (304), byte ranges (206, 416) and unlisted paths (404) behave as designed. **Verified (Azure)**: same results, including exact bytes for ranges. Cost of serving them through the function is unmeasured |
-| Middleware | **Verified (local)**: redirect, rewrite and response header, with a matcher, in the single Function app (internal middleware, not `external`). Azure: Verified (Azure): E2E run on commit 6720a19, 2026-11-07, 35 passed and 2 skipped (log-based tests). Not verified: external (edge) middleware, `matcher` with i18n and `NextResponse.next({ request })` header forwarding are not tested |
-| Pages Router | `getServerSideProps`, `getStaticProps` and an API route: **Verified (Azure)** (35 E2E tests passed on 2026-11-07). `getStaticProps` with `revalidate` (regenerated through the queue), `fallback: "blocking"`, `notFound` and `res.revalidate` from an API route: **Verified (Azure)** (41 E2E tests passed on 2026-11-07, commit a03cfb0). `fallback: true` (loading shell, page built when its `/_next/data` JSON is requested, `notFound` gives 404): Verified (local, Functions host); **Verified (Azure)**: remote E2E on 2026-11-08, 47 passed and 5 skipped. An App Router and a Pages Router in one app (the example has both): Verified (local, Functions host). `app-pages-router` is a term whose meaning was not checked against an official source, so it is not claimed |
-| Server Actions | Verified (local): form post without JavaScript. Azure: Verified (Azure): E2E run on commit 6720a19, 2026-11-07, 35 passed and 2 skipped (log-based tests). A call made like client JavaScript (`Next-Action` header, Flight response): Verified (Azure, 2026-11-07). `package` warns about a missing or different `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` (Verified (local), real builds). Not verified: a real browser, a deployment over an older build with and without the key |
-| Composable Caching (`'use cache'`, `cacheTag`, `cacheLife`) | **Verified (local)** on Next.js 15.5.29 and 16.4.5 with `experimental.useCache` (deprecated in 16 in favor of `cacheComponents`, which changes how dynamic data is handled and was not tried): a cached function keeps its value until `revalidateTag`. Not on Azure; `cacheLife` expiry and the `remote` and `private` variants are not tested |
-| Next.js 16 `proxy` file (the new name of `middleware`) | **Verified (local, Functions host)** on 16.4.5 (2026-11-08, experiment, not in CI): the example's `middleware.js` renamed to `proxy.js` with `export function proxy`; `open-next build` bundles it and all 52 + 10 + 1 E2E cases pass, including redirect, rewrite and header. The repository keeps `middleware.js` (it works on 15 and 16, with a deprecation warning on 16) |
-| `cacheComponents` and Partial Prerendering (Next.js 16) | **Verified (local, Functions host)** on 16.4.5 (2026-11-08, a small separate app, not in CI): the route is built as a partial prerender; a `'use cache'` part keeps its value across requests, a part behind `connection()` inside Suspense is rendered per request, and `revalidateTag` renews the cached part. Not measured: chunk timing of the dynamic part, ISR-style `cacheLife` expiry, `remote` and `private` caches, Azure. The existing example cannot enable it: `cacheComponents` rejects route segment config such as `dynamic = "force-static"` (build error) |
+| App Router: dynamic rendering (SSR), route handlers, dynamic routes | Verified (Azure) |
+| Pages Router: `getServerSideProps`, `getStaticProps`, API routes, `fallback: "blocking"` and `true`, `notFound`, `res.revalidate` | Verified (Azure) |
+| Static pages and time-based ISR (`revalidate`) | Verified (Azure): stale page served at once, the next request gets the new one. Regeneration runs in the same process as the stale request (no queue). |
+| `revalidateTag`, `revalidatePath` | Verified (Azure) |
+| `'use cache'` with `cacheTag` and `revalidateTag` | Verified (Azure) on Next.js 15 with `experimental.useCache`. `cacheComponents` (16) with Partial Prerendering: **Unverified** with this design (it worked in a small test with the OpenNext-based package). `cacheLife` expiry and the `remote` and `private` variants: untested. |
+| Response streaming (Suspense) | Verified (Azure) |
+| Middleware (redirect, rewrite, headers), including the Next.js 16 `proxy` convention | Verified (Azure) for `middleware`; `proxy`: Verified (local) with the OpenNext-based package, **Unverified** with this design. Edge-runtime middleware: not supported. |
+| Server Actions | Verified (Azure): form post and the `Next-Action` call. `package` warns when no stable `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` is set. A deployment over an older build: **Unverified**. |
+| `after()` | Verified (Azure): the response is held open until the work is done (`--wait-until hold`, the default). `detach`: **Unverified** with this design. |
+| Image optimization (`next/image`) | Verified (Azure): resize, WebP, rejection of bad sizes and remote URLs not allowed, with the Linux `sharp`. A missing source image answers **400** (Next.js's own answer on 15). Next.js's disk cache for optimized images is off (the app directory is read-only), so an optimized image is made again after an instance restarts. |
+| Cookies (several `Set-Cookie`) | Verified (Azure) |
+| Static files (`/_next/static`, `public/`) | Verified (Azure): served by the Next.js server from the package, with its `ETag` and `Cache-Control`. They are **not** in Blob or a CDN, so every request is a function execution. |
+| Pages prerendered by `next build` | They are not read from the build output: with a custom cache handler Next.js renders each on its first request. `deploy` primes them. Verified (Azure). |
 | Edge runtime | Not supported |
-
-## Known gaps
-
-Cases verified by hand on Azure (2026-11-06) in addition: B1 (the queue consumer runs and is followed by a `HEAD` request to the page; 34 invocations, none failed), B6 (chunks arrive separately; `Content-Length` handling still open), B7 (`after()` work completes after the response, see ADR-0006), B10 (asset resolver), B11 (resize and rejections). Cases verified by hand locally so far: B2 (partly), B14 (HTTPS stack), image resize. Behavioral cases B1 to B14 in [testing](./contribute/testing.md#required-behavioral-test-cases) are not covered yet. Known gaps in the current code: `waitUntil` delays the client (see above), a missing source image returns 500, `Content-Length` is not removed from streamed responses, error details are not hidden outside development, bodyless status codes are not handled explicitly, there is no optimized-image cache.
+| Front Door | Template compiles; **never deployed**. The `X-Azure-FDID` check of the entry: Verified (local) by unit test only. |
 
 ## Platform
 
 | Item | Status |
 | --- | --- |
-| Azure Functions Flex Consumption, Node 22 | **Verified (Azure)**: the template deploys (after two fixes), the app starts, serves HTTP and runs the queue trigger. Node 24 Unverified |
-| Storage Queue message deduplication | Not available; duplicates are possible but harmless |
-| `waitUntil` / `after()` | Default (`hold`): deferred work completes, but the client waits for it, +2 s for 2 s of work, **on Azure too** (2039 ms measured). Optional `WAIT_UNTIL_MODE=detach` answers at once; what the platform does with the work afterwards: see [ADR-0006](./plan/decisions.md#adr-0006-waituntil-via-response-stream) |
-| Custom domains | Not yet in the Bicep template |
-| Deployment layout | One Function app, Front Door optional ([ADR-0009](./plan/decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default)). **Verified (Azure)** without Front Door; the Front Door variant has never been deployed |
-| pnpm `node_modules` | Azure drops symbolic links in the package; `package` flattens the pnpm layout into a plain tree and refuses to produce a package that still contains links. Verified (Azure) for the example (pnpm, 17 packages). npm and Yarn layouts: Unverified |
-| Front Door id check (`X-Azure-FDID` vs `FRONT_DOOR_ID`) | Verified (local, Functions host): 403 without or with a wrong id on server, static and image routes; case-insensitive match. The `AzureFrontDoor.Backend` access restriction on Flex Consumption is Unverified |
+| Azure Functions Flex Consumption, Node 22 | Verified (Azure). Node 24: Unverified. |
+| Run from package: the app directory is read-only | Verified (Azure): the image optimizer's disk cache failed with `EACCES` until it was turned off. |
+| Package without symbolic links | Verified (Azure): `package` flattens the pnpm layout into a plain tree and refuses to produce a package that still has links. npm and Yarn layouts: Unverified. |
+| Cold start | One sample, client in Japan: **2.4 s** for the first request after about 11 minutes idle (2.5 s in the earlier spike), 0.1 to 0.2 s warm. Always-ready: **not measured** with this package. |
+| Load | 300 requests at 30 parallel: all 200; dynamic page p95 0.29 s, ISR page p95 0.86 s (one sample). |
+| Scale-out | Cache and tags are shared through Storage. After `revalidateTag`, parallel requests can each regenerate (ten different values within 70 ms in one test); the cache converges on the last write. |
+
+## Known gaps
+
+- Concurrent regeneration after a revalidation is not coalesced.
+- `after()` work cannot be tied to one request: a response may also wait for work that other requests started earlier (at most 220 s).
+- Absolute URLs that application code builds from `request.url` in middleware and writes into a response body show the loopback origin (`http://localhost:3000`); a redirect's `Location` header is corrected.
+- Next.js 16 on Azure, Front Door, always-ready and the `proxy` convention with this design are untested.
+- The behavior differences against OpenNext that come from Next.js's own server are listed in [Comparison](./comparison.md).

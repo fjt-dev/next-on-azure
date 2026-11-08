@@ -28,4 +28,4 @@ OpenNext uses `waitUntil` for deferred work such as `after()` and the queue send
 | `hold` (default) | The response stays open until the deferred work has settled, so the client waits for it (measured +2 s for 2 s of work, on Azure too) |
 | `detach` | The response ends at once and the work runs on; safe for short work only, because an idle instance is removed after about 1.5 to 3.5 minutes |
 
-See [ADR-0006](../../plan/decisions.md#adr-0006-waituntil-via-response-stream) for the measurements.
+See [ADR-0006](../../../plan/decisions.md#adr-0006-waituntil-via-response-stream) for the measurements.

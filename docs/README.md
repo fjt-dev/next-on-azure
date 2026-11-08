@@ -1,43 +1,27 @@
-# Azure
+# Documentation
 
-> **Experimental, pre-release, not yet published to npm.** This documentation covers a community adapter and **not an official OpenNext package**. It is not affiliated with the OpenNext organization or SST. The pages follow the structure of the [OpenNext for AWS docs](https://opennext.js.org/aws) so readers of one can find their way around the other.
+> **Experimental, pre-release, not published.** `next-on-azure` is a provisional name (ADR-0017). It is a community project, not affiliated with Vercel or the Next.js team; Next.js is a trademark of Vercel, Inc.
 
-OpenNext takes the Next.js build output and converts it into packages that can be deployed across a variety of environments. This adapter deploys that output to **one Azure Functions app (Flex Consumption)**, with Blob, Table and Queue Storage for the cache, the tag cache and ISR revalidation. Azure Front Door is optional.
+`next-on-azure` runs a Next.js app on **one Azure Function (Flex Consumption)**: the Next.js server runs inside the Functions worker, and its caches are kept in Blob and Table Storage. It uses the options Next.js documents for this (`output: "standalone"`, `cacheHandler`, `cacheHandlers`) and does not depend on `@opennextjs/aws`.
 
-OpenNext aims to support all Next.js 15 features, and this adapter follows what `@opennextjs/aws` supports. Some features are work in progress. If you run into a problem, check [Troubleshooting](./troubleshooting.md) first, then open a new issue.
+Every statement about behavior on Azure is marked **Verified (Azure)**, **Verified (local)** or **Unverified** in [Compatibility](./compatibility.md). Nothing is described as working unless it was run.
 
-Every statement about behavior on Azure is marked **Verified (local)**, **Verified (Azure)** or **Unverified** in [Compatibility](./compatibility.md). Nothing is described as working unless it was run.
-
-- App & Pages Router, API routes, dynamic routes
-- Static site generation, server-side rendering with streaming
-- Incremental static regeneration, regenerated through a Storage Queue
-- On-demand revalidation (`revalidateTag`, `revalidatePath`)
-- Middleware, Server Actions
-- Image optimization
-- Composable Caching (`'use cache'`, checked locally only)
-
-Not supported: the Edge runtime, function splitting and external middleware (see [Comparison](./comparison.md)).
-
-Ready? Start with [Getting started](./get_started.md).
-
-## Pages
-
-| Section | What is in it |
+| Page | What is in it |
 | --- | --- |
-| [Getting started](./get_started.md) | Install, configure, build and deploy a Next.js app to Azure |
-| [Compatibility](./compatibility.md) | Supported Next.js versions and features, with verification status |
-| [Configuration](./config/README.md) | [Simple example](./config/simple_example.md), [Reference](./config/reference.md) and one page per override: [Wrapper](./config/overrides/wrapper.md), [Converter](./config/overrides/converter.md), [Incremental cache](./config/overrides/incremental_cache.md), [Tag cache](./config/overrides/tag_cache.md), [Revalidation queue](./config/overrides/queue.md), [Image loader](./config/overrides/image_loader.md), [Asset resolver](./config/overrides/asset_resolver.md), [Revalidation](./config/overrides/revalidate.md) |
-| [Comparison](./comparison.md) | How this adapter differs from the official AWS and Cloudflare adapters |
-| [How does it work?](./inner_workings/architecture.md) | [Default architecture](./inner_workings/architecture.md), [Caching and revalidation](./inner_workings/caching.md), [Azure notes](./inner_workings/azure_notes.md) |
-| [FAQ](./faq.md) | Short answers |
-| [Troubleshooting](./troubleshooting.md) | Known problems and fixes |
-| [Contributing](./contribute/README.md) | [Run locally](./contribute/local_run.md), [testing](./contribute/testing.md), [CI](./contribute/ci.md), [real Azure runs](./contribute/azure_runs.md) |
-| [Plan](./plan/roadmap.md) | Roadmap, release plan, architecture decision records and the work log |
+| [Get started](./get_started.md) | Install, configure, build, package and deploy |
+| [Compatibility](./compatibility.md) | Next.js versions and features, with verification status and known gaps |
+| [Configuration](./configuration.md) | `withAzure()`, environment variables, the CLI |
+| [How it works](./how_it_works.md) | The request path, the caches, `after()`, priming, packaging |
+| [Azure notes](./inner_workings/azure_notes.md) | Platform facts that shaped the design, with their source |
+| [Comparison](./comparison.md) | OpenNext (AWS, Cloudflare) and the Next.js Adapter API |
+| [FAQ](./faq.md), [Troubleshooting](./troubleshooting.md) | Short answers; known problems and fixes |
+| [Contributing](./contribute/README.md) | Run locally, tests, CI, real Azure runs |
+| [Plan](./plan/roadmap.md) | Roadmap, release plan, decision records (ADRs) and the work log |
+| [Legacy](./legacy-opennext/README.md) | Documentation of the first, OpenNext-based package, until it is removed |
 
 ## Documentation conventions
 
 - Documentation is written in **English**.
-- Every claim about behavior on Azure must be marked **Verified** or **Unverified**. Never describe a behavior as working unless it was actually run.
-- Update the [work log](./plan/worklog.md) at the end of every working session, and the [roadmap](./plan/roadmap.md) whenever a task changes state.
-- Record every non-obvious design choice as an [ADR](./plan/decisions.md) with its reasoning and the alternatives considered.
-- Pages are plain Markdown so they render on GitHub. They can be fed to a docs site generator later without changes.
+- Every claim about behavior on Azure must be marked **Verified** or **Unverified**.
+- Update the [work log](./plan/worklog.md) at the end of every working session and the [roadmap](./plan/roadmap.md) when a task changes state.
+- Record every non-obvious design choice as an [ADR](./plan/decisions.md).

@@ -957,3 +957,11 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - **Results:** see "Azure run of the package build" in ADR-0016 (suite 47 passed and 5 skipped; cold start after idle 2.4 s; load test; the first deployment of the new Bicep and `deploy` worked).
 - **Deleted (15:35 JST), one by one by name:** the five resources and `Application Insights Smart Detection`. The resource group was kept. Read-only inventory right after: empty (the action group was deleted after the first listing showed it), no role assignment. The inventory of 2026-11-09 and the Cost Management figure are still to do.
 - CI of 04fcd42 was green in all 8 jobs, including both `standalone-e2e` legs.
+
+## Session 46 (2026-11-08): migration, stage 4 (documentation and name)
+
+- Name: the maintainer chose `next-on-azure` "for now"; it stays provisional (ADR-0017). The trademark question ("Next" in a package name, Vercel) is not checked and is listed in the docs.
+- The OpenNext-specific pages moved to `docs/legacy-opennext/` (get started, configuration and overrides, comparison, compatibility record, architecture, caching, FAQ, troubleshooting) with relative links repaired; the old package README says it is legacy.
+- New pages written for the new design: docs index, get started, compatibility (with the verification status of each row from the Azure suite run), configuration, how it works, comparison, FAQ, troubleshooting; the root README; the contributing pages got short sections for the new scripts. Link check over all Markdown: 0 broken.
+- Wording choices that stay honest: rows without a run are **Unverified** (Next.js 16 on Azure, Front Door, always-ready, `proxy` and `cacheComponents` with this design, `detach`); the supported Next.js range is inherited from the OpenNext-based design and said so.
+- Not done: stage 5 (removal of the old package, `examples/app-router`, the `azure-e2e` workflow and the legacy CI job). The Azure E2E workflow still targets the old package.

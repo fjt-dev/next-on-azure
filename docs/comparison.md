@@ -1,40 +1,27 @@
 # Comparison
 
-How this adapter relates to the official OpenNext adapters. Compared with `@opennextjs/aws` 4.1.15 (types and docs) and `@opennextjs/cloudflare` (docs), on 2026-11-07. Not every official feature is a goal; each difference is a decision, recorded in the [ADRs](./plan/decisions.md).
+## OpenNext (AWS, Cloudflare)
 
-## What is the same
+This project started as an OpenNext adapter (its first design is in [Legacy](./legacy-opennext/README.md)) and moved to a design without `@opennextjs/aws` ([ADR-0016](./plan/decisions.md)). The reason is the maintainer's decision; the technical difference is below.
 
-- The override model: wrapper, converter, incremental cache, tag cache (`nextMode`), queue, image loader, asset resolver, revalidation wrapper and converter.
-- The Blob layout of the incremental cache is the layout of the S3 override.
-- Tag cache semantics (`hasBeenRevalidated`, `isStale`, `writeTags` with `stale` and `expire`) equal the official `nextMode` implementation.
-- Queue messages carry the whole `{ host, url, lastModified, eTag }` body, and the revalidation consumer is OpenNext's own adapter (a `HEAD` with `x-prerender-revalidate` and `x-isr: 1`).
-- Next.js support follows `@opennextjs/aws` ([ADR-0011](./plan/decisions.md)).
-
-## What is different
-
-| Topic | OpenNext AWS | This adapter |
+| | OpenNext (`@opennextjs/aws`) | next-on-azure |
 | --- | --- | --- |
-| Compute | Lambda functions, optionally split per route | One Azure Functions app (Flex Consumption); no function splitting, no external middleware, no origin resolver ([ADR-0009](./plan/decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default)) |
-| Cache storage | S3 + DynamoDB + SQS | Blob + Table + Storage Queue |
-| Edge runtime | Supported | Not available on Azure Functions |
-| Revalidation de-duplication | FIFO queue message groups | A claim row in the tag table, load tested ([ADR-0010](./plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group)) |
-| Warmer | `warmer` function | No warmer override; `deploy --always-ready <n>` and a warm-up request after each deployment ([ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet)) |
-| CDN invalidation | `cdnInvalidation` override | Not needed: Front Door caches only `/_next/static/*` (content-hashed) |
-| Initialization function | Needed by the original tag cache mode | Not needed: this tag cache is `nextMode` |
-| Development implementations | `fs-dev`, `dummy` | The local stack uses Azurite and the Functions host (`pnpm local:stack`) |
-| Credentials | IAM roles | Managed identity; shared-key access is disabled on the storage account |
-| Cache interception | Optional (`enableCacheInterception`) | Works locally with these overrides; off by default, as upstream; not tried on Azure |
+| How Next.js runs | The build output is re-bundled; OpenNext's own server code does routing, middleware, caching and image optimization, and the platform is reached through *overrides* | Next.js's own standalone server runs as it is, inside the Function; only storage and the entry are Azure-specific |
+| Supported Next.js versions | what OpenNext declares | the `next` peer range of this package (inherited, not re-derived) |
+| Storage interfaces | OpenNext's overrides (incremental cache, tag cache, queue, ...) | Next.js's `cacheHandler` and `cacheHandlers` |
+| ISR | regenerated through a queue consumer | regenerated in the same process; no queue |
+| Static files | an asset resolver serving from Blob with a manifest | served by the Next.js server from the package |
+| Images | OpenNext's image adapter (missing source image: 500, mapped to 404) | Next.js's optimizer (missing source image: 400 on Next.js 15) |
+| Function splitting, external middleware, edge runtime | supported on AWS and Cloudflare | not supported |
+| Package size (same example app) | 31.2 MB zip, three bundles | 17.7 MB zip, one |
+| First request after about 11 minutes idle | 4.1 to 4.5 s (earlier measurement, other package) | 2.4 s (one sample) |
 
-## Compared with the Cloudflare adapter
+Differences that come from Next.js's own server: the `Cache-Control` of `public/` files, `application/javascript` as the JS content type, weak `ETag`s on static files, and 400 for a missing source image. The shared HTTP test suite accepts these when `E2E_TARGET=standalone`.
 
-Cloudflare has a larger CLI (`preview`, `populateCache`, `upload`, `migrate`), skew protection (experimental) and documented support for Partial Prerendering and Turbopack. Here the CLI is `package` and `deploy`; a local `preview` command is on the roadmap, and PPR and Turbopack are not verified.
+## The Next.js Adapter API
 
-## Not planned
+The Adapter API (`adapterPath`, `onBuildComplete`) is a build-time interface, stable since Next.js 16.2 (read through a research agent in [ADR-0012](./plan/decisions.md), not by the maintainer). This package does not use it: `standalone` and the cache handler options exist on Next.js 15 and 16, and they were enough. Using it on 16.2 and later for the packaging step is an open option.
 
-Function splitting, external middleware and `originResolver` (single app); the Edge runtime (not available on Azure Functions).
+## What this project does that is Azure-specific
 
-## Where this adapter is ahead
-
-ISR revalidation de-duplication with a load test, measured `waitUntil` behavior, identity-based access without shared keys, and an Azure E2E run from CI with automatic teardown.
-
-The working list of open items is in the [roadmap](./plan/roadmap.md#comparison-with-the-official-adapters-2026-11-07).
+Identity-based access without shared keys, a Bicep template for one Flex Consumption app, the `after()` hold with its measured background ([Azure notes](./inner_workings/azure_notes.md), item 18), priming after a deployment, flattening of the pnpm layout, and an Azure E2E run from CI with automatic teardown (`.github/workflows/azure-e2e.yml`, still written for the OpenNext-based package).

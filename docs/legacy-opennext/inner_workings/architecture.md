@@ -41,7 +41,7 @@ This page describes how a Next.js app runs on Azure with this package. It assume
 
 ## One app, three bundles
 
-The three OpenNext bundles are loaded into one Node process by a generated `main.mjs`. Each bundle expects its own directory as the working directory (the revalidation adapter reads `./prerender-manifest.json` while it is imported), so the entry changes directory before importing each bundle and loads `server` last. The shared `globalThis` state turned out to be compatible (same configuration object in every bundle). See [ADR-0009](../plan/decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default).
+The three OpenNext bundles are loaded into one Node process by a generated `main.mjs`. Each bundle expects its own directory as the working directory (the revalidation adapter reads `./prerender-manifest.json` while it is imported), so the entry changes directory before importing each bundle and loads `server` last. The shared `globalThis` state turned out to be compatible (same configuration object in every bundle). See [ADR-0009](../../plan/decisions.md#adr-0009-single-function-app-and-optional-front-door-by-default).
 
 Trade-off: SSR and image processing share an instance, so memory must be sized for `sharp` (`instanceMemoryMB`), and they scale together.
 
@@ -60,7 +60,7 @@ Trade-off: SSR and image processing share an instance, so memory must be sized f
 next build ─▶ open-next build ─▶ .open-next/ ─▶ opennext-azure package ─▶ .open-next-azure/app.zip
 ```
 
-`package` copies the three OpenNext bundles into `app/server`, `app/image` and `app/revalidation`, writes `assets-manifest.json`, `host.json`, `package.json` and `main.mjs`, installs the Azure SDKs once at the app root (every bundle resolves them from there; [ADR-0008](../plan/decisions.md#adr-0008-packaging-never-runs-npm-install-inside-an-opennext-bundle)), refuses to continue if `sharp` lacks its Linux x64 binaries, and zips the app. `deploy` uses `az functionapp deployment source config-zip`.
+`package` copies the three OpenNext bundles into `app/server`, `app/image` and `app/revalidation`, writes `assets-manifest.json`, `host.json`, `package.json` and `main.mjs`, installs the Azure SDKs once at the app root (every bundle resolves them from there; [ADR-0008](../../plan/decisions.md#adr-0008-packaging-never-runs-npm-install-inside-an-opennext-bundle)), refuses to continue if `sharp` lacks its Linux x64 binaries, and zips the app. `deploy` uses `az functionapp deployment source config-zip`.
 
 ## Security model
 

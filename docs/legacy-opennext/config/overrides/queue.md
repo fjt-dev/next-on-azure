@@ -4,7 +4,7 @@ The queue `azure-queue` sends ISR revalidation requests to the Storage Queue `re
 
 ## Deduplication
 
-Storage Queues have no deduplication or message groups, so `MessageDeduplicationId` and `MessageGroupId` are ignored. Instead, before enqueueing, a request must win a claim on the page: a row in the tag table (partition `dedupe-<build id>`) created or replaced with optimistic concurrency. That gives one message per page and window, however many requests find the page stale ([ADR-0010](../../plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group)).
+Storage Queues have no deduplication or message groups, so `MessageDeduplicationId` and `MessageGroupId` are ignored. Instead, before enqueueing, a request must win a claim on the page: a row in the tag table (partition `dedupe-<build id>`) created or replaced with optimistic concurrency. That gives one message per page and window, however many requests find the page stale ([ADR-0010](../../../plan/decisions.md#adr-0010-isr-revalidation-depends-on-the-queue-trigger-scale-group)).
 
 - The page version is the ETag of the cached content. A regeneration with new content allows the next claim at once.
 - Without a known version only `REVALIDATION_DEDUPE_SECONDS` (default `60`, `0` = off) decides.

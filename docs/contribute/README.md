@@ -12,6 +12,5 @@ Pull requests are welcome once the repository is public. Until then the maintain
 
 - A behavior change needs a test in `packages/tests-unit`, and an E2E case if it is visible over HTTP.
 - Do not create Azure resources without agreeing on a resource group, a time window and a cost ceiling ([real Azure runs](./azure_runs.md)).
-- Override modules must not import `@azure/*` statically ([ADR-0007](../plan/decisions.md#adr-0007-azure-sdks-are-imported-at-runtime-only)).
-- Never run `npm install` inside an OpenNext bundle ([ADR-0008](../plan/decisions.md#adr-0008-packaging-never-runs-npm-install-inside-an-opennext-bundle)).
+- The runtime `.cjs` files of next-on-azure must not `require("node:...")` (Turbopack; see [Troubleshooting](../troubleshooting.md)). ADR-0007 and ADR-0008 apply to the legacy package only.
 - Documentation is English.

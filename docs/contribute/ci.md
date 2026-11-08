@@ -4,6 +4,8 @@
 
 ## Workflow `check`
 
+Jobs: `check` (lint, build, type check, unit and integration tests, Node 22 and 24, and the Bicep templates of both packages), `supply-chain`, `e2e` (legacy package, local stack, Next.js 15 and 16) and `standalone-e2e` (next-on-azure, `pnpm e2e:standalone`, Next.js 15 and 16.4.5). All eight jobs passed on GitHub for commit 04fcd42. The description below dates from before `standalone-e2e`.
+
 Triggers: every pull request and every push to `main`. Cancels superseded runs of the same ref.
 
 | Job | Runs on | What it does |

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import http from "node:http";
 import https from "node:https";
 import path from "node:path";
 import { inject } from "vitest";
@@ -26,18 +27,26 @@ export function request(
 ): Promise<Response> {
   const base = new URL(inject("baseUrl"));
   // A remote deployment has a certificate from a public CA; only the local stack needs its own.
-  const ca = inject("remote")
-    ? undefined
-    : fs.readFileSync(path.join(inject("runDir"), "cert.pem"));
+  const plain = base.protocol === "http:"; // a deployment under test on loopback (the standalone spike)
+  const ca =
+    plain || inject("remote")
+      ? undefined
+      : fs.readFileSync(path.join(inject("runDir"), "cert.pem"));
   const started = performance.now();
   return new Promise((resolve, reject) => {
-    const req = https.request(
+    const req = (plain ? http : https).request(
       {
         host: base.hostname,
-        port: base.port || 443,
+        port: base.port || (plain ? 80 : 443),
         path: pathAndQuery,
         method: options.method ?? "GET",
-        headers: options.headers,
+        // A known length avoids chunked uploads, which the Functions Core Tools host over plain http never answers.
+        headers: {
+          ...(options.body !== undefined
+            ? { "content-length": String(Buffer.byteLength(options.body)) }
+            : {}),
+          ...options.headers,
+        },
         ca,
       },
       (res) => {

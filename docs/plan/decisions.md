@@ -322,3 +322,33 @@ The default for `revalidationAlwaysReady` stays 0. `revalidationPollingSeconds` 
 
 The code of other Azure adapters is not read while developing this project (rule in `AGENTS.md`). Contributing to or merging with the existing package, which would need a closer look, is not pursued for now.
 
+
+---
+
+## ADR-0016: Run Next.js on Azure without `@opennextjs/aws`; start with a spike (accepted for the spike)
+
+**Date:** 2026-11-08. **Status:** the maintainer decided the direction; the design is validated by a spike before the existing package is changed. A first proposal of the same day was withdrawn when the goal was stated as "the Azure version of opennextjs-aws"; the maintainer then restated, as an instruction, that the implementation must not use `@opennextjs/aws`. The latest instruction is followed. It supersedes [ADR-0011](#adr-0011-nextjs-support-follows-opennextjsaws) and [ADR-0012](#adr-0012-the-nextjs-adapter-api-is-not-adopted-yet-nextjs-15-stays-supported) once the spike is accepted.
+
+**Direction.** Keep the Next.js server (it does routing, rendering, middleware, streaming and image optimization) and provide only the Azure parts, through interfaces Next.js documents: `output: "standalone"`, `cacheHandler` (incremental and `fetch` cache, `revalidateTag`) and, for `'use cache'`, `cacheHandlers`. The goal of the user-visible behavior stays that of `opennextjs-aws` on Azure: one Function app, Blob, Table and Queue Storage, streaming, ISR, tags, images.
+
+**Spike (this ADR's first step).** In a new example (`examples/standalone`): the app built with `output: "standalone"`; a Functions v4 HTTP function that starts the Next.js server inside the worker and forwards each request to it with streaming; a `cacheHandler` on Blob (entries) and Table (tags) against Azurite; run the existing HTTP E2E cases against it. Questions: streaming through the forward, cookies, ISR and `revalidateTag`/`revalidatePath`, `'use cache'`, image optimization, middleware, Server Actions; cold start and package size compared with the OpenNext bundle.
+
+**Next.js 15.** The spike uses 15.5.29 (the catalog version), which has no Adapter API; `standalone` and `cacheHandler` exist in 15 and 16. Whether to also use the Adapter API on 16.2+ is decided after the spike.
+
+**Name and docs.** The package is then not an OpenNext adapter; the name `opennext-adapter-azure` (ADR-0015) and the OpenNext-shaped docs are revisited after the spike, not before.
+
+**Not done by this ADR.** The current package keeps working and is not changed until the spike is accepted. Nothing is removed.
+
+### Spike results (2026-11-08, local only)
+
+Setup: `examples/standalone` on Next.js 15.5.29, `output: "standalone"`, `outputFileTracingRoot` set to the workspace root, `cacheHandler` (`cache-handler.cjs`) and `experimental.cacheHandlers.default` (`cache-handlers.cjs`) on Azurite, `main.mjs` forwarding with `node:http` to the Next.js server started inside the worker, pnpm layout flattened with the existing helper. The existing E2E suite (`e2e:remote`, plain http on loopback) against it, from empty storage: **43 passed, 4 failed, 5 skipped** (52). Azure was not used.
+
+Works: pages and route handlers, Pages Router (ISR, `fallback: "blocking"` and `true`, `notFound`, `res.revalidate`), time-based ISR with stale-while-revalidate **in the same process** (no queue: STALE is served, the next request is a HIT with the new page), `revalidateTag` and `revalidatePath` through the cache handler, `'use cache'` with `revalidateTag` through `cacheHandlers`, Server Actions (form post, `Next-Action` call), middleware (redirect, rewrite, header), streaming (the slow Suspense page), image optimization with Next.js's own optimizer (resize, WebP, 400 for a bad size), all cookies (five distinct `Set-Cookie`), static files and conditional requests (304). Package: zip 17.4 MB for the spike against 31.2 MB for the OpenNext package of the same app (not comparable: the OpenNext package carries three bundles and `sharp` for Linux, the spike's `sharp` is the build machine's). First request after the host started, including starting the Next.js server in the worker: 0.24 s (local, warm disk, Node 26).
+
+The 4 failures are differences, not breakage: (1) `after()`: the response ends at once, the deferred work runs on in the process; the OpenNext wrapper held the response open for it (ADR-0006), and an idle instance can be removed while work is pending, so a hold is still to be designed; (2) a missing source image gives **400** (Next.js's own answer), the OpenNext adapter's mapping gave 404; (3) `/_next/static` JS is served as `application/javascript`, the test wanted `text/javascript`; (4) `public/` files get `public, max-age=0` without `must-revalidate`. 2 to 4 are expectations written for OpenNext's behavior.
+
+Found on the way: Next.js writes the cache handler path into `server.js` relative to the dist directory, so the working directory must be the app directory; `next build` calls the handlers while prerendering (there is no storage account then), so they do nothing in the build phase; page entries carry their tags in the `x-next-cache-tags` header, not in the context; pages prerendered at build are not in Blob (a first request renders them; whether and how to seed them is open); a chunked POST never got an answer from the Functions Core Tools host over plain http (the test client now sends a Content-Length); forwarding the host's request stream hung, so POST bodies are buffered; Node's `fetch` answered 200 to a conditional request where `http` gets 304, so the forward uses `node:http`.
+
+Not tested: Azure (Flex Consumption, run from package, symbolic links are gone), `sharp` for Linux x64 in the package, cold start and memory on Azure, Next.js 16, the Adapter API, concurrency (one worker serves many requests; HTTP concurrency setting), several instances sharing the cache and tags, deploying and the `deploy` CLI, a Front Door id check, `waitUntil`, error handling when the Next.js server dies or does not start, request body limits.
+
+**Verdict so far:** the approach holds for the behavior the E2E suite checks, with much less code than the OpenNext overrides (a 130-line entry and two cache handler files). It is not yet a replacement: nothing runs on Azure, and the points above are open.

@@ -68,6 +68,37 @@ describe("Pages Router static generation", () => {
     expect((await request("/pages-blog/missing")).status).toBe(404);
   });
 
+  it("serves a loading shell for an unknown path (fallback: true), builds it when its data is requested, then serves the page", async () => {
+    const slug = `fb-${Date.now()}`;
+    const shell = await request(`/pages-fallback/${slug}`);
+    expect(shell.status).toBe(200);
+    expect(shell.text).toContain('id="loading"');
+    expect(shell.text).not.toContain(`Fallback post ${slug}`);
+
+    // The client of the shell asks for the page data, which makes the server generate the page.
+    const buildId = /"buildId":"([^"]+)"/.exec(shell.text)?.[1];
+    expect(buildId).toBeDefined();
+    const data = await request(`/_next/data/${buildId}/pages-fallback/${slug}.json`);
+    expect(data.status).toBe(200);
+    expect(JSON.parse(data.text).pageProps.slug).toBe(slug);
+
+    const page = await eventually(
+      async () => {
+        const res = await request(`/pages-fallback/${slug}`);
+        return res.text.replaceAll("<!-- -->", "").includes(`Fallback post ${slug}`) ? res : false;
+      },
+      hasHostLog() ? 15_000 : 60_000,
+      500,
+    );
+    expect(page.status).toBe(200);
+  });
+
+  it("answers 404 for notFound under fallback: true", async () => {
+    const shell = await request("/pages-fallback/missing");
+    const buildId = /"buildId":"([^"]+)"/.exec(shell.text)?.[1];
+    expect((await request(`/_next/data/${buildId}/pages-fallback/missing.json`)).status).toBe(404);
+  });
+
   it("regenerates a page with revalidate after it went stale (queue)", async () => {
     const first = timestampIn((await request("/pages-isr")).text);
     expect(first).toBeDefined();

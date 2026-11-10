@@ -27,6 +27,8 @@ The documentation site was deployed twice on 2026-11-10 (Flex Consumption, japan
 | Application Insights data per request, `--request-telemetry errors` | about 0.63 KB (560 traces and 56 metrics, 0.79 MB, for 1,260 requests) |
 | Storage transactions | a few thousand in the whole window, including the deployment: negligible in cost |
 
+**Next.js 16.** The site was then moved to Next.js 16.4.5 (`proxy.ts` instead of `middleware.ts`) and deployed over the first app. The first run after that deployment: 0.203 GB-seconds per request (about 101 ms at 2048 MB) and 4.4 KB of telemetry per request. A second run a minute later: 0.052 GB-seconds per request (about 26 ms) and 3.8 KB. The first run on Next.js 15.5.29 had cost 0.106. The first requests after a deployment include the warm-up of a new instance, so the figures above are an upper bound for a site that stays up, and one sample of each does not show a difference between Next.js 15 and 16.
+
 The largest part of the telemetry is not the request record but the "Executing" and "Executed" messages of the function. `--request-telemetry errors` sets `Host.Results` to `Error` and `Function.server` to `Warning`; the app setting names contain a period, and that works on Flex Consumption.
 
 ## Estimate by traffic
@@ -40,7 +42,7 @@ For a documentation-like site: 4.2 requests and 186 KB per visit, measured at 20
 | 1,000,000 | 10.5 | 41 | 0 | 9.5 | about 62 | about 22 |
 | 10,000,000 | 130 | 558 | 70 | 194 | about 900 | about 410 |
 
-Storage adds about 1.5 USD at one million visits. One always-ready instance adds its baseline: about 21 USD a month at 2048 MB. A site with more requests or more data per visit costs more, and one with fewer costs less: scale the table by the requests and the kilobytes of your own pages.
+The function column uses the first-run figure; at steady state (0.052 GB-seconds per request) it is about half of that. Storage adds about 1.5 USD at one million visits. One always-ready instance adds its baseline: about 21 USD a month at 2048 MB. A site with more requests or more data per visit costs more, and one with fewer costs less: scale the table by the requests and the kilobytes of your own pages.
 
 Up to about 100,000 visits a month the bill is inside the free grants or a few dollars. Above that, Application Insights is the largest part of the bill unless it is reduced, then the function, then outbound data.
 

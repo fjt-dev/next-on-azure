@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   findSymlinks,
   flattenPnpmNodeModules,
+  removeShims,
 } from "../../../../next-on-azure/src/cli/flatten-node-modules.js";
 
 let bundle: string;
@@ -158,5 +159,20 @@ describe("flattenPnpmNodeModules", () => {
 
   it("works when the bundle has no node_modules at all", () => {
     expect(flattenPnpmNodeModules(bundle).flattened).toBe(false);
+  });
+});
+
+describe("removeShims", () => {
+  it("removes the .bin directories at every depth, also inside a package (the complete sharp with Yarn on Linux)", () => {
+    const nested = path.join(bundle, "node_modules/sharp/node_modules");
+    fs.mkdirSync(path.join(nested, "semver/bin"), { recursive: true });
+    fs.writeFileSync(path.join(nested, "semver/bin/semver.js"), "");
+    fs.mkdirSync(path.join(nested, ".bin"));
+    fs.symlinkSync("../semver/bin/semver.js", path.join(nested, ".bin/semver"));
+    fs.mkdirSync(path.join(bundle, "node_modules/.bin"));
+    expect(findSymlinks(bundle)).toHaveLength(1);
+    removeShims(bundle);
+    expect(findSymlinks(bundle)).toEqual([]);
+    expect(fs.existsSync(path.join(nested, "semver/bin/semver.js"))).toBe(true);
   });
 });

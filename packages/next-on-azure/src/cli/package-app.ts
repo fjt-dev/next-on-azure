@@ -228,6 +228,8 @@ export function packageApp(options: PackageOptions = {}): PackageResult {
   if (copyCompleteSharp(appRoot, nodeModules) && (options.target ?? "azure") === "azure") {
     installLinuxSharp(nodeModules);
   }
+  // The complete sharp comes with its own `node_modules/.bin` (links to command shims): again.
+  removeShims(nodeModules);
 
   fs.writeFileSync(path.join(appDir, "main.mjs"), entrypoint(appSub));
   fs.copyFileSync(path.join(runtimeDir(), "cookies.js"), path.join(appDir, "cookies.mjs"));

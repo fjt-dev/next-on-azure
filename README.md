@@ -11,6 +11,10 @@
 
 > **Experimental, pre-release, not published to npm.**
 
+<p align="center">
+  <img src="./docs/assets/banner.png" alt="Next.js + Azure" width="480">
+</p>
+
 ## Description
 
 `next-on-azure` runs a Next.js app on **one Azure Function (Flex Consumption)**. The Next.js standalone server runs inside the Functions worker; the package replaces only what has to be Azure-specific: the incremental cache and `'use cache'` (Blob Storage), the tag state (Table Storage), the Functions entry that forwards requests to the server, and the packaging and deployment. It uses the options Next.js documents for this (`output: "standalone"`, `cacheHandler`, `cacheHandlers`) and does not depend on `@opennextjs/aws`.

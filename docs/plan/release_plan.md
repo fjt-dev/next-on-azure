@@ -21,13 +21,29 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 | P3 | The promise of `0.1.0` | Suggested: "experimental, App Router and Pages Router, Next.js 15, pnpm, Linux or macOS build machine"; the README lists the **Unverified** rows |
 | P4 | npm account with two-factor authentication, package or scope, trusted publishing for the repository, a security contact address | Only the maintainer can do these |
 
-## 3. Stage 1: `0.1.0-alpha` (public, tagged `alpha` on npm)
+### Making the repository public (P2): audit of 2026-11-10
+
+Public does not need npm: the repository can be public while the package stays unpublished (the README says so).
+
+| Check | Result |
+| --- | --- |
+| Commit identities | All 94 commits use the GitHub no-reply address; no personal e-mail address is in the history |
+| Secrets | Both scans (tree and history) find nothing; the only GUIDs are built-in role ids |
+| Personal data in the files | The GitHub user and repository ids in the OIDC example (`azure_e2e.md`, public through the API anyway); "Azure for Students" in the work log and ADR-0013; 10 lines with the maintainer's Japanese words in the work log and the decisions; no home-directory path |
+| Workflows | `check` runs on `pull_request` without secrets, read-only, actions pinned; `azure-e2e` runs only on `workflow_dispatch` (needs write access) and is the only one with `id-token: write`; a unit test pins this |
+| License | MIT, "Copyright (c) 2026 fjtd" |
+| Community files | Drafted 2026-11-10: `SECURITY.md` (GitHub private vulnerability reporting, no e-mail needed), `CONTRIBUTING.md`, `CODEOWNERS`, pull request and issue templates. **Missing: a code of conduct** (it needs a contact for enforcement) |
+| Logos in the README | Microsoft's and Vercel's brand guidelines were **not read**; decide before the repository is public |
+| The documentation site | A separate private repository; its "request a translation" link points at that repository's issues, which would answer 404 for the public |
+| After the switch (R5) | Private vulnerability reporting, secret scanning and push protection, Dependabot alerts, branch protection with the required checks, approval for workflows from forks |
+
+ `0.1.0-alpha` (public, tagged `alpha` on npm)
 
 Gate: every item done, and one Azure run on the release commit with the whole suite green.
 
 | # | Task | Size |
 | --- | --- | --- |
-| R1 | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue and pull request templates, `CODEOWNERS` | S |
+| R1 | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue and pull request templates, `CODEOWNERS` | S; **drafted 2026-11-10** except the code of conduct (needs a contact for enforcement); the security contact is GitHub's private vulnerability reporting, so no e-mail address is needed |
 | R2 | Scrub before the repository becomes public: the sample client id in `secret-scan.test.ts`, the OIDC subject in `azure_e2e.md`, resource names in the work log; run the history scan again | S; **checked 2026-11-10**: working tree and history scans find nothing; the sample client id is gone; no e-mail address in tracked files; the only GUIDs are built-in role ids; left: the GitHub user and repository ids in the OIDC subject (`azure_e2e.md`, public through the GitHub API anyway), names of deleted resources and a home-directory path in the work log: the maintainer decides whether to scrub them |
 | R3 | Release pipeline: Changesets version pull request, a `release` workflow with npm provenance and trusted publishing (no long-lived token), SHA-pinned actions, a protected environment; dry run with `npm publish --dry-run` | M |
 | R4 | Install test of the packed tarball in a clean project (Node 22 and 24, Linux and macOS), running `package` on the example and on the documentation site (which already installs from a tarball) | M; **started 2026-11-10**: npm, macOS, Node 26 done (see R7); Linux, Node 22 and 24: CI job `install` passes (2026-11-10, commit a82be0d); macOS stays a local check |

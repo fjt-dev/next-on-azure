@@ -52,6 +52,7 @@ The range is the `next` peer range of the package, inherited from the first desi
 ## Known gaps
 
 - A response that fails after its first byte (the Next.js server closes the connection) ends at that point: the client sees a shortened body with a normal end, and the failure is logged. Erroring the stream left the client waiting until the platform's timeout (measured locally). The case passes against a deployment on Azure (2026-11-09).
+- App Router routes with `dynamicParams = false` answer 404 for every path, the built ones too: Next.js does not find the prerendered page through the cache handler and, with no fallback, does not render it (`NoFallbackError`). Seen on Azure and locally on 2026-11-10 (the documentation site); `it.fails` case `routes without a fallback` in the E2E suite. The Pages Router with `fallback: false` works. Leave `dynamicParams` at its default.
 - Concurrent regeneration after a revalidation is not coalesced.
 - `after()` work cannot be tied to one request: a response may also wait for work that other requests started earlier (at most 220 s).
 - Absolute URLs that application code builds from `request.url` in middleware and writes into a response body show the loopback origin (`http://localhost:3000`); a redirect's `Location` header is corrected.

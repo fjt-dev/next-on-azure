@@ -20,16 +20,18 @@ Yes: [Local development](./contribute/local_run.md).
 
 Flex Consumption bills executions and memory times active time, Storage per transaction and capacity, Application Insights and Log Analytics per ingested GB, and Front Door Standard has a base fee per profile. Always-ready instances (`--always-ready`) are billed continuously ([ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet)).
 
-**An estimate by traffic. Not measured: every quantity is an assumption** (see [ADR-0020](./plan/decisions.md#adr-0020-static-files-stay-with-the-function-cost-options-first-measure-later)). Unit prices are the Azure retail prices for Japan East of 2026-11-10 (USD): 0.40 per million executions, 0.000026 per GB-second, Blob 0.004 per 10,000 reads, Log Analytics 3.34 per GB. The free grants (250,000 executions and 100,000 GB-seconds a month, paid subscriptions only) are taken from the Azure docs, not re-read from the price list. Assumed: 30% of page views are first visits that fetch 30 static files (the browser keeps `/_next/static/*` for a year), so 10 executions per page view; 0.2 to 2 GB-seconds per page view at 2048 MB (a busy instance shares its time; a lone visit bills at least one second); 0.5 to 1 KB of Application Insights data per request, which is never sampled.
+**Measured on Azure, with the documentation site (2026-11-10, two apps, 300 scripted visits each; 30% of the visits are first visits that fetch the page and its 10 static files, the others fetch the page only).** A visit made 4.2 requests and 186 KB. Per request at 2048 MB: 0.106 GB-seconds of execution time, and about 4.1 KB of Application Insights data (6.4 MB for 1,550 requests: 3,561 traces, 1,550 requests, 146 metrics). Storage transactions were few (about 3 Blob and 6 Table operations per page request, including the host's own).
 
-| Page views a month | Function, 2048 MB | Function, 512 MB | Application Insights | Total, 2048 MB |
-| --- | --- | --- | --- | --- |
-| 10,000 | 0 | 0 | 0 | about 0 |
-| 100,000 | 0.3 to 2.9 | 0.3 | 0 | about 0.4 to 3 |
-| 1,000,000 | 6.5 to 53 | 3.9 to 14 | 0 to 17 | about 7 to 70 |
-| 10,000,000 | 89 to 557 | 50 to 167 | 150 to 317 | about 250 to 880 |
+**An estimate by traffic, from those numbers** (a documentation-like site: 4.2 requests and 186 KB per visit; Azure retail prices for Japan East of 2026-11-10 in USD: 0.40 per million executions, 0.000026 per GB-second, Log Analytics 3.34 per GB, Blob reads 0.004 per 10,000, outbound data 0.11 per GB after what looks like a free first 100 GB, **tier sizes not confirmed**; free grants of 250,000 executions, 100,000 GB-seconds and 5 GB of Log Analytics a month, taken from the Azure docs). Estimates, not bills.
 
-Storage adds about 0.5 USD at one million page views. One always-ready instance adds its baseline: about 21 USD a month at 2048 MB, about 5 USD at 512 MB. What brings the bill down, in the order of their effect: `--memory 512` (unverified below 2048), `--request-telemetry errors` (unverified), and, at hundreds of thousands of page views a month, serving `/_next/static/*` from Blob or Front Door instead of the function (Front Door Standard has a base fee of about 35 USD a month at list price, checked on 2026-11-07). The cost of serving static files through the function is the open item B3 of the [release plan](./plan/release_plan.md). The real runs so far were short (17 and 27 minutes of one small app, and two of about 35 minutes); no Azure Cost Management figure has been read yet.
+| Visits a month | Function | Application Insights, `all` | Application Insights, `errors` | Outbound data | Total, `all` | Total, `errors` |
+| --- | --- | --- | --- | --- | --- | --- |
+| 10,000 | 0 | 0 | 0 | 0 | about 0 | about 0 |
+| 100,000 | 0.1 | 0 | 0 | 0 | about 0.2 | about 0.2 |
+| 1,000,000 | 10.5 | 41 | 0 | 9.5 | about 62 | about 22 |
+| 10,000,000 | 130 | 558 | 70 | 194 | about 900 | about 410 |
+
+Storage adds about 1.5 USD at one million visits. One always-ready instance adds its baseline: about 21 USD a month at 2048 MB. What brings the bill down: `--request-telemetry errors` (85% less telemetry, measured), and, for the rest, fewer requests per visit (static files from Blob or Front Door instead of the function; Front Door Standard has a base fee of about 35 USD a month at list price, checked on 2026-11-07, and outbound data is billed there too). `--memory 512` did **not** save money (measured). The cost of serving static files through the function is the open item B3 of the [release plan](./plan/release_plan.md). The real runs so far were short (17 and 27 minutes of one small app, two of about 35 minutes, and about 90 minutes for the documentation site); no Azure Cost Management figure has been read yet.
 
 ## Why are the first requests after a deployment slow?
 

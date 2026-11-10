@@ -65,3 +65,22 @@ describe("cookies (B5)", () => {
     expect(cookies.find((c) => c.startsWith("a="))).toContain("HttpOnly");
   });
 });
+
+// Known gap, App Router only: with `dynamicParams = false` Next.js does not find the prerendered page through
+// the cache handler and, with no fallback, does not render it (NoFallbackError), so even the built path answers
+// 404. `it.fails` flags the day this is fixed (docs/compatibility.md, "Known gaps"). The Pages Router with
+// `fallback: false` works.
+describe("routes without a fallback", () => {
+  it.fails("serves a path of generateStaticParams when dynamicParams is false (App Router)", async () => {
+    const res = await request("/params-closed/a");
+    expect(res.status).toBe(200);
+    expect(res.text).toContain("closed a");
+  });
+
+  it("serves a path of getStaticPaths when fallback is false (Pages Router)", async () => {
+    const res = await request("/pages-closed/known");
+    expect(res.status).toBe(200);
+    expect(res.text.replaceAll("<!-- -->", "")).toContain("Closed known");
+    expect((await request("/pages-closed/unknown")).status).toBe(404);
+  });
+});

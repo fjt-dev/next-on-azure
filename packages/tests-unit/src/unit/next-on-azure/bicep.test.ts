@@ -58,10 +58,10 @@ describe("next-on-azure main.bicep", () => {
     expect(bicep).toMatch(/blobTypes: \['blockBlob'\]/);
   });
 
-  it("can record only failed requests, by the Host.Results log level, and records all by default", () => {
+  it("can record only failures, by the Host.Results and Function.server log levels, and records all by default", () => {
     expect(bicep).toMatch(/param requestTelemetry string = 'all'/);
     expect(bicep).toMatch(
-      /requestTelemetry == 'errors' \? \[\s*\{ name: 'AzureFunctionsJobHost__logging__logLevel__Host\.Results', value: 'Error' \}/,
+      /requestTelemetry == 'errors' \? \[\s*\{ name: 'AzureFunctionsJobHost__logging__logLevel__Host\.Results', value: 'Error' \}\s*\{ name: 'AzureFunctionsJobHost__logging__logLevel__Function\.server', value: 'Warning' \}/,
     );
   });
 

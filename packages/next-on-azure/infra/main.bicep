@@ -38,7 +38,7 @@ param maximumInstanceCount int = 20
 @description('Send every telemetry item to Application Insights instead of a sample. Costs more with traffic. Useful when counting invocations in a measurement; requests are never sampled either way.')
 param fullTelemetry bool = false
 
-@description('Which function executions get a request record in Application Insights. "all" records every request, static files included (billed by ingestion). "errors" records only failed ones: the Host.Results log level is set to Error (see "Configure log levels" in the Azure Functions monitoring docs). Unverified on Flex Consumption: the app setting name contains a period.')
+@description('How much of each request goes to Application Insights, which bills by ingestion. "all" records every request and the start and end of every execution (measured: about 4 KB per request, static files included). "errors" records only failures: Host.Results is set to Error and Function.server to Warning (measured: about 0.6 KB per request, 85 percent less). See "Configure log levels" in the Azure Functions monitoring docs.')
 @allowed(['all', 'errors'])
 param requestTelemetry string = 'all'
 
@@ -234,6 +234,7 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
         { name: 'FUNCTIONS_REQUEST_BODY_SIZE_LIMIT', value: '104857600' }
       ], requestTelemetry == 'errors' ? [
         { name: 'AzureFunctionsJobHost__logging__logLevel__Host.Results', value: 'Error' }
+        { name: 'AzureFunctionsJobHost__logging__logLevel__Function.server', value: 'Warning' }
       ] : [], fullTelemetry ? [
         // Overrides host.json logging.applicationInsights.samplingSettings.isEnabled
         {

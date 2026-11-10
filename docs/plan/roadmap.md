@@ -129,6 +129,13 @@ Not planned, with the reason: function splitting, external middleware and `origi
 
 Where this adapter is ahead: ISR revalidation de-duplication with a load test (ADR-0010), measured `waitUntil` behavior (ADR-0006), identity-based access without shared keys, and an Azure E2E run from CI with automatic teardown.
 
+## Use by organizations (at the level of OpenNext, [ADR-0019](./decisions.md#adr-0019-enterprise-use-at-the-level-of-opennext))
+
+- [x] [Your own infrastructure](../infrastructure.md): what the app needs, access, what is stored where, deploying without `deploy` (2026-11-10; the resource set is Verified on Azure, building it with other tools is Unverified)
+- [ ] `SECURITY.md` and the community files (R1 of the [release plan](./release_plan.md); needs the maintainer's contact address)
+- [ ] Release pipeline with npm provenance (R3)
+- Not planned until someone needs it: private networking, WAF, customer-managed keys, redundancy and diagnostic settings, Azure Policy tags, reuse of existing resources
+
 ## Phase 4: Publish
 
 The stages, gates and order are in the [Release plan](./release_plan.md). Finding of 2026-11-07: the placeholder name is already taken on npm ([ADR-0015](./decisions.md#adr-0015-the-placeholder-package-name-is-taken-the-name-and-the-positioning-are-open-proposed)).

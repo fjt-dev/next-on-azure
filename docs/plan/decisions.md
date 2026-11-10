@@ -414,3 +414,13 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 **Considered.** `azure-<name>`: the maintainer asked on 2026-11-10 whether to follow Microsoft's naming; rejected because `@azure/*` is Microsoft's own scope, an `azure-` prefix reads as an official package, and Microsoft's trademark guidelines are generally strict about product names that start with "Azure" (the guidelines themselves were not read in this session). `opennextjs-azure` and `opennext-*` names: dropped when the package stopped depending on `@opennextjs/aws` (ADR-0016).
 
 **Consequences.** The "provisional" notes are removed from the README, the docs and the package. The rule not to hard-code the name in source files is gone. Before the first publish the name must be free on npm (checked on 2026-11-08; check again on the publish day); if it is not, a new ADR chooses another one.
+
+## ADR-0019: Enterprise use at the level of OpenNext
+
+**Date:** 2026-11-10. **Status:** accepted by the maintainer ("法人対応と言っても、opennextjs-awsと同様程度にしたい").
+
+**Decision.** Support for organizations means what OpenNext offers: a build that runs on the platform, documentation that says what the app needs, versioned releases and a security policy. The template (`infra/main.bicep`) and `deploy` are a reference implementation, as OpenNext's reference implementation is; an organization that has its own infrastructure code or landing zone creates the resources itself ([Your own infrastructure](../infrastructure.md)). OpenNext does not create infrastructure at all ([its architecture page](https://opennext.js.org/aws/inner_workings/architecture), read 2026-11-10).
+
+**Not in the template, and not planned until someone needs it:** private networking, a web application firewall, customer-managed keys, redundancy and diagnostic settings, tags for Azure Policy, reuse of an existing workspace or plan. A first version of these (parameters for storage SKU, tags, an existing Log Analytics workspace, retention and diagnostic settings) was written and discarded the same day as beyond this level.
+
+**Still to do at this level:** `SECURITY.md`, `CONTRIBUTING.md` and the other community files (R1, waits for the maintainer's contact address, P4), a statement of the supported Next.js and Node.js versions (the peer range and [Compatibility](../compatibility.md)), the release pipeline with provenance (R3).

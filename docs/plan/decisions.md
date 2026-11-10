@@ -377,7 +377,7 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 
 ## ADR-0017: Migrate to the standalone design in a new package, `next-on-azure`
 
-**Date:** 2026-11-08. **Status:** accepted by the maintainer's instruction to migrate ("移行を進めてください"); the name was provisional until [ADR-0018](#adr-0018-the-package-name-is-next-on-azure).
+**Date:** 2026-11-08. **Status:** accepted by the maintainer's instruction to migrate ("go ahead with the migration"); the name was provisional until [ADR-0018](#adr-0018-the-package-name-is-next-on-azure).
 
 **Decision.** The runtime validated by the spike ([ADR-0016](#adr-0016-run-nextjs-on-azure-without-opennextjsaws-start-with-a-spike-accepted-for-the-spike)) becomes a package of its own, `packages/next-on-azure`, with the name `next-on-azure` (not published; `next-on-azure`, `next-azure-adapter`, `nextjs-on-azure` and `azure-next-adapter` were free on npm on 2026-11-08). It does not depend on `@opennextjs/aws`. The old package `packages/open-next-azure` stays untouched, with its tests and CI, until the new one reaches parity (the same E2E suite, an Azure run, docs). Then the old package is removed in a separate change. The name and the positioning are decided before publishing (ADR-0015 is superseded in spirit: `opennext-adapter-azure` no longer describes the project).
 
@@ -385,7 +385,7 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 
 **Stages.** (1) the package with runtime, config helper and CLI `package`/`prime`, unit and integration tests, the example using it, local E2E; (2) simplified Bicep and `deploy`, Azure run; (3) CI jobs; (4) docs rewrite and the choice of name; (5) removal of the old package.
 
-**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now" ("一旦"). It was free on npm that day. Confirmed on 2026-11-10 (ADR-0018).
+**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now". It was free on npm that day. Confirmed on 2026-11-10 (ADR-0018).
 
 **Not decided.** Static files from Blob (today Next.js serves them from the package), Front Door, always-ready defaults, a Next.js Adapter API path for 16.2+.
 
@@ -407,7 +407,7 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 
 ## ADR-0018: The package name is `next-on-azure`
 
-**Date:** 2026-11-10. **Status:** accepted by the maintainer ("next-on-azureで良い"). Supersedes [ADR-0005](#adr-0005-package-name-is-deferred).
+**Date:** 2026-11-10. **Status:** accepted by the maintainer ("next-on-azure is fine"). Supersedes [ADR-0005](#adr-0005-package-name-is-deferred).
 
 **Decision.** The package, the repository and the documentation use the name `next-on-azure`. It follows the pattern `next-on-<platform>` of other platform packages for Next.js, and says what the package does: Next.js on Azure.
 
@@ -417,7 +417,7 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 
 ## ADR-0019: Enterprise use at the level of OpenNext
 
-**Date:** 2026-11-10. **Status:** accepted by the maintainer ("法人対応と言っても、opennextjs-awsと同様程度にしたい").
+**Date:** 2026-11-10. **Status:** accepted by the maintainer ("for organizations, at the level of opennextjs-aws").
 
 **Decision.** Support for organizations means what OpenNext offers: a build that runs on the platform, documentation that says what the app needs, versioned releases and a security policy. The template (`infra/main.bicep`) and `deploy` are a reference implementation, as OpenNext's reference implementation is; an organization that has its own infrastructure code or landing zone creates the resources itself ([Your own infrastructure](../infrastructure.md)). OpenNext does not create infrastructure at all ([its architecture page](https://opennext.js.org/aws/inner_workings/architecture), read 2026-11-10).
 
@@ -427,7 +427,7 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 
 ## ADR-0020: Static files stay with the function; cost options first, measure later
 
-**Date:** 2026-11-10. **Status:** accepted by the maintainer ("現状でいいかも", "それ以外は現状で", and the choice of option B after the estimate by traffic).
+**Date:** 2026-11-10. **Status:** accepted by the maintainer ("the current state may be fine", "otherwise keep the current state", and the choice of option B after the estimate by traffic).
 
 **Context.** Every request, static files included, runs the function: in the first design the asset resolver read Blob inside the function, and now the Next.js server serves them from the package. OpenNext (AWS) serves its `assets` folder without the server function, from S3 behind a CDN that the user builds ([architecture page](https://opennext.js.org/aws/inner_workings/architecture), read 2026-11-10). `/_next/static/*` is sent with `Cache-Control: public, max-age=31536000, immutable`, so a browser fetches each file once; `public/` files are revalidated on every request.
 

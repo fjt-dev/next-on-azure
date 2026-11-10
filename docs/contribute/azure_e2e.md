@@ -30,7 +30,7 @@ az ad sp create --id <appId> --query id -o tsv
 az ad app federated-credential create --id <appId> --parameters '{
   "name": "github-main-branch",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:fjt-dev@157100279/next-on-azure@1448297244:ref:refs/heads/main",
+  "subject": "repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 ```

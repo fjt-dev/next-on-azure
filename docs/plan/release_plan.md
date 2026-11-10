@@ -29,11 +29,11 @@ Public does not need npm: the repository can be public while the package stays u
 | --- | --- |
 | Commit identities | All 94 commits use the GitHub no-reply address; no personal e-mail address is in the history |
 | Secrets | Both scans (tree and history) find nothing; the only GUIDs are built-in role ids |
-| Personal data in the files | The GitHub user and repository ids in the OIDC example (`azure_e2e.md`, public through the API anyway); "Azure for Students" in the work log and ADR-0013; 10 lines with the maintainer's Japanese words in the work log and the decisions; no home-directory path |
+| Personal data in the files | Removed from the current files on 2026-11-10 at the maintainer's choice: the GitHub ids in the OIDC example, the subscription type in the work log, the maintainer's Japanese words. **They stay in the git history** (not rewritten; none is a secret). ADR-0013 keeps a quota fact of the Azure docs that names trial and student offers |
 | Workflows | `check` runs on `pull_request` without secrets, read-only, actions pinned; `azure-e2e` runs only on `workflow_dispatch` (needs write access) and is the only one with `id-token: write`; a unit test pins this |
-| License | MIT, "Copyright (c) 2026 fjtd" |
-| Community files | Drafted 2026-11-10: `SECURITY.md` (GitHub private vulnerability reporting, no e-mail needed), `CONTRIBUTING.md`, `CODEOWNERS`, pull request and issue templates. **Missing: a code of conduct** (it needs a contact for enforcement) |
-| Logos in the README | Microsoft's and Vercel's brand guidelines were **not read**; decide before the repository is public |
+| License | MIT, "Copyright (c) 2026 fjtd": kept (the maintainer's choice) |
+| Community files | Drafted 2026-11-10: `SECURITY.md` (GitHub private vulnerability reporting, no e-mail needed), `CONTRIBUTING.md`, `CODEOWNERS`, pull request and issue templates. **The code of conduct**: the maintainer chose the Contributor Covenant; it needs a contact for enforcement, which was not given yet, so it is not in the repository |
+| Logos in the README | The maintainer states that the images were chosen according to the official guidelines and wants no notice. Not verified by the assistant (the guidelines were not read) |
 | The documentation site | A separate private repository; its "request a translation" link points at that repository's issues, which would answer 404 for the public |
 | After the switch (R5) | Private vulnerability reporting, secret scanning and push protection, Dependabot alerts, branch protection with the required checks, approval for workflows from forks |
 

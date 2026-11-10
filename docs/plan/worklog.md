@@ -373,7 +373,7 @@ The maintainer reported that **all jobs of the first `check` run succeeded**: `c
 
 | Item | Value |
 | --- | --- |
-| Subscription | Azure for Students (`<subscription-id>`), signed-in user is Owner |
+| Subscription | the maintainer's subscription (`<subscription-id>`), signed-in user is Owner |
 | Region | japaneast |
 | Resource group | `rg-opennextjs-azure-2`, **new**, created by this run. The pre-existing empty group `opennextjs-azure` is not touched; the group of the first run was deleted |
 | Layout | Single Function app, no Front Door |
@@ -470,7 +470,7 @@ Deploy once with the new defaults and with `--alert-queue-backlog` and a lower p
 
 | Item | Value |
 | --- | --- |
-| Subscription | Azure for Students (`<subscription-id>`), signed-in user is Owner |
+| Subscription | the maintainer's subscription (`<subscription-id>`), signed-in user is Owner |
 | Region | japaneast (Flex Consumption supported; no region policy on the subscription) |
 | Resource group | `rg-opennextjs-azure-1c`, **new**, created by this run. The pre-existing empty group `opennextjs-azure` (japaneast) is not touched |
 | Layout | Single Function app, **no Front Door** (`frontDoor=false`) |
@@ -882,7 +882,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 37 (2026-11-08): Azure run, plan written before starting
 
-- **Approved by the maintainer (2026-11-08):** resource group `opennextjs-azure-fjtd` in japaneast (it existed before, empty, no tags: it is **not deleted**; only resources created by this run are deleted, by name), time window 3 hours, cost ceiling 500 yen, no Front Door. Subscription: Azure for Students.
+- **Approved by the maintainer (2026-11-08):** resource group `opennextjs-azure-fjtd` in japaneast (it existed before, empty, no tags: it is **not deleted**; only resources created by this run are deleted, by name), time window 3 hours, cost ceiling 500 yen, no Front Door. Subscription: the maintainer's.
 - **Start 10:58 JST (01:58Z). Hard stop 13:58 JST (04:58Z).** Stage deadlines: provision and deploy by 11:30; verify by 12:30; delete by 13:00; read-only inventory right after, and again on 2026-11-09.
 - **Plan:** deploy `examples/app-router` with `--always-ready 1 --revalidation-polling-seconds 5` and the name `onxfjt1`; run the remote E2E (`e2e:remote`) including the new cases (Pages `fallback: true`, cookies, `'use cache'`, remote images are skipped in remote mode); record the deploy warm-up output and the first-request time; look at Application Insights for the sampling setting. Not planned: Front Door (35 USD per month base fee).
 - **Resources created (recorded as they appear):** see below.
@@ -911,7 +911,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 40 (2026-11-08): Azure run of the standalone spike, plan written before starting
 
-- **Conditions:** the same as the run earlier today, restated by me and followed by the maintainer's "go ahead with the Azure check" (the group name, 3 hours, 500 yen were in my question; they were not typed again by the maintainer): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing, empty; it is **kept**, only the resources of this run are deleted, by name), no Front Door, Azure for Students subscription. Window 3 hours; cost ceiling 500 yen.
+- **Conditions:** the same as the run earlier today, restated by me and followed by the maintainer's "go ahead with the Azure check" (the group name, 3 hours, 500 yen were in my question; they were not typed again by the maintainer): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing, empty; it is **kept**, only the resources of this run are deleted, by name), no Front Door, the maintainer's subscription. Window 3 hours; cost ceiling 500 yen.
 - **Start 13:33 JST (the 13:00 first written was a guess made before the clock was read). Hard stop 16:33 JST.** Deadlines: provision and deploy by 14:15, verify by 15:15, delete by 15:45, read-only inventory right after, and again on 2026-11-09.
 - **Plan:** deploy `examples/standalone` (built with `--linux` for the sharp binaries) on the infrastructure of `packages/open-next-azure/infra/main.bicep` (name `sfjt1`, no always-ready), with `az functionapp deployment source config-zip`. Measure: first request after the deployment, the first request after about 10 minutes idle, the remote E2E (`e2e:remote`), the host's logs and Application Insights for errors. Then, if time allows, `alwaysReadyInstances=1` and the same measurements. Not planned: Front Door, load tests.
 - **Resources created:** see below, recorded as they appear.
@@ -949,7 +949,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 45 (2026-11-08): Azure run of the next-on-azure package, plan written before starting
 
-- **Conditions** (stated in my questions after the CI stage and answered "go ahead" by the maintainer, as before): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; it is **kept**, only resources of this run are deleted, by name), no Front Door, Azure for Students subscription, window 3 hours, cost ceiling 500 yen.
+- **Conditions** (stated in my questions after the CI stage and answered "go ahead" by the maintainer, as before): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; it is **kept**, only resources of this run are deleted, by name), no Front Door, the maintainer's subscription, window 3 hours, cost ceiling 500 yen.
 - **Start 15:18 JST (the time was read from the clock). Hard stop 18:18 JST.** Deadlines: provision and deploy by 15:50, verify by 17:00, delete by 17:30, read-only inventory right after and again on 2026-11-09.
 - **Plan:** package `examples/standalone` for Azure (`next-on-azure package`), deploy it with `next-on-azure deploy -g opennextjs-azure-fjtd -n nfjt1` (new Bicep template, warm-up and prime of the CLI), run the HTTP suite with `E2E_TARGET=standalone` against the URL, measure the first request after about 11 minutes idle, read Application Insights for errors, a small load. Not planned: Front Door, always-ready.
 - **Resources created:** see below, recorded as they appear.
@@ -968,7 +968,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 47 (2026-11-08): migration, stage 5 (removal of the OpenNext-based package)
 
-- Removal approved by the maintainer ("削除して良いです"). Deleted: `packages/open-next-azure`, `examples/app-router`, `scripts/local-stack.mjs`, `docs/legacy-opennext`, the stack files and the `front-door` and `poison` projects of `packages/tests-e2e`, and every unit and integration test of the old package (the ported ones remain). `@opennextjs/aws` is gone from the catalog; the dependencies only the old package used were dropped. History stays in git.
+- Removal approved by the maintainer. Deleted: `packages/open-next-azure`, `examples/app-router`, `scripts/local-stack.mjs`, `docs/legacy-opennext`, the stack files and the `front-door` and `poison` projects of `packages/tests-e2e`, and every unit and integration test of the old package (the ported ones remain). `@opennextjs/aws` is gone from the catalog; the dependencies only the old package used were dropped. History stays in git.
 - Dead code of the HTTP suite removed: the host-log helpers, the cases that needed the local host log (queue consumer ran, failed revalidations, stampede count) or an HTTPS fixture (remote images). The suite is now 47 cases, none skipped; the Azure run earlier today (47 passed, 5 skipped) had run the same cases plus those five skipped ones.
 - `azure-e2e.yml` now deploys `examples/standalone` with `next-on-azure deploy` and runs the suite with `E2E_TARGET=standalone`; the tag of its resource groups is `purpose=next-on-azure-e2e`. **It was not run** (the federated credential and the variables exist for the old workflow; the rights of that identity were set for the old template).
 - `check.yml`: the old `e2e` job is gone, `standalone-e2e` is now `e2e`; one Bicep step.
@@ -984,8 +984,8 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 49 (2026-11-08): repository renamed
 
-- The maintainer renamed the repository to `fjt-dev/next-on-azure` (private; the numeric repository id 1448297244 did not change) and created `fjt-dev/docs-next-on-azure` (**public**, empty) for the documentation site. The remote of this checkout points to the new URL; the local directory name is unchanged.
-- The OIDC `subject` in `docs/contribute/azure_e2e.md` now names the new repository. The federated credential in Azure (app registration `opennextjs-azure-e2e`, credential `github-main-branch`) had the old subject; changed on 2026-11-08 with the maintainer's approval ("実行してください") to `repo:fjt-dev@157100279/next-on-azure@1448297244:ref:refs/heads/main`, and read back. **Not tested by a workflow run** (a run creates billable resources). The app registration keeps its old display name.
+- The maintainer renamed the repository to `fjt-dev/next-on-azure` (private) and created `fjt-dev/docs-next-on-azure` (**public**, empty) for the documentation site. The remote of this checkout points to the new URL; the local directory name is unchanged.
+- The OIDC `subject` in `docs/contribute/azure_e2e.md` now names the new repository. The federated credential in Azure (app registration `opennextjs-azure-e2e`, credential `github-main-branch`) had the old subject; changed on 2026-11-08 with the maintainer's approval to `repo:<owner>@<owner id>/<repo>@<repo id>:ref:refs/heads/main`, and read back. **Not tested by a workflow run** (a run creates billable resources). The app registration keeps its old display name.
 
 ## Session 50 (2026-11-08): small clean-ups
 
@@ -998,14 +998,14 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 51 (2026-11-09): Azure run, Next.js 16.4.5 and always-ready
 
-- **Conditions** (stated in my question, answered "同じ条件で進める" by the maintainer): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; **kept**, only resources of this run deleted, by name), no Front Door, Azure for Students subscription, window 00:34 to 03:34 JST, cost ceiling 500 yen.
+- **Conditions** (stated in my question, answered "same conditions" by the maintainer): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; **kept**, only resources of this run deleted, by name), no Front Door, the maintainer's subscription, window 00:34 to 03:34 JST, cost ceiling 500 yen.
 - **Done:** a throwaway worktree of commit 1eb995c with `next: 16.4.5`, the example packaged for Azure, deployed with `next-on-azure deploy -n noaz1109 --always-ready 1`. First answer 0.7 s after the deployment, 9 prerendered routes primed. The HTTP suite with `E2E_TARGET=standalone`: **48 of 48 passed**, including the stream-error case. The first run without that variable had 2 failures (the one shown was a `static` expectation for the other target; the second was not looked at, and the run with the variable passed).
 - **Created and deleted by name** (00:43 to 00:44 JST, about 10 minutes after creation): `func-noaz1109-l3tyas7mni4wg`, `plan-noaz1109-l3tyas7mni4wg`, `appi-noaz1109-l3tyas7mni4wg`, `log-noaz1109-l3tyas7mni4wg`, `stnoaz1109l3tyas7m`. Inventory right after: empty. The maintainer looked at the site before the deletion.
 - **Not done:** Front Door; the `proxy` convention on Azure (the example uses `middleware.js`); a measurement of always-ready (cold start with and without it); the cost figure (usage is not reported yet; the run lasted about 10 minutes with one always-ready instance, expected to be a few yen, an estimate). To do: inventory and cost on 2026-11-10.
 
 ## Session 52 (2026-11-10): Azure run, always-ready and Next.js 16 `proxy` / `cacheComponents`
 
-- **Conditions** (the maintainer asked for the check of these two items; same conditions as before, restated by me): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; **kept**, only resources of this run deleted, by name), no Front Door, Azure for Students subscription, window 10:45 to 13:45 JST, cost ceiling 500 yen.
+- **Conditions** (the maintainer asked for the check of these two items; same conditions as before, restated by me): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; **kept**, only resources of this run deleted, by name), no Front Door, the maintainer's subscription, window 10:45 to 13:45 JST, cost ceiling 500 yen.
 - **Plan:** two apps from the same Next.js 16.4.5 build of the example with `proxy.js` instead of `middleware.js`: one with `--always-ready 0`, one with `--always-ready 1`; cold start after idle on both; then a small `cacheComponents` app deployed over the first one; delete everything by name.
 - **Done:** the example with `proxy.js` on Next.js 16.4.5 deployed as `noazra0` (`--always-ready 0`) and `noazra1` (`--always-ready 1`; the setting read back as `http: 1`). HTTP suite (`E2E_TARGET=standalone`): **48 of 48 on both**; a redirect and a rewrite by `proxy` checked by hand. Cold start after about 17 minutes without requests (`/pages-ssr?name=x`, client in Japan): `noazra0` **2.40 s**, then 0.13 s and 0.22 s; `noazra1` **0.15 s**, then 0.13 s and 0.12 s. One sample each. Then a small `cacheComponents` + `partialPrefetching` app (`app/page.js`: a `'use cache'` part tagged `cc`, a part behind `connection()`) deployed over `noazra0`: the cached timestamp stayed the same over three requests, the live one changed each time, after `POST /api/revalidate` (`revalidateTag("cc", "max")`) the cached one was renewed and stayed.
 - **Seen:** two `deploy` runs started at the same time in one resource group collide on the Bicep deployment name `main` (only one app was created; run them one after the other). The zip deployment got `403` from the storage account right after the first Bicep deployment (role assignment not yet effective) and worked two minutes later, the same symptom as on the first run. A `proxy` rewrite leaves `x-middleware-rewrite: http://localhost:3000/pages-static` in the response (not checked on Next.js 15).
@@ -1030,7 +1030,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 55 (2026-11-10): the package name is confirmed
 
-- The maintainer asked whether an `azure-<name>` name would follow Microsoft's naming better, then decided: **`next-on-azure`** ("next-on-azureで良い"). [ADR-0018](./decisions.md#adr-0018-the-package-name-is-next-on-azure) records it and supersedes ADR-0005; the Microsoft trademark guidelines were **not read** in this session, the reasoning against `azure-` is the `@azure/*` scope and the general caution about names that start with "Azure", labelled as such in the ADR.
+- The maintainer asked whether an `azure-<name>` name would follow Microsoft's naming better, then decided: **`next-on-azure`** ("next-on-azure is fine"). [ADR-0018](./decisions.md#adr-0018-the-package-name-is-next-on-azure) records it and supersedes ADR-0005; the Microsoft trademark guidelines were **not read** in this session, the reasoning against `azure-` is the `@azure/*` scope and the general caution about names that start with "Azure", labelled as such in the ADR.
 - The "provisional name" notes are gone from the README, `docs/`, the package README and `package.json`, `AGENTS.md`; the rule not to hard-code the name in source files is removed (ADR-0005 superseded). The release plan marks P1 as decided. Still to do before the first publish: check on npm that the name is free that day.
 
 ## Session 56 (2026-11-10): banner image in the README
@@ -1045,7 +1045,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 58 (2026-11-10): organizations, at the level of OpenNext
 
-- The maintainer wanted the project usable by organizations, then narrowed it: "同様程度" as opennextjs-aws. The official architecture page says OpenNext does not create infrastructure; its docs have a reference implementation and leave the rest to SST, CDK or Terraform.
+- The maintainer wanted the project usable by organizations, then narrowed it: "at the same level" as opennextjs-aws. The official architecture page says OpenNext does not create infrastructure; its docs have a reference implementation and leave the rest to SST, CDK or Terraform.
 - A first batch for the template (storage SKU, tags, an existing Log Analytics workspace, retention, diagnostic settings; it compiled with `az bicep build`) was **discarded before any commit**, as beyond that level.
 - Done: [Your own infrastructure](../infrastructure.md) (what the app needs, roles, deploying without `deploy`, what is stored where, what is not provided), ADR-0019, a roadmap section. The manual steps of the page are those of `deploy`; infrastructure not made by the template is **Unverified**. The documentation site does not have the page yet (its sync list and navigation).
 
@@ -1057,7 +1057,7 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 ## Session 60 (2026-11-10): the documentation site on Azure, first a measuring run
 
-- **Conditions** (stated in my question; the maintainer chose "first a temporary measuring run, then a permanent site", "publish on the internet" for the permanent site, and the existing resource group; the ceiling was in my wording and not typed by the maintainer): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; **kept**, only resources of this run deleted, by name), no Front Door, Azure for Students subscription, window 14:55 to 17:55 JST, cost ceiling 500 yen. The permanent deployment gets its own decision (resource group, monthly ceiling) afterwards; the existing group is not a good home for something that stays.
+- **Conditions** (stated in my question; the maintainer chose "first a temporary measuring run, then a permanent site", "publish on the internet" for the permanent site, and the existing resource group; the ceiling was in my wording and not typed by the maintainer): resource group `opennextjs-azure-fjtd` in japaneast (pre-existing and empty; **kept**, only resources of this run deleted, by name), no Front Door, the maintainer's subscription, window 14:55 to 17:55 JST, cost ceiling 500 yen. The permanent deployment gets its own decision (resource group, monthly ceiling) afterwards; the existing group is not a good home for something that stays.
 - **Plan:** two apps from the same package of the documentation site, one after the other: `docsa` with the defaults (2048 MB, all requests recorded) and `docsb` with `--memory 512 --request-telemetry errors`. A scripted visitor (first visits that fetch the page and its assets, and repeat visits) and the metrics (executions, execution units, memory working set, storage transactions, Application Insights requests); the resource inventory for the diagram; delete everything by name.
 
 - **Measuring run, results (2026-11-10, JST 14:51 to about 15:15):** two apps of the documentation site (`docsa` defaults, `docsb` 512 MB), same scripted visitors (300 visits, 30% first visits, 4 at a time; 1,260 requests, 55.7 MB each run). The first deployment answered 404 for every page: the site used `dynamicParams = false`, and next-on-azure does not render such App Router routes (see below); fixed in the site. After that all pages 200 on both apps.
@@ -1081,3 +1081,4 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 
 - The maintainer chose to go the P2 way. Audit (read-only): commit identities, secrets, personal data, workflows, license, community files, logos; the result is the table in the [release plan](./release_plan.md). Drafted `SECURITY.md` (private vulnerability reporting of GitHub, best effort, one maintainer), `CONTRIBUTING.md`, `.github/CODEOWNERS`, the pull request template and the issue templates (bug report, feature request; blank issues off). Lint, 131 unit tests. Nothing was changed in GitHub: the repository is still private, no setting was touched.
 - Open: logos (guidelines not read), the license holder name, the code of conduct, whether to scrub the work log, the issues target of the documentation site, the date.
+- Decisions of the maintainer: the logos stay as they are with no notice (the images were chosen according to the official guidelines, which the assistant did not read); the license holder stays `fjtd`; the code of conduct is the Contributor Covenant, to be added when the enforcement contact is given; personal items are removed from the current files (the GitHub ids of the OIDC example, the subscription type, the Japanese phrases; the history is not rewritten).

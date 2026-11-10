@@ -2,7 +2,7 @@
 
 Azure platform facts that affect the design.
 
-**Source and status.** Items marked *(microsoft)* were found in Microsoft Learn during development. Items marked *(reported)* come from an external review of an earlier Azure adapter that ran on real Azure; treat them as hypotheses until this project confirms them. Items marked *(verified 2026-11-06)* were observed by this project on a real Azure subscription (japaneast, Azure for Students), see the work log, session 7.
+**Source and status.** Items marked *(microsoft)* were found in Microsoft Learn during development. Items marked *(reported)* come from an external review of an earlier Azure adapter that ran on real Azure; treat them as hypotheses until this project confirms them. Items marked *(verified 2026-11-06)* were observed by this project on a real Azure subscription (japaneast, a subscription with the quotas of a trial or student offer), see the work log, session 7.
 
 ## Flex Consumption
 

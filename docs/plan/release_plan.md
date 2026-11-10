@@ -41,7 +41,7 @@ Gate: every item done, and one Azure run on the release commit with the whole su
 | --- | --- |
 | B1 | Concurrent regeneration after a revalidation is not coalesced (ten values in one test): decide whether a lock in Table Storage is worth it |
 | B2 | `after()` work cannot be tied to one request: measure how much it matters under load |
-| B3 | Static files are served by the function: Blob or CDN for `/_next/static`, and its cost against the function executions |
+| B3 | Static files are served by the function: Blob or CDN for `/_next/static`, and its cost against the function executions. **Direction decided 2026-11-10 ([ADR-0020](./decisions.md#adr-0020-static-files-stay-with-the-function-cost-options-first-measure-later))**: keep, with cost options; measure on the deployment of the documentation site, then decide |
 | B4 | Observability: Application Insights queries (invocations, failures, instances), documented |
 | B5 | Rollback and redeploy (Flex has no slots), and a deployment over an older build with and without a stable Server Actions key |
 | B6 | A CI case for `proxy` and `cacheComponents` (both pass on Azure and locally); Node 24 |

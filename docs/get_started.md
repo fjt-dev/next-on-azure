@@ -54,6 +54,7 @@ next-on-azure deploy --resource-group <rg> --name <short-name> --location <regio
 | `--memory <512\|2048\|4096>` | `2048` | Memory of each instance (MB). Flex Consumption bills memory times execution time, so a smaller size costs less per request; it must hold the Next.js server and, with `next/image`, `sharp`. **Unverified on Azure below 2048.** |
 | `--max-instances <n>` | `20` | Upper bound on instances: a burst or abuse cannot scale (and bill) without limit. |
 | `--cache-retention-days <n>` | `30` | A lifecycle rule deletes cache entries not written for `n` days, and with them the entries of old builds, which are never read again. `0` keeps everything. A deleted entry is a cache miss: the page is rendered and written again. **Unverified on Azure** (the template compiles; the rule was never deployed). |
+| `--request-telemetry all\|errors` | `all` | `errors` records only failed requests in Application Insights (the `Host.Results` log level is set to `Error`). Every request, static files included, is otherwise a record that is billed by ingestion. **Unverified on Flex Consumption** (the app setting name has a period; the Azure docs name Linux plans where that does not work, Flex is not among them). |
 | `--full-telemetry` | off | Turns Application Insights sampling off. Costs more with traffic. |
 | `--no-warm-up`, `--no-prime` | off | Skip the wait for the first answer, or the priming. |
 | `--output-file <path>` | none | Writes the URL and the resource names as JSON. |

@@ -58,6 +58,13 @@ export function bicepParameters(argv: string[]): string[] {
     }
     parameters.push(`instanceMemoryMB=${memory}`);
   }
+  const requests = option(argv, "--request-telemetry");
+  if (requests !== undefined) {
+    if (requests !== "all" && requests !== "errors") {
+      throw new Error('--request-telemetry must be "all" or "errors"');
+    }
+    parameters.push(`requestTelemetry=${requests}`);
+  }
   if (option(argv, "--max-instances") !== undefined) {
     parameters.push(`maximumInstanceCount=${integerOption(argv, "--max-instances", 20, 1, 1000)}`);
   }
@@ -72,7 +79,7 @@ export function bicepParameters(argv: string[]): string[] {
 /**
  * next-on-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach]
  *   [--always-ready <n>] [--memory 512|2048|4096] [--max-instances <n>] [--cache-retention-days <n>]
- *   [--full-telemetry] [--no-warm-up] [--no-prime] [--output-file <path>]
+ *   [--request-telemetry all|errors] [--full-telemetry] [--no-warm-up] [--no-prime] [--output-file <path>]
  *
  * Creates the infrastructure with Bicep, deploys `.next-azure/app.zip`, waits for the first answer
  * and requests every prerendered route once. Creates billable resources; see

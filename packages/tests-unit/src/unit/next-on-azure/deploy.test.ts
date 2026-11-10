@@ -80,6 +80,12 @@ describe("bicepParameters", () => {
     expect(bicepParameters(["-n", "a", "--cache-retention-days", "0"])).toContain(
       "cacheRetentionDays=0",
     );
+    expect(bicepParameters(["-n", "a", "--request-telemetry", "errors"])).toContain(
+      "requestTelemetry=errors",
+    );
+    expect(() => bicepParameters(["-n", "a", "--request-telemetry", "none"])).toThrow(
+      /"all" or "errors"/,
+    );
     expect(() => bicepParameters(["-n", "a", "--memory", "1024"])).toThrow(/512, 2048 or 4096/);
     expect(() => bicepParameters(["-n", "a", "--max-instances", "0"])).toThrow(/integer/);
     expect(() => bicepParameters(["-n", "a", "--cache-retention-days", "-1"])).toThrow(/integer/);
@@ -106,6 +112,8 @@ describe("bicepParameters", () => {
       "5",
       "--cache-retention-days",
       "7",
+      "--request-telemetry",
+      "errors",
     ]);
     for (const p of all) {
       expect(bicep).toMatch(new RegExp(`^param ${p.split("=")[0]} `, "m"));

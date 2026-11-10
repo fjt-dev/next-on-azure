@@ -58,6 +58,13 @@ describe("next-on-azure main.bicep", () => {
     expect(bicep).toMatch(/blobTypes: \['blockBlob'\]/);
   });
 
+  it("can record only failed requests, by the Host.Results log level, and records all by default", () => {
+    expect(bicep).toMatch(/param requestTelemetry string = 'all'/);
+    expect(bicep).toMatch(
+      /requestTelemetry == 'errors' \? \[\s*\{ name: 'AzureFunctionsJobHost__logging__logLevel__Host\.Results', value: 'Error' \}/,
+    );
+  });
+
   it("keeps a bound on the instance count and offers the three memory sizes of Flex Consumption", () => {
     expect(bicep).toMatch(/param maximumInstanceCount int = 20/);
     expect(bicep).toMatch(/@allowed\(\[512, 2048, 4096\]\)\nparam instanceMemoryMB/);

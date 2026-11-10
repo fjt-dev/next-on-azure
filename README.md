@@ -9,7 +9,7 @@
 
 ---
 
-> **Experimental, pre-release, not published to npm.**
+> **Experimental, pre-release, not published to npm.** What is promised and what is not: [Support](./docs/support.md).
 
 <p align="center">
   <img src="./docs/assets/banner.png" alt="Next.js + Azure" width="480">

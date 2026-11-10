@@ -14,6 +14,7 @@ Every statement about behavior on Azure is marked **Verified (Azure)**, **Verifi
 | [How it works](./how_it_works.md) | The request path, the caches, `after()`, priming, packaging |
 | [Azure notes](./inner_workings/azure_notes.md) | Platform facts that shaped the design, with their source |
 | [Your own infrastructure](./infrastructure.md) | What the app needs from Azure, access, what is stored where, deploying without `deploy` |
+| [Support](./support.md) | What is promised for the first release, and what is not |
 | [Cost](./cost.md) | What is billed, what was measured on Azure, the bill by traffic, what lowers it |
 | [Comparison](./comparison.md) | OpenNext (AWS, Cloudflare) |
 | [FAQ](./faq.md), [Troubleshooting](./troubleshooting.md) | Short answers; known problems and fixes |

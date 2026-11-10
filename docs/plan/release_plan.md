@@ -19,7 +19,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 | --- | --- | --- |
 | P1 | The package name | **Decided 2026-11-10: `next-on-azure`** (ADR-0018). Free on npm when checked on 2026-11-08; check again on the publish day. The npm package `opennextjs-azure` by another author exists; its code is not read ([AGENTS.md](../../AGENTS.md)) |
 | P2 | Public or private, and when | A public repository gets unlimited free Actions minutes on standard runners (GitHub policy, to be confirmed), branch protection and environment reviewers on the free plan |
-| P3 | The promise of `0.1.0` | Suggested: "experimental, App Router and Pages Router, Next.js 15, pnpm, Linux or macOS build machine"; the README lists the **Unverified** rows |
+| P3 | The promise of `0.1.0` | **Decided 2026-11-10**: only what was run is promised, as written in [Support](../support.md). The first release is `0.1.0` with the default npm tag; the version carries **no suffix** such as `-alpha` (the maintainer's choice); that the project is experimental is said in the README, the package description and the Support page |
 | P4 | npm account with two-factor authentication, package or scope, trusted publishing for the repository, a security contact address | The account `fjtd` exists (npmjs.com/~fjtd) and the maintainer states that two-factor authentication is on (not verifiable from outside). The name `next-on-azure` and `@fjtd/next-on-azure` were both unpublished on 2026-11-10 (the registry answers 404). Contacts: `security@fjtd.dev`, `conduct@fjtd.dev`. Still to do: trusted publishing (R3) |
 
 ### Making the repository public (P2): audit of 2026-11-10
@@ -38,7 +38,7 @@ Public does not need npm: the repository can be public while the package stays u
 | The documentation site | A separate private repository; its "request a translation" link points at that repository's issues, which would answer 404 for the public |
 | After the switch (R5) | Private vulnerability reporting, secret scanning and push protection, Dependabot alerts, branch protection with the required checks, approval for workflows from forks |
 
- `0.1.0-alpha` (public, tagged `alpha` on npm)
+ `0.1.0` (public, default npm tag, no pre-release suffix; experimental by the Support page)
 
 Gate: every item done, and one Azure run on the release commit with the whole suite green.
 
@@ -52,7 +52,7 @@ Gate: every item done, and one Azure run on the release commit with the whole su
 | R6 | Azure run on the release commit: the suite on Next.js 15 and 16, `--always-ready 1` measurement (done once on 2026-11-10), one `--front-door` deployment, the cost recorded; first a run of `azure-e2e` | M, costs money |
 | R7 | npm and Yarn layouts of `node_modules` (only pnpm is verified): a clean-install test for npm; Yarn documented as unverified | M; **done locally 2026-11-10**: npm (Next.js 15 and 16) and Yarn 1 pass the suite (48 cases); Yarn Plug'n'Play was found to produce a broken package and is now refused with a message; the CI job `install` runs npm and Yarn 1 on Linux with Node 22 and 24 and passes (it found a bug on its first run, see the work log) |
 
-## 4. Stage 2: beta
+## 4. Stage 2: `0.2.0` (the items that were called beta)
 
 | # | Task |
 | --- | --- |

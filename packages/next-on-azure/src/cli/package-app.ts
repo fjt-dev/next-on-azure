@@ -153,6 +153,19 @@ export function repointRuntimePaths(standaloneDir: string, appSub: string): numb
   return changed;
 }
 
+/**
+ * The server needs its dependencies as files. With Yarn Plug'n'Play there is no `node_modules`:
+ * the standalone build then has none, and the app fails at the first request with a missing module.
+ */
+export function assertHasNodeModules(standaloneDir: string) {
+  if (!fs.existsSync(path.join(standaloneDir, "node_modules"))) {
+    throw new Error(
+      "The standalone build has no node_modules directory, so the app would fail to start. " +
+        "Yarn Plug'n'Play is not supported: set `nodeLinker: node-modules` in .yarnrc.yml, install again and rebuild.",
+    );
+  }
+}
+
 export function assertNoSymlinks(dir: string) {
   const links = findSymlinks(dir);
   if (links.length > 0) {
@@ -199,6 +212,7 @@ export function packageApp(options: PackageOptions = {}): PackageResult {
   const flat = flattenPnpmNodeModules(target);
   if (flat.flattened)
     console.log(`flattened pnpm node_modules: ${flat.packages} packages (${flat.nested} nested)`);
+  assertHasNodeModules(target);
   removeShims(target);
   repointRuntimePaths(target, appSub);
 

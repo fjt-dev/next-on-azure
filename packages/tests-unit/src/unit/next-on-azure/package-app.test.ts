@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  assertHasNodeModules,
   assertNoSymlinks,
   entrypoint,
   findAppDir,
@@ -67,6 +68,15 @@ describe("hostJson", () => {
       isEnabled: true,
       excludedTypes: "Request",
     });
+  });
+});
+
+describe("assertHasNodeModules", () => {
+  it("accepts a build with node_modules and refuses one without (Yarn Plug'n'Play), naming the fix", () => {
+    const dir = tmp();
+    expect(() => assertHasNodeModules(dir)).toThrow(/nodeLinker: node-modules/);
+    fs.mkdirSync(path.join(dir, "node_modules"));
+    expect(() => assertHasNodeModules(dir)).not.toThrow();
   });
 });
 

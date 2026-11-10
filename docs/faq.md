@@ -22,4 +22,4 @@ Flex Consumption bills per execution and memory, Storage per use, and Front Door
 
 ## Why are the first requests after a deployment slow?
 
-Without `--always-ready` the instance starts on the first request (2.4 s measured after idle). `deploy` makes that request itself and primes the prerendered pages, so a visitor does not.
+Without `--always-ready` the instance starts on the first request (2.4 s measured after idle; 0.15 s with `--always-ready 1`). `deploy` makes that request itself and primes the prerendered pages, so a visitor does not.

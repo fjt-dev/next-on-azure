@@ -50,7 +50,7 @@ next-on-azure deploy --resource-group <rg> --name <short-name> --location <regio
 | --- | --- | --- |
 | `--front-door` | off | Puts Azure Front Door in front (recurring base fee). The app then refuses requests that did not pass through it (`X-Azure-FDID`). **Never deployed so far.** |
 | `--wait-until hold\|detach` | `hold` | What happens to deferred work such as `after()` when the response is complete. `hold` keeps the response open until the work is done; `detach` answers at once, which is safe for short work only (an idle instance is removed after about 1.5 to 3.5 minutes). |
-| `--always-ready <n>` | `0` | Keeps `n` instances of the HTTP function running, so that a request does not wait for a cold start. Billed continuously; **not measured with this package**. |
+| `--always-ready <n>` | `0` | Keeps `n` instances of the HTTP function running, so that a request does not wait for a cold start. Billed continuously. Measured once: the first request after about 17 idle minutes took 0.15 s instead of 2.4 s. |
 | `--full-telemetry` | off | Turns Application Insights sampling off. Costs more with traffic. |
 | `--no-warm-up`, `--no-prime` | off | Skip the wait for the first answer, or the priming. |
 | `--output-file <path>` | none | Writes the URL and the resource names as JSON. |

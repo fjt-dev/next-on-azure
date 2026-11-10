@@ -4,7 +4,7 @@ This repository runs Next.js on Azure Functions (`next-on-azure`), developed wit
 
 ## What this is
 
-A pnpm + Turborepo monorepo. The package is `packages/next-on-azure` (provisional name, ADR-0017): a `withAzure()` config helper, cache handlers on Blob and Table Storage, the Functions entry that forwards requests to the Next.js standalone server, a CLI (`package`, `deploy`, `prime`) and a Bicep template for one Azure Functions app (Flex Consumption); Front Door is optional. It does not use `@opennextjs/aws` (ADR-0016). Full context is in `docs/`.
+A pnpm + Turborepo monorepo. The package is `packages/next-on-azure` (name confirmed by the maintainer on 2026-11-10, ADR-0018): a `withAzure()` config helper, cache handlers on Blob and Table Storage, the Functions entry that forwards requests to the Next.js standalone server, a CLI (`package`, `deploy`, `prime`) and a Bicep template for one Azure Functions app (Flex Consumption); Front Door is optional. It does not use `@opennextjs/aws` (ADR-0016). Full context is in `docs/`.
 
 ## Read before working
 
@@ -19,7 +19,7 @@ A pnpm + Turborepo monorepo. The package is `packages/next-on-azure` (provisiona
 - **Tests with every change.** A behavior change needs a test in `packages/tests-unit` (and an E2E case if it is visible over HTTP). Tests that document a known gap use `it.fails` so they flag themselves when the gap is fixed.
 - **Verification honesty.** Never write that something works unless it was run. Mark it **Verified (local)**, **Verified (Azure)** or **Unverified** in `docs/compatibility.md`.
 - **Do not create Azure resources without asking.** Deploying costs money. Follow `docs/contribute/azure_runs.md`: dedicated resource group, time window, cost ceiling, delete by name, next-day inventory. Run the local stack first.
-- **Package name is provisional.** Do not hard-code it in source (ADR-0005, ADR-0017).
+- **Package name: `next-on-azure`** (ADR-0018). It was free on npm when checked; check again on the publish day (the release plan). Do not rename it without a new ADR.
 - **The runtime `.cjs` files must not `require("node:...")`** (Next.js 16 bundles them with Turbopack; see `docs/troubleshooting.md`).
 - **Do not read the code of other Azure adapters for Next.js or OpenNext** (for example the npm package `opennextjs-azure` by another author): not the repository, the tarball or its documentation beyond the registry listing. Reading it would influence the design. Use official sources (Next.js, Microsoft Learn) and this project's own measurements.
 

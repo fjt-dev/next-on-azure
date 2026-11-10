@@ -1,6 +1,6 @@
 # Get started
 
-> **Experimental, pre-release.** The package is not published to npm yet and has the provisional name `next-on-azure`, so the install step works from a checkout of this repository only (`examples/standalone` is a working app). What is verified is in [Compatibility](./compatibility.md).
+> **Experimental, pre-release.** The package is not published to npm yet, so the install step works from a checkout of this repository only (`examples/standalone` is a working app). What is verified is in [Compatibility](./compatibility.md).
 
 ## Prerequisites
 

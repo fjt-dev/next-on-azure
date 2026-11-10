@@ -1,4 +1,4 @@
-# next-on-azure (provisional name, not published)
+# next-on-azure (not published)
 
 Runs Next.js on one Azure Function (Flex Consumption) with Blob and Table Storage. Experimental. See the [documentation](../../docs/README.md).
 

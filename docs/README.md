@@ -1,6 +1,6 @@
 # Documentation
 
-> **Experimental, pre-release, not published.** `next-on-azure` is a provisional name (ADR-0017).
+> **Experimental, pre-release, not published.**
 
 `next-on-azure` runs a Next.js app on **one Azure Function (Flex Consumption)**: the Next.js server runs inside the Functions worker, and its caches are kept in Blob and Table Storage. It uses the options Next.js documents for this (`output: "standalone"`, `cacheHandler`, `cacheHandlers`) and does not depend on `@opennextjs/aws`.
 

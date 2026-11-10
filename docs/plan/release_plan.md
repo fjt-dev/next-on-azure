@@ -6,7 +6,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 
 | Area | State |
 | --- | --- |
-| Package | `packages/next-on-azure`, provisional name, private, version 0.0.1 |
+| Package | `packages/next-on-azure`, private, version 0.0.1; the name was confirmed on 2026-11-10 ([ADR-0018](./decisions.md#adr-0018-the-package-name-is-next-on-azure)) |
 | Verified on Azure | The HTTP suite passes on Next.js 15.5.29 (47 cases, 2026-11-08) and 16.4.5 (48 cases, 2026-11-09 and 11-10, with `middleware.js` and with `proxy.js`; `cacheComponents` with a small app): Flex Consumption, japaneast, Node 22; first request after about 17 idle minutes 2.4 s, 0.15 s with `--always-ready 1` (one sample each); see [Compatibility](../compatibility.md) |
 | Verified locally and in CI | Next.js 15.5.29 and 16.4.5 (`pnpm e2e:standalone`), 126 unit and 3 integration tests, lint, audit, secret scan, license allow-list; all CI jobs green |
 | Not verified | Front Door, the cost figures, the `azure-e2e` workflow after its rewrite, macOS install tests in CI |
@@ -16,7 +16,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 
 | # | Decision | Notes |
 | --- | --- | --- |
-| P1 | The package name | `next-on-azure` is provisional and free on npm (checked 2026-11-08). Check again on the publish day. The npm package `opennextjs-azure` by another author exists; its code is not read ([AGENTS.md](../../AGENTS.md)) |
+| P1 | The package name | **Decided 2026-11-10: `next-on-azure`** (ADR-0018). Free on npm when checked on 2026-11-08; check again on the publish day. The npm package `opennextjs-azure` by another author exists; its code is not read ([AGENTS.md](../../AGENTS.md)) |
 | P2 | Public or private, and when | A public repository gets unlimited free Actions minutes on standard runners (GitHub policy, to be confirmed), branch protection and environment reviewers on the free plan |
 | P3 | The promise of `0.1.0` | Suggested: "experimental, App Router and Pages Router, Next.js 15, pnpm, Linux or macOS build machine"; the README lists the **Unverified** rows |
 | P4 | npm account with two-factor authentication, package or scope, trusted publishing for the repository, a security contact address | Only the maintainer can do these |

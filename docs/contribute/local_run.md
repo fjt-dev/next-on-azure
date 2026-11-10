@@ -28,5 +28,4 @@ To try another Next.js version, change `next` in the catalog of `pnpm-workspace.
 
 - TypeScript with ESM; relative imports include the `.js` extension.
 - Do not import `@azure/*` statically in override modules ([ADR-0007](../plan/decisions.md#adr-0007-azure-sdks-are-imported-at-runtime-only)).
-- Do not hard-code the package name in source files ([ADR-0005](../plan/decisions.md#adr-0005-package-name-is-deferred)).
 - Update the [work log](../plan/worklog.md) and [roadmap](../plan/roadmap.md) with every change.

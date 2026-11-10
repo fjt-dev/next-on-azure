@@ -77,7 +77,7 @@ docs/                      documentation, plan and work log
 
 ## ADR-0005: Package name is deferred
 
-**Status:** Accepted, 2026-11-05.
+**Status:** Accepted, 2026-11-05. Superseded by [ADR-0018](#adr-0018-the-package-name-is-next-on-azure) on 2026-11-10 (the rule about not hard-coding the name no longer applies).
 
 **Decision:** Use the placeholder name `opennextjs-azure` until just before the first publish. The `@opennextjs/*` scope belongs to the upstream organization and cannot be used. The final name must not start with `opennextjs` unless the OpenNext maintainers agree, and the package must state that it is not an official OpenNext package.
 
@@ -375,17 +375,17 @@ Cost: the app existed for about 27 minutes (13:33 to 14:00 JST). No figure from 
 
 ---
 
-## ADR-0017: Migrate to the standalone design in a new package; provisional name `next-on-azure`
+## ADR-0017: Migrate to the standalone design in a new package, `next-on-azure`
 
-**Date:** 2026-11-08. **Status:** accepted by the maintainer's instruction to migrate ("移行を進めてください"); the name is provisional.
+**Date:** 2026-11-08. **Status:** accepted by the maintainer's instruction to migrate ("移行を進めてください"); the name was provisional until [ADR-0018](#adr-0018-the-package-name-is-next-on-azure).
 
-**Decision.** The runtime validated by the spike ([ADR-0016](#adr-0016-run-nextjs-on-azure-without-opennextjsaws-start-with-a-spike-accepted-for-the-spike)) becomes a package of its own, `packages/next-on-azure`, with the provisional name `next-on-azure` (not published; `next-on-azure`, `next-azure-adapter`, `nextjs-on-azure` and `azure-next-adapter` were free on npm on 2026-11-08). It does not depend on `@opennextjs/aws`. The old package `packages/open-next-azure` stays untouched, with its tests and CI, until the new one reaches parity (the same E2E suite, an Azure run, docs). Then the old package is removed in a separate change. The name and the positioning are decided before publishing (ADR-0015 is superseded in spirit: `opennext-adapter-azure` no longer describes the project).
+**Decision.** The runtime validated by the spike ([ADR-0016](#adr-0016-run-nextjs-on-azure-without-opennextjsaws-start-with-a-spike-accepted-for-the-spike)) becomes a package of its own, `packages/next-on-azure`, with the name `next-on-azure` (not published; `next-on-azure`, `next-azure-adapter`, `nextjs-on-azure` and `azure-next-adapter` were free on npm on 2026-11-08). It does not depend on `@opennextjs/aws`. The old package `packages/open-next-azure` stays untouched, with its tests and CI, until the new one reaches parity (the same E2E suite, an Azure run, docs). Then the old package is removed in a separate change. The name and the positioning are decided before publishing (ADR-0015 is superseded in spirit: `opennext-adapter-azure` no longer describes the project).
 
 **Contents of the new package.** Runtime: cache handlers (`cache-handler`, `cache-handlers`) on Blob and Table, the Functions entry that forwards to the Next.js server, the cookie conversion. Build side: `withAzure(nextConfig)` (sets `output: "standalone"`, the handlers, and the settings the spike found necessary), a CLI with `package`, `prime` and `deploy`, a Bicep template without the OpenNext pieces. Code that is still good is moved from the old package by copy (flattening of pnpm trees, version and Server Actions key checks, warm-up).
 
 **Stages.** (1) the package with runtime, config helper and CLI `package`/`prime`, unit and integration tests, the example using it, local E2E; (2) simplified Bicep and `deploy`, Azure run; (3) CI jobs; (4) docs rewrite and the choice of name; (5) removal of the old package.
 
-**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now" ("一旦"): the name stays provisional. It was free on npm that day.
+**Name (2026-11-08).** The maintainer chose `next-on-azure` "for now" ("一旦"). It was free on npm that day. Confirmed on 2026-11-10 (ADR-0018).
 
 **Not decided.** Static files from Blob (today Next.js serves them from the package), Front Door, always-ready defaults, a Next.js Adapter API path for 16.2+.
 
@@ -404,3 +404,13 @@ CI (GitHub, commit 04fcd42): all jobs green, including `standalone-e2e` on Next.
 Not tested on Azure: Front Door, always-ready, Next.js 16, the Queue Data Contributor role being unnecessary (the template still grants it), a deployment over an older build with and without a stable Server Actions key, scale-out instance count.
 
 Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from Azure Cost Management yet.
+
+## ADR-0018: The package name is `next-on-azure`
+
+**Date:** 2026-11-10. **Status:** accepted by the maintainer ("next-on-azureで良い"). Supersedes [ADR-0005](#adr-0005-package-name-is-deferred).
+
+**Decision.** The package, the repository and the documentation use the name `next-on-azure`. It follows the pattern `next-on-<platform>` of other platform packages for Next.js, and says what the package does: Next.js on Azure.
+
+**Considered.** `azure-<name>`: the maintainer asked on 2026-11-10 whether to follow Microsoft's naming; rejected because `@azure/*` is Microsoft's own scope, an `azure-` prefix reads as an official package, and Microsoft's trademark guidelines are generally strict about product names that start with "Azure" (the guidelines themselves were not read in this session). `opennextjs-azure` and `opennext-*` names: dropped when the package stopped depending on `@opennextjs/aws` (ADR-0016).
+
+**Consequences.** The "provisional" notes are removed from the README, the docs and the package. The rule not to hard-code the name in source files is gone. Before the first publish the name must be free on npm (checked on 2026-11-08; check again on the publish day); if it is not, a new ADR chooses another one.

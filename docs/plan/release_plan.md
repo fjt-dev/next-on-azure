@@ -11,6 +11,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 | Verified locally and in CI | Next.js 15.5.29 and 16.4.5 (`pnpm e2e:standalone`), 126 unit and 3 integration tests, lint, audit, secret scan, license allow-list; all CI jobs green |
 | Not verified | Front Door, the cost figures, the `azure-e2e` workflow after its rewrite, macOS install tests in CI |
 | Repository | Private (`fjt-dev/next-on-azure`), one maintainer; the documentation site is a separate private repository (`fjt-dev/docs-next-on-azure`) |
+| Documentation site | Domain **`next-on-azure.fjtd.dev`** (decided 2026-11-10; DNS is at Cloudflare; the maintainer sets up the DNS records and the custom domain on Azure). Not deployed permanently yet; Flex Consumption supports a free managed certificate for a custom domain, but only through the portal or Bicep, not the Azure CLI (Microsoft docs, read 2026-11-10). Whether a redeployment with `deploy` keeps the binding is **Unverified**; Cloudflare in front as a CDN for `/_next/static/*` is an option to measure |
 
 ## 2. Decisions that are the maintainer's
 
@@ -19,7 +20,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 | P1 | The package name | **Decided 2026-11-10: `next-on-azure`** (ADR-0018). Free on npm when checked on 2026-11-08; check again on the publish day. The npm package `opennextjs-azure` by another author exists; its code is not read ([AGENTS.md](../../AGENTS.md)) |
 | P2 | Public or private, and when | A public repository gets unlimited free Actions minutes on standard runners (GitHub policy, to be confirmed), branch protection and environment reviewers on the free plan |
 | P3 | The promise of `0.1.0` | Suggested: "experimental, App Router and Pages Router, Next.js 15, pnpm, Linux or macOS build machine"; the README lists the **Unverified** rows |
-| P4 | npm account with two-factor authentication, package or scope, trusted publishing for the repository, a security contact address | Only the maintainer can do these |
+| P4 | npm account with two-factor authentication, package or scope, trusted publishing for the repository, a security contact address | The account `fjtd` exists (npmjs.com/~fjtd) and the maintainer states that two-factor authentication is on (not verifiable from outside). The name `next-on-azure` and `@fjtd/next-on-azure` were both unpublished on 2026-11-10 (the registry answers 404). Contacts: `security@fjtd.dev`, `conduct@fjtd.dev`. Still to do: trusted publishing (R3) |
 
 ### Making the repository public (P2): audit of 2026-11-10
 

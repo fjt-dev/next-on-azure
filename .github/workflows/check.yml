@@ -146,3 +146,47 @@ jobs:
           path: ${{ runner.temp }}/standalone-logs
           if-no-files-found: ignore
           retention-days: 7
+
+  install:
+    # The packed package installed the way a user does it (npm, Yarn 1) into a clean project, built,
+    # packaged and run on the Functions host with Azurite: the pnpm workspace link hides layout problems.
+    name: install test (${{ matrix.manager }}, Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        manager: [npm, yarn]
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+
+      - name: Install pnpm
+        run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install, build, package and test
+        run: node scripts/install-test.mjs ${{ matrix.manager }}
+        env:
+          LOCAL_STACK_LOG_DIR: ${{ runner.temp }}/install-logs
+
+      - name: Upload host logs of a failed run
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: install-logs-${{ matrix.manager }}-node-${{ matrix.node }}
+          path: ${{ runner.temp }}/install-logs
+          if-no-files-found: ignore
+          retention-days: 7

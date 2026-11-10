@@ -7,6 +7,7 @@ Workflow `check`: every pull request and every push to `main`; superseded runs o
 | `check` (Node 22 and 24) | `pnpm install --frozen-lockfile`, lint, build, type check, unit tests, Azurite integration tests, `az bicep build` of the template |
 | `supply-chain` | production audit, secret scan, license allow-list ([Supply chain](./supply_chain.md)) |
 | `e2e` (Next.js 15 and 16.4.5, Node 22) | `pnpm e2e:standalone`; on failure it uploads the host log (`LOCAL_STACK_LOG_DIR`) for 7 days |
+| `install` (npm and Yarn 1, Node 22 and 24) | `node scripts/install-test.mjs`: packs the package, installs the tarball into a clean copy of the example, builds, packages and runs the HTTP suite on the Functions host; on failure it uploads the host log. The `pnpm` workspace link hides layout problems, this job does not |
 
 ## Security rules for workflows
 

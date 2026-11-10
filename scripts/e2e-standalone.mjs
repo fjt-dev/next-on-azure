@@ -1,7 +1,8 @@
 // Runs the HTTP E2E suite against examples/standalone (next-on-azure, ADR-0016/0017): packages the
 // example for the local machine, starts Azurite and the Functions host, runs the `remote` project of
 // tests-e2e against http://localhost:7071, and stops everything. Set LOCAL_STACK_LOG_DIR to keep the
-// host output (CI uploads it when the run fails).
+// host output (CI uploads it when the run fails). With `--app <dir>` it runs an already packaged app
+// (`<project>/.next-azure/app`) instead, for scripts/install-test.mjs.
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -15,12 +16,16 @@ function run(cmd, args, env = {}) {
   return r.status ?? 1;
 }
 
-if (run("pnpm", ["--filter", "example-standalone", "run", "standalone"]) !== 0) process.exit(1);
+const appArg = process.argv.indexOf("--app");
+const app = appArg >= 0 ? process.argv[appArg + 1] : undefined;
+if (!app && run("pnpm", ["--filter", "example-standalone", "run", "standalone"]) !== 0) {
+  process.exit(1);
+}
 
 const logDir = process.env.LOCAL_STACK_LOG_DIR;
 if (logDir) fs.mkdirSync(logDir, { recursive: true });
 const log = logDir ? fs.openSync(path.join(logDir, "standalone-local.log"), "a") : "inherit";
-const stack = spawn("node", ["scripts/standalone-local.mjs"], {
+const stack = spawn("node", ["scripts/standalone-local.mjs", ...(app ? [app] : [])], {
   cwd: root,
   stdio: ["ignore", log, log],
 });

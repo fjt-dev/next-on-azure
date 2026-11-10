@@ -1019,3 +1019,9 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - Not done: Linux, Node 22 and 24 (the CI matrix would do it as a job that packs, installs and runs); Azure.
 - R2 checked: both secret scans (tree and history) find nothing; no e-mail address; the only GUIDs in tracked files are built-in role ids. Left for the maintainer: the GitHub user and repository ids in the OIDC subject, deleted resource names and a home-directory path in this log.
 - The release plan state table was brought up to date (it still described Next.js 16 and always-ready as unverified).
+
+## Session 54 (2026-11-10): the install test as a CI job
+
+- `scripts/install-test.mjs npm|yarn [--next <version>]` packs the package, installs the tarball into a clean copy of `examples/standalone` (versions of Next.js and React from the catalog), builds, packages and runs the suite through `scripts/e2e-standalone.mjs --app <dir>` (new option: run an already packaged app). Run here (macOS, Node 26): npm and Yarn 1.22, Next.js 15.5.29, 48 of 48 each.
+- New CI job `install` (npm and Yarn 1, Node 22 and 24, Linux): the item R4 of the release plan (Linux, Node 22 and 24). **Its first run on GitHub is still to be seen.** macOS stays a local check (macOS runners are billed at a higher rate).
+- An earlier CI run of the same day failed once in `pnpm install` (the download of the Functions Core Tools binary by its postinstall, a network error); the rerun passed.

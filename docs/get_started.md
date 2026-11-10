@@ -51,6 +51,9 @@ next-on-azure deploy --resource-group <rg> --name <short-name> --location <regio
 | `--front-door` | off | Puts Azure Front Door in front (recurring base fee). The app then refuses requests that did not pass through it (`X-Azure-FDID`). **Never deployed so far.** |
 | `--wait-until hold\|detach` | `hold` | What happens to deferred work such as `after()` when the response is complete. `hold` keeps the response open until the work is done; `detach` answers at once, which is safe for short work only (an idle instance is removed after about 1.5 to 3.5 minutes). |
 | `--always-ready <n>` | `0` | Keeps `n` instances of the HTTP function running, so that a request does not wait for a cold start. Billed continuously. Measured once: the first request after about 17 idle minutes took 0.15 s instead of 2.4 s. |
+| `--memory <512\|2048\|4096>` | `2048` | Memory of each instance (MB). Flex Consumption bills memory times execution time, so a smaller size costs less per request; it must hold the Next.js server and, with `next/image`, `sharp`. **Unverified on Azure below 2048.** |
+| `--max-instances <n>` | `20` | Upper bound on instances: a burst or abuse cannot scale (and bill) without limit. |
+| `--cache-retention-days <n>` | `30` | A lifecycle rule deletes cache entries not written for `n` days, and with them the entries of old builds, which are never read again. `0` keeps everything. A deleted entry is a cache miss: the page is rendered and written again. **Unverified on Azure** (the template compiles; the rule was never deployed). |
 | `--full-telemetry` | off | Turns Application Insights sampling off. Costs more with traffic. |
 | `--no-warm-up`, `--no-prime` | off | Skip the wait for the first answer, or the priming. |
 | `--output-file <path>` | none | Writes the URL and the resource names as JSON. |

@@ -43,18 +43,36 @@ export function bicepParameters(argv: string[]): string[] {
   if (waitUntilMode !== "hold" && waitUntilMode !== "detach") {
     throw new Error('--wait-until must be "hold" or "detach"');
   }
-  return [
+  const parameters = [
     `name=${name}`,
     `frontDoor=${argv.includes("--front-door")}`,
     `waitUntilMode=${waitUntilMode}`,
     `alwaysReadyInstances=${integerOption(argv, "--always-ready", 0, 0)}`,
     `fullTelemetry=${argv.includes("--full-telemetry")}`,
   ];
+  // Cost settings are passed only when given: main.bicep holds the defaults.
+  const memory = option(argv, "--memory");
+  if (memory !== undefined) {
+    if (!["512", "2048", "4096"].includes(memory)) {
+      throw new Error("--memory must be 512, 2048 or 4096 (MB)");
+    }
+    parameters.push(`instanceMemoryMB=${memory}`);
+  }
+  if (option(argv, "--max-instances") !== undefined) {
+    parameters.push(`maximumInstanceCount=${integerOption(argv, "--max-instances", 20, 1, 1000)}`);
+  }
+  if (option(argv, "--cache-retention-days") !== undefined) {
+    parameters.push(
+      `cacheRetentionDays=${integerOption(argv, "--cache-retention-days", 30, 0, 36500)}`,
+    );
+  }
+  return parameters;
 }
 
 /**
  * next-on-azure deploy -g <rg> -n <name> [-l <location>] [--front-door] [--wait-until hold|detach]
- *   [--always-ready <n>] [--full-telemetry] [--no-warm-up] [--no-prime] [--output-file <path>]
+ *   [--always-ready <n>] [--memory 512|2048|4096] [--max-instances <n>] [--cache-retention-days <n>]
+ *   [--full-telemetry] [--no-warm-up] [--no-prime] [--output-file <path>]
  *
  * Creates the infrastructure with Bicep, deploys `.next-azure/app.zip`, waits for the first answer
  * and requests every prerendered route once. Creates billable resources; see

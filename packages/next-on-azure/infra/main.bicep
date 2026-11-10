@@ -42,6 +42,10 @@ param fullTelemetry bool = false
 @minValue(0)
 param alwaysReadyInstances int = 0
 
+@description('Delete cache entries that were not written for this many days: a lifecycle rule on the cache container. It also removes the entries of old builds, which are never read again. 0 keeps everything. A deleted entry is only a cache miss: the page is rendered again and written again.')
+@minValue(0)
+param cacheRetentionDays int = 30
+
 @description('What happens to deferred work (after(), queue enqueues) when the response is complete. "hold" keeps the response open until the work is done (safe, the client waits). "detach" ends the response at once and lets the work run in the background (see ADR-0006 for what is known about the platform).')
 @allowed(['hold', 'detach'])
 param waitUntilMode string = 'hold'
@@ -81,6 +85,35 @@ resource cache 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-0
   parent: blobService
   name: 'cache'
   properties: { publicAccess: 'None' }
+}
+
+// Entries are keyed by build id: without this rule every deployment leaves its entries behind for good.
+// The rule is not applied to the deploy-app container, which the platform fills.
+resource lifecycle 'Microsoft.Storage/storageAccounts/managementPolicies@2023-05-01' = if (cacheRetentionDays > 0) {
+  parent: storage
+  name: 'default'
+  properties: {
+    policy: {
+      rules: [
+        {
+          enabled: true
+          name: 'delete-old-cache-entries'
+          type: 'Lifecycle'
+          definition: {
+            actions: {
+              baseBlob: {
+                delete: { daysAfterModificationGreaterThan: cacheRetentionDays }
+              }
+            }
+            filters: {
+              blobTypes: ['blockBlob']
+              prefixMatch: ['${cache.name}/']
+            }
+          }
+        }
+      ]
+    }
+  }
 }
 
 resource deployContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {

@@ -55,6 +55,36 @@ describe("bicepParameters", () => {
     ]);
   });
 
+  it("passes the cost settings only when they are given, and checks them", () => {
+    expect(
+      bicepParameters([
+        "-n",
+        "a",
+        "--memory",
+        "512",
+        "--max-instances",
+        "5",
+        "--cache-retention-days",
+        "7",
+      ]),
+    ).toEqual([
+      "name=a",
+      "frontDoor=false",
+      "waitUntilMode=hold",
+      "alwaysReadyInstances=0",
+      "fullTelemetry=false",
+      "instanceMemoryMB=512",
+      "maximumInstanceCount=5",
+      "cacheRetentionDays=7",
+    ]);
+    expect(bicepParameters(["-n", "a", "--cache-retention-days", "0"])).toContain(
+      "cacheRetentionDays=0",
+    );
+    expect(() => bicepParameters(["-n", "a", "--memory", "1024"])).toThrow(/512, 2048 or 4096/);
+    expect(() => bicepParameters(["-n", "a", "--max-instances", "0"])).toThrow(/integer/);
+    expect(() => bicepParameters(["-n", "a", "--cache-retention-days", "-1"])).toThrow(/integer/);
+  });
+
   it("needs a name and a valid wait-until mode", () => {
     expect(() => bicepParameters([])).toThrow(/--name/);
     expect(() => bicepParameters(["-n", "a", "--wait-until", "later"])).toThrow(/hold.*detach/);
@@ -67,7 +97,17 @@ describe("bicepParameters", () => {
       path.resolve(import.meta.dirname, "../../../../next-on-azure/infra/main.bicep"),
       "utf8",
     );
-    for (const p of bicepParameters(["-n", "a"])) {
+    const all = bicepParameters([
+      "-n",
+      "a",
+      "--memory",
+      "512",
+      "--max-instances",
+      "5",
+      "--cache-retention-days",
+      "7",
+    ]);
+    for (const p of all) {
       expect(bicep).toMatch(new RegExp(`^param ${p.split("=")[0]} `, "m"));
     }
   });

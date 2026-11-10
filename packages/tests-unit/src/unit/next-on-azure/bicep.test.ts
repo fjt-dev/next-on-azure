@@ -50,6 +50,19 @@ describe("next-on-azure main.bicep", () => {
     expect(bicep).toMatch(/frontDoor \? \[\s*\/\/[^\n]*\n\s*\{ name: 'FRONT_DOOR_ID'/);
   });
 
+  it("deletes old cache entries with a lifecycle rule on the cache container only", () => {
+    expect(bicep).toMatch(/param cacheRetentionDays int = 30/);
+    expect(bicep).toMatch(/managementPolicies@[\d-]+' = if \(cacheRetentionDays > 0\)/);
+    expect(bicep).toMatch(/daysAfterModificationGreaterThan: cacheRetentionDays/);
+    expect(bicep).toMatch(/prefixMatch: \['\$\{cache\.name\}\/'\]/); // never deploy-app
+    expect(bicep).toMatch(/blobTypes: \['blockBlob'\]/);
+  });
+
+  it("keeps a bound on the instance count and offers the three memory sizes of Flex Consumption", () => {
+    expect(bicep).toMatch(/param maximumInstanceCount int = 20/);
+    expect(bicep).toMatch(/@allowed\(\[512, 2048, 4096\]\)\nparam instanceMemoryMB/);
+  });
+
   it("names the containers and the table the handlers default to", () => {
     expect(bicep).toMatch(/name: 'cache'/);
     expect(bicep).toMatch(/var tableName = 'tagcache'/);

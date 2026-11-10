@@ -9,7 +9,7 @@ Rewritten 2026-11-08 for the design without OpenNext ([ADR-0016](./decisions.md)
 | Package | `packages/next-on-azure`, provisional name, private, version 0.0.1 |
 | Verified on Azure | The HTTP suite passes on Next.js 15.5.29 (47 cases, 2026-11-08) and 16.4.5 (48 cases, 2026-11-09 and 11-10, with `middleware.js` and with `proxy.js`; `cacheComponents` with a small app): Flex Consumption, japaneast, Node 22; first request after about 17 idle minutes 2.4 s, 0.15 s with `--always-ready 1` (one sample each); see [Compatibility](../compatibility.md) |
 | Verified locally and in CI | Next.js 15.5.29 and 16.4.5 (`pnpm e2e:standalone`), 126 unit and 3 integration tests, lint, audit, secret scan, license allow-list; all CI jobs green |
-| Not verified | Front Door, the cost figures, the `azure-e2e` workflow after its rewrite, Linux and Node 22/24 install tests of the packed tarball |
+| Not verified | Front Door, the cost figures, the `azure-e2e` workflow after its rewrite, macOS install tests in CI |
 | Repository | Private (`fjt-dev/next-on-azure`), one maintainer; the documentation site is a separate private repository (`fjt-dev/docs-next-on-azure`) |
 
 ## 2. Decisions that are the maintainer's
@@ -30,10 +30,10 @@ Gate: every item done, and one Azure run on the release commit with the whole su
 | R1 | `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue and pull request templates, `CODEOWNERS` | S |
 | R2 | Scrub before the repository becomes public: the sample client id in `secret-scan.test.ts`, the OIDC subject in `azure_e2e.md`, resource names in the work log; run the history scan again | S; **checked 2026-11-10**: working tree and history scans find nothing; the sample client id is gone; no e-mail address in tracked files; the only GUIDs are built-in role ids; left: the GitHub user and repository ids in the OIDC subject (`azure_e2e.md`, public through the GitHub API anyway), names of deleted resources and a home-directory path in the work log: the maintainer decides whether to scrub them |
 | R3 | Release pipeline: Changesets version pull request, a `release` workflow with npm provenance and trusted publishing (no long-lived token), SHA-pinned actions, a protected environment; dry run with `npm publish --dry-run` | M |
-| R4 | Install test of the packed tarball in a clean project (Node 22 and 24, Linux and macOS), running `package` on the example and on the documentation site (which already installs from a tarball) | M; **started 2026-11-10**: npm, macOS, Node 26 done (see R7); Linux, Node 22 and 24: CI job `install` added (first run to be seen) |
+| R4 | Install test of the packed tarball in a clean project (Node 22 and 24, Linux and macOS), running `package` on the example and on the documentation site (which already installs from a tarball) | M; **started 2026-11-10**: npm, macOS, Node 26 done (see R7); Linux, Node 22 and 24: CI job `install` passes (2026-11-10, commit a82be0d); macOS stays a local check |
 | R5 | GitHub settings: branch protection on `main` with the required checks, review of workflow changes, Dependabot, secret scanning and push protection | S |
 | R6 | Azure run on the release commit: the suite on Next.js 15 and 16, `--always-ready 1` measurement (done once on 2026-11-10), one `--front-door` deployment, the cost recorded; first a run of `azure-e2e` | M, costs money |
-| R7 | npm and Yarn layouts of `node_modules` (only pnpm is verified): a clean-install test for npm; Yarn documented as unverified | M; **done locally 2026-11-10**: npm (Next.js 15 and 16) and Yarn 1 pass the suite (48 cases); Yarn Plug'n'Play was found to produce a broken package and is now refused with a message; the CI job `install` runs npm and Yarn 1 on Linux with Node 22 and 24 |
+| R7 | npm and Yarn layouts of `node_modules` (only pnpm is verified): a clean-install test for npm; Yarn documented as unverified | M; **done locally 2026-11-10**: npm (Next.js 15 and 16) and Yarn 1 pass the suite (48 cases); Yarn Plug'n'Play was found to produce a broken package and is now refused with a message; the CI job `install` runs npm and Yarn 1 on Linux with Node 22 and 24 and passes (it found a bug on its first run, see the work log) |
 
 ## 4. Stage 2: beta
 

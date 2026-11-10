@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for looking at `next-on-azure`. It is an experimental project with one maintainer, so please open an issue before you start on a large change.
+Thank you for looking at `next-on-azure`. It is an experimental project with one maintainer, so please open an issue before you start on a large change. Everyone taking part is expected to follow the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Set up
 

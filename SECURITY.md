@@ -4,7 +4,7 @@
 
 ## Reporting a vulnerability
 
-Please do not open a public issue for a security problem. Use GitHub's private vulnerability reporting: open the **Security** tab of this repository and choose **Report a vulnerability**. Include what you found, how to reproduce it, and the version or commit.
+Please do not open a public issue for a security problem. Use GitHub's private vulnerability reporting: open the **Security** tab of this repository and choose **Report a vulnerability**. Or send an e-mail to security@fjtd.dev. Include what you found, how to reproduce it, and the version or commit.
 
 This is a project with one maintainer. Reports are answered on a best-effort basis; there is no guaranteed response time and no bug bounty.
 

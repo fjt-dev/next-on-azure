@@ -1,6 +1,6 @@
 # Cost
 
-What a deployment costs depends on the traffic. This page says what is billed, what was measured on Azure, and what the bill looks like at different traffic. The estimates are made from measurements of one site (this documentation site) and are not bills: nothing here was compared with an Azure Cost Management figure yet.
+What a deployment costs depends on the traffic. This page says what is billed, what was measured on Azure, and what the bill looks like at different traffic. The estimates are made from measurements of one site (this documentation site) and are not bills. The only bill read so far is that of the short runs below (see "A real bill").
 
 ## What is billed
 
@@ -31,6 +31,10 @@ The documentation site was deployed twice on 2026-11-10 (Flex Consumption, japan
 
 The largest part of the telemetry is not the request record but the "Executing" and "Executed" messages of the function. `--request-telemetry errors` sets `Host.Results` to `Error` and `Function.server` to `Warning`; the app setting names contain a period, and that works on Flex Consumption.
 
+## A real bill
+
+Azure Cost Management (actual cost, read through its API on 2026-11-11) for the resource group of the runs, 2026-11-08 to 2026-11-10: **0.28 yen in total** (0.0006 on 11-08 and 0.28 on 11-10; nothing was shown for 11-09, so usage of the last days may not be reported yet). The runs in that group were three short deployments of the example (17 to 35 minutes each) and the two apps of the documentation site (about two hours), each with a few thousand requests. This fits the estimate for a small site: inside the free grants, so the bill is the small items. It says nothing about the cost at real traffic, and a figure read within a day or two of the usage can still grow.
+
 ## Estimate by traffic
 
 For a documentation-like site: 4.2 requests and 186 KB per visit, measured at 2048 MB. Prices are the Azure retail prices for Japan East of 2026-11-10 in USD: 0.40 per million executions, 0.000026 per GB-second, Log Analytics 3.34 per GB, Blob reads 0.004 per 10,000, outbound data 0.11 per GB after what looks like a free first 100 GB (**tier sizes not confirmed**). Free grants: 250,000 executions, 100,000 GB-seconds and 5 GB of Log Analytics a month, taken from the Azure docs and not re-read from the price list.
@@ -59,6 +63,6 @@ Up to about 100,000 visits a month the bill is inside the free grants or a few d
 
 ## What was not measured
 
-- A bill: no Azure Cost Management figure has been read; the runs were short (about 90 minutes for the documentation site).
+- A bill at traffic: the one bill read is for runs of minutes to hours with scripted traffic, see "A real bill" below.
 - Traffic of a real site: the visits were scripted, 4 at a time. Dynamic pages, images and Server Actions were not part of the load.
 - Outbound data prices above the free first part, and Table Storage prices.

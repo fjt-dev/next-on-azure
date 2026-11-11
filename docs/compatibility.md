@@ -56,6 +56,6 @@ The range is the `next` peer range of the package, inherited from the first desi
 - Concurrent regeneration after a revalidation is not coalesced.
 - `after()` work cannot be tied to one request: a response may also wait for work that other requests started earlier (at most 220 s).
 - Absolute URLs that application code builds from `request.url` in middleware and writes into a response body show the loopback origin (`http://localhost:3000`); a redirect's `Location` header is corrected.
-- Front Door is untested, and so is the cost of always-ready (the Azure Cost Management figure has not been read).
+- Front Door is untested, and so is the cost of always-ready (the only Azure Cost Management figure read is for the short runs: [Cost](./cost.md#a-real-bill)).
 - A rewrite by `proxy` (Next.js 16.4.5) leaves the response header `x-middleware-rewrite` with the loopback origin (`http://localhost:3000/...`). Seen on Azure on 2026-11-10; whether Next.js 15 or a plain `next start` does the same was not checked.
 - The behavior differences against OpenNext that come from Next.js's own server are listed in [Comparison](./comparison.md).

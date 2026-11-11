@@ -1113,3 +1113,5 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - Open for the maintainer: the `npm-publish` environment, the trusted publisher on npm (and whether npm accepts one before the first publish of a new name).
 
 - 2026-11-11: the maintainer states that the routing and the test of `security@fjtd.dev` and `conduct@fjtd.dev` were done when the addresses were created. Recorded in the release plan; the assistant did not test them.
+
+- 2026-11-11: the maintainer could not find how to add a reviewer to the environment. Read the GitHub Docs: on Free, Pro and Team, required reviewers and wait timers are public-repository features only; the repository already has the environments `npm-publish` and `azure-e2e` (no protection rules). So the reviewer is set after the repository is public; steps and the self-review caveat are in `docs/contribute/release.md`.

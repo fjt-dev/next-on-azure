@@ -6,7 +6,7 @@ A release is a tag. The `release` workflow (`.github/workflows/release.yml`) run
 
 These steps are the maintainer's: they need the npm and GitHub accounts.
 
-1. **GitHub environment.** Settings, Environments, new environment `npm-publish`; add the maintainer as required reviewer; restrict deployment to tags `v*.*.*`.
+1. **GitHub environment.** Settings, Environments, `npm-publish` (it exists; a workflow run also creates it without rules). Select "Required reviewers" and add the maintainer; **leave "Prevent self-review" off**, or the only maintainer cannot approve their own release; under "Deployment branches and tags" choose "Selected branches and tags" and add the tag rule `v*.*.*`. **Required reviewers exist only for a public repository** on the GitHub Free, Pro and Team plans (GitHub Docs, "Managing environments for deployment", read 2026-11-11), so this step comes after the repository is made public; the protection rules are ignored again if it goes back to private.
 2. **npm trusted publisher.** On npmjs.com, in the settings of the package, "Trusted publishing", choose GitHub Actions: organization or user `fjt-dev`, repository `next-on-azure`, workflow filename `release.yml`, environment `npm-publish`; allow `npm publish` among the allowed actions. The package must be configured before it can publish this way: whether npm lets you do that **before the first publish of a new name** is **not verified** (the npm documentation says that a new configuration must complete its first publish within two days, and describes the settings page of a package). If it does not, the first `0.1.0` needs another route: a one-time token with a short life, removed at once.
 3. **Two-factor authentication** on the npm account (done, stated by the maintainer).
 

@@ -41,7 +41,7 @@ jobs:
         run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bash scripts/ci/pnpm-install.sh --frozen-lockfile
 
       - name: Lint
         run: pnpm lint
@@ -79,7 +79,7 @@ jobs:
         run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bash scripts/ci/pnpm-install.sh --frozen-lockfile
 
       # Production dependencies must have no known high or critical advisory. Development tools are
       # reported but do not fail the build (see docs/contribute/supply_chain.md).
@@ -94,6 +94,9 @@ jobs:
 
       - name: License allow-list
         run: node scripts/license-check.mjs
+
+      - name: Links between the Markdown files
+        run: node scripts/check-links.mjs
 
   e2e:
     # The HTTP suite against the Next.js server running in the Functions host, with Azurite. Next.js 15
@@ -120,7 +123,7 @@ jobs:
 
       - name: Install dependencies
         if: matrix.next == 'catalog'
-        run: pnpm install --frozen-lockfile
+        run: bash scripts/ci/pnpm-install.sh --frozen-lockfile
 
       - name: Install dependencies with Next.js ${{ matrix.next }}
         if: matrix.next != 'catalog'
@@ -128,7 +131,7 @@ jobs:
           NEXT_VERSION: ${{ matrix.next }}
         run: |
           sed -i "s/^  next: .*/  next: ${NEXT_VERSION}/" pnpm-workspace.yaml
-          pnpm install --no-frozen-lockfile
+          bash scripts/ci/pnpm-install.sh --no-frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -172,7 +175,7 @@ jobs:
         run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bash scripts/ci/pnpm-install.sh --frozen-lockfile
 
       - name: Build
         run: pnpm build

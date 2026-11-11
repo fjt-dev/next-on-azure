@@ -10,7 +10,7 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 - Pushed up to `74dc394`; `check` green (all five jobs).
 - Checked the npm registry (read-only): **`opennextjs-azure` is already published by someone else** (0.2.0, MIT, Azure Functions with Blob, Table and Queue Storage, built on `@opennextjs/aws` 3.x). Read from the registry metadata and README only. `opennext-azure` and a few other names were free.
-- Wrote [the release plan](./release_plan.md): starting point, the name finding, three stages with gates, sizes and verification, fixed dates, order, Azure budget, risks, maintainer-only actions. [ADR-0015](./decisions.md#adr-0015-the-placeholder-package-name-is-taken-the-name-and-the-positioning-are-open-proposed) (proposed).
+- Wrote [the release plan](./release_plan.md): starting point, the name finding, three stages with gates, sizes and verification, fixed dates, order, Azure budget, risks, maintainer-only actions. [ADR-0015](./decisions.md#adr-0015-the-package-is-named-opennext-adapter-azure-the-positioning-is-open-superseded-by-adr-0017-for-the-name) (proposed).
 - Found two identifiers to scrub before the repository goes public: a real client id in a test sample, and the federated credential subject in the Azure E2E guide.
 
 ### Rule from the maintainer
@@ -61,7 +61,7 @@ Newest entry first. One entry per working session: what was done, what was verif
 
 - Pushed up to `d0a6867`; `check` green.
 - Read the image adapter of `@opennextjs/aws` 4.1.15: it does not cache images by design (`Cache-Control: public,max-age=<n>,immutable`, `Vary: Accept`, optional ETag and 304 with `OPENNEXT_STATIC_ETAG`). Correction: the earlier statement that the missing cache is a gap against the official adapters was wrong; on AWS the CDN does the caching.
-- [ADR-0014](./decisions.md#adr-0014-optimized-images-are-not-cached-by-the-server-opennextstaticetag-is-on) : options A to D; recommendation B (set `OPENNEXT_STATIC_ETAG`), measure on Azure before building a Blob cache. Accepted the same day (B): `OPENNEXT_STATIC_ETAG=true` in Bicep and the local stack, one E2E case (ETag, `Vary: Accept`, 304 for a matching `If-None-Match`, 200 for another size). Verified (local): unit 221, E2E 50 + 10 + 1, Bicep compiles. Not on Azure.
+- [ADR-0014](./decisions.md#adr-0014-optimized-images-are-not-cached-by-the-server-opennext_static_etag-is-on) : options A to D; recommendation B (set `OPENNEXT_STATIC_ETAG`), measure on Azure before building a Blob cache. Accepted the same day (B): `OPENNEXT_STATIC_ETAG=true` in Bicep and the local stack, one E2E case (ETag, `Vary: Accept`, 304 for a matching `If-None-Match`, 200 for another size). Verified (local): unit 221, E2E 50 + 10 + 1, Bicep compiles. Not on Azure.
 
 ---
 
@@ -782,7 +782,7 @@ A written review of the first roadmap, produced by another session from verifica
 - `git init -b main` (no commits yet).
 - Rewrote the [roadmap](./roadmap.md): Phase 1 split into 1a local Functions stack, 1b deployment shape, 1c first real deployment; added security, version-policy, rollback, readiness, `npm pack` and cross-platform install items.
 - [ADR-0002](./decisions.md#adr-0002-one-function-app-per-opennext-component) marked provisional and under re-evaluation; open question on Front Door cost added to ADR-0001; naming rule added to ADR-0005.
-- Added B1 to B14 behavioral test cases to [testing](../contribute/testing.md#required-behavioral-test-cases), added [Real Azure runs](../contribute/azure_runs.md) and [Azure notes](../inner_workings/azure_notes.md), added a Known gaps section to [Compatibility](../compatibility.md), updated `AGENTS.md`.
+- Added B1 to B14 behavioral test cases to [testing](../contribute/testing.md#what-the-suite-checks), added [Real Azure runs](../contribute/azure_runs.md) and [Azure notes](../inner_workings/azure_notes.md), added a Known gaps section to [Compatibility](../compatibility.md), updated `AGENTS.md`.
 
 ### Checked against the current code
 
@@ -1115,3 +1115,9 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - 2026-11-11: the maintainer states that the routing and the test of `security@fjtd.dev` and `conduct@fjtd.dev` were done when the addresses were created. Recorded in the release plan; the assistant did not test them.
 
 - 2026-11-11: the maintainer could not find how to add a reviewer to the environment. Read the GitHub Docs: on Free, Pro and Team, required reviewers and wait timers are public-repository features only; the repository already has the environments `npm-publish` and `azure-e2e` (no protection rules). So the reviewer is set after the repository is public; steps and the self-review caveat are in `docs/contribute/release.md`.
+
+## Session 68 (2026-11-11): link checks, install retries
+
+- `scripts/check-links.mjs` (`pnpm check-links`, a step of the `supply-chain` job): the relative links of the repository's Markdown files, the file and the `#anchor` (GitHub's rule for heading anchors; no network). First run: 22 reports; 16 were my checker blanking the code in headings; 6 were real dead links (anchors of ADR-0014 and ADR-0015, and of the testing page, that had changed): fixed. 199 links, 0 broken.
+- The documentation site cannot be checked that way: its build turns a link to something that is not on the site into plain text, silently. `scripts/check-site-links.mjs` (`pnpm check:links` there, after `pnpm build`) reads the built HTML: 37 pages, 936 internal links; it found one real dead anchor in the Japanese page (`#3-deploy`, the Japanese heading has another id): fixed.
+- `scripts/ci/pnpm-install.sh`: up to three attempts of `pnpm install`, used by all workflows (the Functions Core Tools download failed three times on runners).

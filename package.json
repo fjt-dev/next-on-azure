@@ -18,7 +18,8 @@
     "audit:prod": "pnpm audit --prod --audit-level high",
     "secret-scan": "node scripts/secret-scan.mjs",
     "license-check": "node scripts/license-check.mjs",
-    "e2e:standalone": "node scripts/e2e-standalone.mjs"
+    "e2e:standalone": "node scripts/e2e-standalone.mjs",
+    "check-links": "node scripts/check-links.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.5",

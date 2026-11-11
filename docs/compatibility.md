@@ -2,8 +2,8 @@
 
 How far each row has been verified:
 
-- **Verified (Azure)**: run against a real deployment of this package (Flex Consumption, japaneast, Node 22). The record is the HTTP suite of `packages/tests-e2e` with `E2E_TARGET=standalone` (47 passed on 2026-11-08; five host-log cases that no longer exist were skipped then) and the measurements in ADR-0016; an earlier spike of the same design gave the same results.
-- **Verified (local)**: run with Azurite and the Azure Functions host on a developer machine and in CI (`pnpm e2e:standalone`).
+- **Verified (Azure)**: run against a real deployment of this package ([Flex Consumption](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan?wt.mc_id=studentamb_679600), japaneast, Node 22). The record is the HTTP suite of `packages/tests-e2e` with `E2E_TARGET=standalone` (47 passed on 2026-11-08; five host-log cases that no longer exist were skipped then) and the measurements in ADR-0016; an earlier spike of the same design gave the same results.
+- **Verified (local)**: run with [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?wt.mc_id=studentamb_679600) and the Azure Functions host on a developer machine and in CI (`pnpm e2e:standalone`).
 - **Unverified**: implemented or expected to work, but never run.
 
 ## Next.js
@@ -37,7 +37,7 @@ The range is the `next` peer range of the package, inherited from the first desi
 | Pages prerendered by `next build` | Next.js does not read them through a custom cache handler, so on a miss in Blob the handler reads them itself from the build output, with Next.js's own file-system cache class (read-only; tag revalidation is checked against Table Storage as for any entry; [ADR-0022](./plan/decisions.md#adr-0022-the-cache-handler-reads-the-build-output-on-a-miss)). **Verified (local)** since 2026-11-11; **Unverified on Azure** after that change. Before it, each page was rendered on its first request and `deploy` primed them (Verified (Azure)); `deploy` still primes every route once. |
 | `dynamicParams = false` (App Router), `fallback: false` (Pages Router) | App Router: every path answered 404 until 2026-11-11 (Azure and local; Next.js does not render a page that is not in the cache when there is no fallback). Now the built page is found through the build output: the path answers 200, an unknown one 404, and a stale page is served and regenerated. **Verified (local)**: E2E cases, and the documentation site on Next.js 16.4.5 on the Functions host; **Unverified on Azure**. Pages Router `fallback: false`: Verified (local), it was not affected. |
 | Edge runtime | Not supported |
-| Front Door | Template compiles; **never deployed**. The `X-Azure-FDID` check of the entry: Verified (local) by unit test only. |
+| [Front Door](https://learn.microsoft.com/azure/frontdoor/front-door-overview?wt.mc_id=studentamb_679600) | Template compiles; **never deployed**. The `X-Azure-FDID` check of the entry: Verified (local) by unit test only. |
 
 ## Platform
 

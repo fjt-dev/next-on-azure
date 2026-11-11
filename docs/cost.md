@@ -6,11 +6,11 @@ What a deployment costs depends on the traffic. This page says what is billed, w
 
 | Resource | Billed by |
 | --- | --- |
-| Function app (Flex Consumption) | executions, and memory times execution time (GB-seconds), above a monthly free grant; always-ready instances are billed continuously ([ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet)) |
+| Function app ([Flex Consumption](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan?wt.mc_id=studentamb_679600)) | executions, and memory times execution time (GB-seconds), above a monthly free grant; always-ready instances are billed continuously ([ADR-0013](./plan/decisions.md#adr-0013-cold-start-always-ready-instances-first-no-timer-warmer-yet)) |
 | Application Insights and Log Analytics | ingested data (GB), above a monthly free grant |
 | Storage account | transactions and capacity |
 | Outbound data | GB sent to the internet, above a free first part |
-| Azure Front Door Standard (optional) | a base fee per profile, plus requests and data |
+| [Azure Front Door](https://learn.microsoft.com/azure/frontdoor/front-door-overview?wt.mc_id=studentamb_679600) Standard (optional) | a base fee per profile, plus requests and data |
 
 Every request runs the function, static files included. `/_next/static/*` is sent with `Cache-Control: public, max-age=31536000, immutable`, so a browser fetches each file once; `public/` files are revalidated on every request ([ADR-0020](./plan/decisions.md#adr-0020-static-files-stay-with-the-function-cost-options-first-measure-later)).
 
@@ -33,7 +33,7 @@ The largest part of the telemetry is not the request record but the "Executing" 
 
 ## A real bill
 
-Azure Cost Management (actual cost, read through its API on 2026-11-11) for the resource group of the runs, 2026-11-08 to 2026-11-10: **0.28 yen in total** (0.0006 on 11-08 and 0.28 on 11-10; nothing was shown for 11-09, so usage of the last days may not be reported yet). The runs in that group were three short deployments of the example (17 to 35 minutes each) and the two apps of the documentation site (about two hours), each with a few thousand requests. This fits the estimate for a small site: inside the free grants, so the bill is the small items. It says nothing about the cost at real traffic, and a figure read within a day or two of the usage can still grow.
+Azure Cost Management (actual cost, read through its [Query API](https://learn.microsoft.com/rest/api/cost-management/query?wt.mc_id=studentamb_679600) on 2026-11-11) for the resource group of the runs, 2026-11-08 to 2026-11-10: **0.28 yen in total** (0.0006 on 11-08 and 0.28 on 11-10; nothing was shown for 11-09, so usage of the last days may not be reported yet). The runs in that group were three short deployments of the example (17 to 35 minutes each) and the two apps of the documentation site (about two hours), each with a few thousand requests. This fits the estimate for a small site: inside the free grants, so the bill is the small items. It says nothing about the cost at real traffic, and a figure read within a day or two of the usage can still grow.
 
 ## Estimate by traffic
 

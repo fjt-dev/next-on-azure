@@ -20,12 +20,12 @@ It returns your configuration with these changes. The app's own values for `imag
 
 ## Environment variables
 
-The Bicep template sets these on the Function app.
+The [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview?wt.mc_id=studentamb_679600) template sets these on the Function app.
 
 | Variable | Default | Used by |
 | --- | --- | --- |
 | `AZURE_STORAGE_ACCOUNT_NAME` | none (required unless a connection string is set) | cache handlers |
-| `AZURE_STORAGE_CONNECTION_STRING` | none | cache handlers, local development with Azurite only |
+| `AZURE_STORAGE_CONNECTION_STRING` | none | cache handlers, local development with [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?wt.mc_id=studentamb_679600) only |
 | `CACHE_CONTAINER_NAME` | `cache` | incremental cache and `'use cache'` entries |
 | `CACHE_TABLE_NAME` | `tagcache` | tag state |
 | `NEXT_BUILD_ID` | the build id in `.next/BUILD_ID` | prefix of every key: entries of an older build are never read by a newer one |

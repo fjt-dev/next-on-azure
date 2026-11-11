@@ -8,16 +8,16 @@
 
 | Resource | Settings the app relies on |
 | --- | --- |
-| Function app on **Flex Consumption**, Linux | Node.js 22 (24 is unverified); a system-assigned managed identity; one HTTP function (`server`, route `{*path}`) that the package provides; instance memory 512, 2048 or 4096 MB (2048 is the verified one); an instance limit |
+| Function app on **[Flex Consumption](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan?wt.mc_id=studentamb_679600)**, Linux | Node.js 22 (24 is unverified); a system-assigned managed identity; one HTTP function (`server`, route `{*path}`) that the package provides; instance memory 512, 2048 or 4096 MB (2048 is the verified one); an instance limit |
 | Storage account | `cache` container (cache entries), `tagcache` table (tag state), the deployment container of the Function app (the template uses `deploy-app`) |
 | Application Insights (optional) | `APPLICATIONINSIGHTS_CONNECTION_STRING` on the app |
-| Azure Front Door (optional) | A route for `/_next/static/*` with caching; the app then checks `X-Azure-FDID` (`FRONT_DOOR_ID`). **Never deployed** |
+| [Azure Front Door](https://learn.microsoft.com/azure/frontdoor/front-door-overview?wt.mc_id=studentamb_679600) (optional) | A route for `/_next/static/*` with caching; the app then checks `X-Azure-FDID` (`FRONT_DOOR_ID`). **Never deployed** |
 
 The template also sets: TLS 1.2 or later and HTTPS only on the storage account, shared-key access off, anonymous Blob access off, `FUNCTIONS_REQUEST_BODY_SIZE_LIMIT` for large bodies and Server Actions. The settings the app reads are in [Configuration](./configuration.md#environment-variables).
 
 ## Access
 
-The app uses its managed identity; no keys or connection strings are needed (a connection string is accepted for Azurite only). On the storage account the template grants the app's identity:
+The app uses its managed identity; no keys or connection strings are needed (a connection string is accepted for [Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?wt.mc_id=studentamb_679600) only). On the storage account the template grants the app's identity:
 
 | Role | Why |
 | --- | --- |

@@ -6,7 +6,7 @@
 
 - Node.js 22 or later
 - A Next.js app on 15.5.29 or later, or 16.4.5 or later, using the App Router or the Pages Router
-- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli), signed in (`az login`), with the right to create resources in a resource group
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli?wt.mc_id=studentamb_679600), signed in (`az login`), with the right to create resources in a resource group
 - `zip` on the PATH (used by `package`)
 
 ## 1. Configure Next.js
@@ -48,10 +48,10 @@ next-on-azure deploy --resource-group <rg> --name <short-name> --location <regio
 
 | Flag | Default | Effect |
 | --- | --- | --- |
-| `--front-door` | off | Puts Azure Front Door in front (recurring base fee). The app then refuses requests that did not pass through it (`X-Azure-FDID`). **Never deployed so far.** |
+| `--front-door` | off | Puts [Azure Front Door](https://learn.microsoft.com/azure/frontdoor/front-door-overview?wt.mc_id=studentamb_679600) in front (recurring base fee). The app then refuses requests that did not pass through it (`X-Azure-FDID`). **Never deployed so far.** |
 | `--wait-until hold\|detach` | `hold` | What happens to deferred work such as `after()` when the response is complete. `hold` keeps the response open until the work is done; `detach` answers at once, which is safe for short work only (an idle instance is removed after about 1.5 to 3.5 minutes). |
 | `--always-ready <n>` | `0` | Keeps `n` instances of the HTTP function running, so that a request does not wait for a cold start. Billed continuously. Measured once: the first request after about 17 idle minutes took 0.15 s instead of 2.4 s. |
-| `--memory <512\|2048\|4096>` | `2048` | Memory of each instance (MB). Flex Consumption bills memory times execution time. Measured on Azure (documentation site, 2026-11-10): at 512 MB a request took about four times as long as at 2048 MB, so the GB-seconds per request were the same and the instance count went up: **a smaller size did not save money for this CPU-bound workload.** The site ran correctly at 512 MB; images with `sharp` were not tried. |
+| `--memory <512\|2048\|4096>` | `2048` | Memory of each instance (MB). [Flex Consumption](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan?wt.mc_id=studentamb_679600) bills memory times execution time. Measured on Azure (documentation site, 2026-11-10): at 512 MB a request took about four times as long as at 2048 MB, so the GB-seconds per request were the same and the instance count went up: **a smaller size did not save money for this CPU-bound workload.** The site ran correctly at 512 MB; images with `sharp` were not tried. |
 | `--max-instances <n>` | `20` | Upper bound on instances: a burst or abuse cannot scale (and bill) without limit. |
 | `--cache-retention-days <n>` | `30` | A lifecycle rule deletes cache entries not written for `n` days, and with them the entries of old builds, which are never read again. `0` keeps everything. A deleted entry is a cache miss: the page is rendered and written again. **Unverified on Azure** (the template compiles; the rule was never deployed). |
 | `--request-telemetry all\|errors` | `all` | `errors` sends only failures to Application Insights: `Host.Results` is set to `Error` and `Function.server` to `Warning`. Measured on Azure (2026-11-10, the documentation site): about 4.1 KB of telemetry per request with `all`, about 0.6 KB with `errors`. Application Insights bills by ingestion, and every request counts, static files included. Successful requests then do not appear in Application Insights. |
@@ -59,7 +59,7 @@ next-on-azure deploy --resource-group <rg> --name <short-name> --location <regio
 | `--no-warm-up`, `--no-prime` | off | Skip the wait for the first answer, or the priming. |
 | `--output-file <path>` | none | Writes the URL and the resource names as JSON. |
 
-Every setting lives in the Bicep template, because a redeployment replaces the app settings: a setting added later with `az functionapp config appsettings set` is gone after the next `deploy`.
+Every setting lives in the [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview?wt.mc_id=studentamb_679600) template, because a redeployment replaces the app settings: a setting added later with `az functionapp config appsettings set` is gone after the next `deploy`.
 
 ## What gets created
 

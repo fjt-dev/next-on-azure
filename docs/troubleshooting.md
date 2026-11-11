@@ -42,7 +42,7 @@ The app did not start. Read the host's log first: `az monitor app-insights query
 
 ## A setting I added with `az functionapp config appsettings set` disappeared
 
-A Bicep redeployment replaces the whole `appSettings` array. Put settings in the template.
+A [Bicep](https://learn.microsoft.com/azure/azure-resource-manager/bicep/overview?wt.mc_id=studentamb_679600) redeployment replaces the whole `appSettings` array. Put settings in the template.
 
 ## `pnpm e2e:standalone` or the local stack cannot find `func`
 
@@ -50,4 +50,4 @@ A Bicep redeployment replaces the whole `appSettings` array. Put settings in the
 
 ## A POST without Content-Length never gets an answer on the local stack
 
-The Functions Core Tools host over plain http never answered a chunked upload (the request hangs until the client gives up). Send a `Content-Length`; the test client does. Not seen over https or on Azure.
+The [Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?wt.mc_id=studentamb_679600) host over plain http never answered a chunked upload (the request hangs until the client gives up). Send a `Content-Length`; the test client does. Not seen over https or on Azure.

@@ -47,7 +47,7 @@ Azure platform facts that affect the design.
 | Front Door Standard base fee | 35.00 USD per month per profile, all zones; requests and data transfer out are extra | Azure retail prices API, public list price, queried 2026-11-06 *(verified)* |
 | Front Door Premium base fee | 330.00 USD per month per profile | same |
 
-List prices change and exclude agreements and discounts. Re-query before relying on them (`https://prices.azure.com/api/retail/prices`).
+List prices change and exclude agreements and discounts. Re-query before relying on them ([Azure Retail Prices API](https://learn.microsoft.com/rest/api/cost-management/retail-prices/azure-retail-prices?wt.mc_id=studentamb_679600), `https://prices.azure.com/api/retail/prices`).
 
 ## Open items (not verified on Flex by anyone)
 

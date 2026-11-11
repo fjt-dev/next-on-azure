@@ -11,7 +11,7 @@ Workflow `check`: every pull request and every push to `main`; superseded runs o
 
 ## Security rules for workflows
 
-- `permissions: contents: read` for the whole workflow. No job needs more. Do not add `id-token` or any write permission to this workflow; the Azure E2E workflow is separate ([Azure E2E in CI](./azure_e2e.md)) and is the only one with `id-token: write`; a unit test pins this.
+- `permissions: contents: read` for the whole workflow. No job needs more. Do not add `id-token` or any write permission to this workflow. `id-token: write` exists in two places, both pinned by a unit test: the Azure E2E workflow ([Azure E2E in CI](./azure_e2e.md)) and the publish job of the release workflow ([Release](./release.md)).
 - Never use `pull_request_target` or `workflow_run` here: they run with a privileged token against code from forks.
 - `actions/checkout` runs with `persist-credentials: false`.
 - **Every action is pinned to a full commit SHA**, with the release tag in a trailing comment. Currently: `actions/checkout` v7.0.1, `actions/setup-node` v7.1.0, `actions/upload-artifact` v7.0.2.

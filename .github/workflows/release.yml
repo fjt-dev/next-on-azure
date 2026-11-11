@@ -1,0 +1,101 @@
+name: release
+
+# Publishes next-on-azure to npm when a version tag is pushed (docs/contribute/release.md).
+# The tag must be `v<version of packages/next-on-azure/package.json>`. The publish job waits for an
+# approval of the `npm-publish` environment and uses npm trusted publishing (OIDC): no npm token is stored.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+# Read-only by default. Never run this workflow for pull requests or with pull_request_target.
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+
+jobs:
+  verify:
+    name: verify and pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: The tag matches the package, and the package may be published
+        run: |
+          node -e '
+            const p = require("./packages/next-on-azure/package.json");
+            const tag = process.env.GITHUB_REF_NAME;
+            if (tag !== `v${p.version}`) throw new Error(`tag ${tag} does not match version ${p.version}`);
+            if (p.private) throw new Error("packages/next-on-azure/package.json is still private");
+          '
+
+      - name: Install pnpm
+        run: npm install --global "pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint, type check, build, test
+        run: |
+          pnpm lint
+          pnpm typecheck
+          pnpm build
+          pnpm test
+          pnpm test:integration
+
+      - name: Pack
+        run: |
+          mkdir release
+          pnpm --filter next-on-azure pack --pack-destination release
+
+      - name: Upload the package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: package
+          path: release/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: publish to npm
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # A protected environment with the maintainer as required reviewer: nothing is published without a click.
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and the provenance of the package
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: npm supports trusted publishing
+        run: |
+          node -e '
+            const v = process.argv[1].split(".").map(Number);
+            if (v[0] < 11 || (v[0] === 11 && v[1] < 5) || (v[0] === 11 && v[1] === 5 && v[2] < 1)) {
+              throw new Error(`npm ${process.argv[1]} is older than 11.5.1`);
+            }
+          ' "$(npm --version)"
+
+      - name: Download the package that was verified
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: package
+          path: release
+
+      - name: Publish
+        run: npm publish ./release/*.tgz --provenance --access public

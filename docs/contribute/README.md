@@ -5,6 +5,7 @@ Pull requests are welcome once the repository is public. Until then the maintain
 - [Run locally](./local_run.md): build the packages and start the local stack (Azurite and the Azure Functions host)
 - [Testing](./testing.md): unit, integration and E2E tests and the required behavioral cases
 - [CI](./ci.md): what the GitHub Actions workflows run
+- [Release](./release.md): how a version is published to npm (a tag, an approval, trusted publishing)
 - [Azure E2E](./azure_e2e.md) and [real Azure runs](./azure_runs.md): the opt-in run against real resources, with its cost rules
 - [Supply chain](./supply_chain.md): audit, license check and secret scan
 

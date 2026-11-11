@@ -454,3 +454,13 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 **Not chosen.** Seeding Blob at deploy (OpenNext's populate-cache): the deployer would need a data role on the storage account, and the value shape differs by Next.js version, which the class above already knows. Reproducing the file formats in the handler: brittle across versions 15 and 16.
 
 **Consequences.** The handler depends on an internal path of Next.js (`next/dist/server/lib/incremental-cache/file-system-cache`); the E2E suite runs on 15 and 16 in CI, and a missing class degrades to the old behavior. `dynamicParams = false` works (local E2E: the built path, 404 for an unknown path, stale then regenerated; the documentation site on 16.4.5 on the Functions host). The first requests no longer render the built pages again. Priming stays: it warms the instance and starts the regeneration of stale pages. To verify on Azure: the same E2E cases against a deployment, with Next.js 15 and 16.
+
+## ADR-0023: Releases are tags, published with trusted publishing, without Changesets
+
+**Date:** 2026-11-11. **Status:** written, **not run**; the npm side is not configured.
+
+**Decision.** A release is a version tag. The `release` workflow verifies (lint, type check, build, unit and integration tests, the tag equals the package version, the package is not private), packs the package once, and a second job downloads that tarball and publishes it with `npm publish --provenance` after the approval of the protected environment `npm-publish`, using npm trusted publishing (OIDC). No npm token exists. The version and `CHANGELOG.md` are edited by hand in the release commit. Only first-party `actions/*` actions are used.
+
+**Not chosen.** Changesets: it asks for its own action (`changesets/action`), which the CI rules do not allow (third-party actions), and for a bot-made "version" pull request; for one package and one maintainer a hand-written changelog and a tag are less machinery and less supply chain. A token in a secret: a long-lived credential that trusted publishing avoids.
+
+**Consequences.** The first release depends on npm accepting a trusted publisher before a package exists, which is not verified ([Release](../contribute/release.md)). The end-to-end checks on a real deployment (R6) are done by hand before the tag, not by the workflow: the workflow has no Azure access by design.

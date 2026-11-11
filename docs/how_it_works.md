@@ -30,7 +30,7 @@ The key prefix is the build id: a new deployment starts with an empty cache, and
 
 **Time-based ISR** is Next.js's own: a request that finds an entry older than `revalidate` gets the stale page at once (`x-nextjs-cache: STALE`) and the server regenerates the page in the background, in the same process. There is no queue. If the instance is removed in the meantime, the regeneration is lost and the next request starts it again.
 
-**Priming.** With a custom cache handler Next.js does not read the pages that `next build` prerendered; each would be rendered on its first request. `next-on-azure prime` (run by `deploy`) requests every route of `.next/prerender-manifest.json` once, after which they are `HIT`.
+**The build output and priming.** `next build` prerenders pages into `.next/server`. Next.js reads them through its own file-system cache; with a custom cache handler it asks the handler instead. So on a miss in Blob the handler reads them itself, with Next.js's own `FileSystemCache` class (read-only, no memory cache), and checks the tags of the page against Table Storage as for any entry. A route without a fallback (`dynamicParams = false`) needs this: Next.js does not render a page that is not in the cache for such a route. Once a page is regenerated, its entry is in Blob and is read from there. `next-on-azure prime` (run by `deploy`) requests every route of `.next/prerender-manifest.json` once: it warms the instance and starts the regeneration of pages that are already past their revalidate time.
 
 ## `after()` and other deferred work
 

@@ -34,7 +34,8 @@ The range is the `next` peer range of the package, inherited from the first desi
 | Image optimization (`next/image`) | Verified (Azure): resize, WebP, rejection of bad sizes and remote URLs not allowed, with the Linux `sharp`. A missing source image answers **400** (Next.js's own answer on 15). Next.js's disk cache for optimized images is off (the app directory is read-only), so an optimized image is made again after an instance restarts. |
 | Cookies (several `Set-Cookie`) | Verified (Azure) |
 | Static files (`/_next/static`, `public/`) | Verified (Azure): served by the Next.js server from the package, with its `ETag` and `Cache-Control`. They are **not** in Blob or a CDN, so every request is a function execution. |
-| Pages prerendered by `next build` | They are not read from the build output: with a custom cache handler Next.js renders each on its first request. `deploy` primes them. Verified (Azure). |
+| Pages prerendered by `next build` | Next.js does not read them through a custom cache handler, so on a miss in Blob the handler reads them itself from the build output, with Next.js's own file-system cache class (read-only; tag revalidation is checked against Table Storage as for any entry; [ADR-0022](./plan/decisions.md#adr-0022-the-cache-handler-reads-the-build-output-on-a-miss)). **Verified (local)** since 2026-11-11; **Unverified on Azure** after that change. Before it, each page was rendered on its first request and `deploy` primed them (Verified (Azure)); `deploy` still primes every route once. |
+| `dynamicParams = false` (App Router), `fallback: false` (Pages Router) | App Router: every path answered 404 until 2026-11-11 (Azure and local; Next.js does not render a page that is not in the cache when there is no fallback). Now the built page is found through the build output: the path answers 200, an unknown one 404, and a stale page is served and regenerated. **Verified (local)**: E2E cases, and the documentation site on Next.js 16.4.5 on the Functions host; **Unverified on Azure**. Pages Router `fallback: false`: Verified (local), it was not affected. |
 | Edge runtime | Not supported |
 | Front Door | Template compiles; **never deployed**. The `X-Azure-FDID` check of the entry: Verified (local) by unit test only. |
 
@@ -52,7 +53,6 @@ The range is the `next` peer range of the package, inherited from the first desi
 ## Known gaps
 
 - A response that fails after its first byte (the Next.js server closes the connection) ends at that point: the client sees a shortened body with a normal end, and the failure is logged. Erroring the stream left the client waiting until the platform's timeout (measured locally). The case passes against a deployment on Azure (2026-11-09).
-- App Router routes with `dynamicParams = false` answer 404 for every path, the built ones too: Next.js does not find the prerendered page through the cache handler and, with no fallback, does not render it (`NoFallbackError`). Seen on Azure and locally on 2026-11-10 (the documentation site); `it.fails` case `routes without a fallback` in the E2E suite. The Pages Router with `fallback: false` works. Leave `dynamicParams` at its default.
 - Concurrent regeneration after a revalidation is not coalesced.
 - `after()` work cannot be tied to one request: a response may also wait for work that other requests started earlier (at most 220 s).
 - Absolute URLs that application code builds from `request.url` in middleware and writes into a response body show the loopback origin (`http://localhost:3000`); a redirect's `Location` header is corrected.

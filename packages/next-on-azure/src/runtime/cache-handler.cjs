@@ -18,8 +18,17 @@ const reviver = (_k, v) => {
   return v;
 };
 
+// What `next build` prerendered is on disk (.next/server/app and .next/server/pages). Next.js reads it
+// itself with its FileSystemCache; a custom handler is asked instead, so on a miss in Blob it is read
+// from the build output the same way, and no instance has to render a built page first. Needed for
+// routes without a fallback (`dynamicParams = false`): Next.js does not render a page that is not in the
+// cache for them and answers 404. Only the kinds that `next build` prerenders; `fetch` entries are not.
+const BUILT_KINDS = new Set(["APP_PAGE", "APP_ROUTE", "PAGES"]);
+const FILE_CACHE = "next/dist/server/lib/incremental-cache/file-system-cache";
+
 module.exports = class AzureCacheHandler {
   constructor(options) {
+    this.options = options;
     this.buildId = readBuildId(options.serverDistDir);
   }
 
@@ -27,20 +36,57 @@ module.exports = class AzureCacheHandler {
     return `${this.buildId}/${sha(key)}.json`;
   }
 
+  /** Next.js's own reader of the build output, made from the Next.js that the app runs; null when it cannot be found. */
+  fileCache() {
+    if (this.builtCache !== undefined) return this.builtCache;
+    try {
+      const resolveFrom = require("module").createRequire(
+        require("path").join(this.options.serverDistDir, "noop.js"),
+      );
+      const FileSystemCache = resolveFrom(FILE_CACHE).default;
+      // No memory cache and no writes: only reads of what the build wrote.
+      this.builtCache = new FileSystemCache({
+        ...this.options,
+        maxMemoryCacheSize: 0,
+        flushToDisk: false,
+      });
+    } catch {
+      this.builtCache = null;
+    }
+    return this.builtCache;
+  }
+
+  async readBuildOutput(key, ctx) {
+    if (!BUILT_KINDS.has(ctx.kind)) return null;
+    const cache = this.fileCache();
+    if (!cache) return null;
+    try {
+      return (await cache.get(key, ctx)) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   async get(key, ctx = {}) {
     if (inBuild()) return null;
     const { container, table } = await getClients();
-    let text;
+    let entry;
     try {
       const res = await container.getBlockBlobClient(this.blobName(key)).downloadToBuffer();
-      text = res.toString("utf8");
+      entry = JSON.parse(res.toString("utf8"), reviver);
     } catch (e) {
-      if (e.statusCode === 404) return null;
-      throw e;
+      if (e.statusCode !== 404) throw e;
+      entry = await this.readBuildOutput(key, ctx);
+      if (!entry) return null;
     }
-    const entry = JSON.parse(text, reviver);
+    // Pages and route handlers carry their tags in a response header, fetch entries next to the value.
+    const headerTags = entry.value?.headers?.["x-next-cache-tags"];
     const tags = [
-      ...new Set([...(entry.tags ?? []), ...(ctx.softTags ?? []), ...(ctx.tags ?? [])]),
+      ...new Set([
+        ...(entry.tags ?? (typeof headerTags === "string" ? headerTags.split(",") : [])),
+        ...(ctx.softTags ?? []),
+        ...(ctx.tags ?? []),
+      ]),
     ];
     for (const tag of tags) {
       try {

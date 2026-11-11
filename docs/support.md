@@ -23,6 +23,6 @@
 - The Edge runtime and external middleware (not supported).
 - Azure Front Door, Node.js 24, other regions, a Windows build machine, Yarn 2 and later, Bun: **Unverified**.
 - `after()` with `--wait-until detach`, `cacheLife` expiry, the `remote` and `private` variants of `'use cache'`: **Unverified**.
-- App Router routes with `dynamicParams = false`: they answer 404 (a known gap, see [Compatibility](./compatibility.md#known-gaps)).
+- App Router routes with `dynamicParams = false`: they answered 404 until 2026-11-11 and are now read from the build output: **Verified (local)**, Unverified on Azure.
 - Private networking, a web application firewall, customer-managed keys and other settings of a landing zone: not in the template ([ADR-0019](./plan/decisions.md#adr-0019-enterprise-use-at-the-level-of-opennext)).
 - The numbers on the [Cost](./cost.md) page are estimates from measurements of one site, and the cold start and load figures are single samples: they are not guarantees.

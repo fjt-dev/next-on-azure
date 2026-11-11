@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { cacheStatus, header, request } from "../http.js";
+import {
+  cacheStatus,
+  eventually,
+  freshPage,
+  header,
+  request,
+  sleep,
+  timestampIn,
+} from "../http.js";
 
 describe("pages", () => {
   it("renders a dynamic page on the server", async () => {
@@ -66,15 +74,31 @@ describe("cookies (B5)", () => {
   });
 });
 
-// Known gap, App Router only: with `dynamicParams = false` Next.js does not find the prerendered page through
-// the cache handler and, with no fallback, does not render it (NoFallbackError), so even the built path answers
-// 404. `it.fails` flags the day this is fixed (docs/compatibility.md, "Known gaps"). The Pages Router with
-// `fallback: false` works.
+// Routes without a fallback: Next.js does not render a page that is not in the cache for them, so the page
+// of `next build` has to be found through the cache handler (it reads the build output when Blob has no entry).
 describe("routes without a fallback", () => {
-  it.fails("serves a path of generateStaticParams when dynamicParams is false (App Router)", async () => {
-    const res = await request("/params-closed/a");
-    expect(res.status).toBe(200);
-    expect(res.text).toContain("closed a");
+  it("serves a path of generateStaticParams when dynamicParams is false (App Router), then regenerates it", async () => {
+    // The built page is older than its revalidate time by now: wait for a page that is not stale.
+    const first = await freshPage("/params-closed/a");
+    expect(first.status).toBe(200);
+    expect(first.text.replaceAll("<!-- -->", "")).toContain("closed a");
+    const builtAt = timestampIn(first.text);
+    expect(builtAt).toBeDefined();
+    expect((await request("/params-closed/unknown")).status).toBe(404);
+
+    await sleep(6500); // revalidate = 5
+    const stale = await request("/params-closed/a");
+    expect(stale.status).toBe(200);
+    expect(timestampIn(stale.text)).toBe(builtAt); // the stale page is served at once
+    const fresh = await eventually(
+      async () => {
+        const res = await request("/params-closed/a");
+        return timestampIn(res.text) !== builtAt ? res : false;
+      },
+      30_000,
+      500,
+    );
+    expect(fresh.status).toBe(200);
   });
 
   it("serves a path of getStaticPaths when fallback is false (Pages Router)", async () => {

@@ -1,4 +1,4 @@
-// Pages Router with fallback: false. Works, unlike dynamicParams = false in the App Router (app/params-closed).
+// Pages Router with fallback: false (the App Router counterpart is app/params-closed).
 export function getStaticPaths() {
   return { paths: [{ params: { slug: "known" } }], fallback: false };
 }

@@ -1123,3 +1123,8 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - `scripts/ci/pnpm-install.sh`: up to three attempts of `pnpm install`, used by all workflows (the Functions Core Tools download failed three times on runners).
 
 - 2026-11-11: links to the official Microsoft Learn pages (Flex Consumption, Bicep, Azure CLI, Azurite, Front Door, Functions Core Tools, the Cost Management Query API, the Retail Prices API) added where each term is first used in `get_started`, `infrastructure`, `cost`, `compatibility`, `configuration`, `troubleshooting` and `azure_notes`, and in the Japanese pages of the documentation site. Each URL was found through the Microsoft Learn search; the page was not opened one by one. External links are not checked by `check-links`.
+
+## Session 69 (2026-11-13): R5 script, Dependabot
+
+- CI on the last pushes: green. Dependabot is already running on the private repository: two pull requests are open (biome 2.6.5 to 2.6.6, which CI passed; `actions/download-artifact` v7.0.0 to v8.0.2 in `release.yml`, whose only use is in the release workflow that has never run, so a green CI says nothing about it: to be checked on the first release dry run, or left until then).
+- `scripts/github-settings.sh` (R5): `check` is read-only and was run (nothing set; the fork-approval endpoint answers that it is not allowed for private repositories, which shows the endpoint exists); `apply` refuses a private repository. **Not applied.** The required check names come from the check run names of the last push.

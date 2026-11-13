@@ -1,8 +1,7 @@
 {
   "name": "next-on-azure",
-  "version": "0.0.1",
-  "private": true,
-  "description": "Run Next.js on one Azure Function (Flex Consumption) with Blob and Table Storage. Not published yet.",
+  "version": "0.1.0",
+  "description": "Run Next.js on one Azure Function (Flex Consumption) with Blob and Table Storage. Experimental.",
   "license": "MIT",
   "repository": {
     "type": "git",

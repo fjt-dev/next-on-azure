@@ -21,7 +21,7 @@
 ## What is not promised
 
 - The Edge runtime and external middleware (not supported).
-- Azure Front Door, Node.js 24, other regions, a Windows build machine, Yarn 2 and later, Bun: **Unverified**.
+- Azure Front Door (a Free Trial or Student subscription cannot create it; checked 2026-11-14), Node.js 24, other regions, a Windows build machine, Yarn 2 and later, Bun: **Unverified**.
 - `after()` with `--wait-until detach`, `cacheLife` expiry, the `remote` and `private` variants of `'use cache'`: **Unverified**.
 - Private networking, a web application firewall, customer-managed keys and other settings of a landing zone: not in the template ([ADR-0019](./plan/decisions.md#adr-0019-enterprise-use-at-the-level-of-opennext)).
 - The numbers on the [Cost](./cost.md) page are estimates from measurements of one site, and the cold start and load figures are single samples: they are not guarantees.

@@ -445,7 +445,7 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 
 ## ADR-0022: The cache handler reads the build output on a miss
 
-**Date:** 2026-11-11. **Status:** implemented and tested locally; **not yet run on Azure**.
+**Date:** 2026-11-11. **Status:** implemented and tested locally; **verified on Azure on 2026-11-14** (the HTTP suite, 50 of 50, on the example app on Next.js 15.5.29 and 16.4.5, `dynamicParams = false` cases included).
 
 **Context.** Next.js reads what `next build` prerendered (`.next/server/app`, `.next/server/pages`) through its own `FileSystemCache`. With a custom `cacheHandler` it asks the handler, which had none of these entries, so every page was rendered on its first request (and `deploy` primed them). For a route without a fallback (`dynamicParams = false` in the App Router) Next.js does not render a page that is not in the cache: it throws `NoFallbackError` and answers 404, for the built paths too. The documentation site hit this on its first deployment (every page 404, on Azure and locally).
 
@@ -453,7 +453,7 @@ Cost: the app existed for about 17 minutes (15:18 to 15:35 JST). No figure from 
 
 **Not chosen.** Seeding Blob at deploy (OpenNext's populate-cache): the deployer would need a data role on the storage account, and the value shape differs by Next.js version, which the class above already knows. Reproducing the file formats in the handler: brittle across versions 15 and 16.
 
-**Consequences.** The handler depends on an internal path of Next.js (`next/dist/server/lib/incremental-cache/file-system-cache`); the E2E suite runs on 15 and 16 in CI, and a missing class degrades to the old behavior. `dynamicParams = false` works (local E2E: the built path, 404 for an unknown path, stale then regenerated; the documentation site on 16.4.5 on the Functions host). The first requests no longer render the built pages again. Priming stays: it warms the instance and starts the regeneration of stale pages. To verify on Azure: the same E2E cases against a deployment, with Next.js 15 and 16.
+**Consequences.** The handler depends on an internal path of Next.js (`next/dist/server/lib/incremental-cache/file-system-cache`); the E2E suite runs on 15 and 16 in CI, and a missing class degrades to the old behavior. `dynamicParams = false` works (local E2E: the built path, 404 for an unknown path, stale then regenerated; the documentation site on 16.4.5 on the Functions host). The first requests no longer render the built pages again. Priming stays: it warms the instance and starts the regeneration of stale pages. Verified on Azure: the same E2E cases against a deployment, with Next.js 15 and 16 (2026-11-14).
 
 ## ADR-0023: Releases are tags, published with trusted publishing, without Changesets
 

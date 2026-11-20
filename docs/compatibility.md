@@ -49,6 +49,7 @@ The range is the `next` peer range of the package, inherited from the first desi
 | Cold start | One sample, client in Japan: **2.4 s** for the first request after about 11 minutes idle (2.5 s in the earlier spike), 0.1 to 0.2 s warm. With `--always-ready 1`: **0.15 s** for the first request after the same kind of idle time (about 17 minutes), against **2.4 s** without it (2026-11-10, one sample each, the same build on two apps). On 2026-11-14 the first request after about 10 to 12 minutes idle took **2.68 s** (Next.js 15.5.29) and **2.45 s** (16.4.5), without always-ready, one sample each. |
 | Load | 300 requests at 30 parallel: all 200; dynamic page p95 0.29 s, ISR page p95 0.86 s (one sample). |
 | Scale-out | Cache and tags are shared through Storage. After `revalidateTag`, parallel requests can each regenerate (ten different values within 70 ms in one test); the cache converges on the last write. |
+| Custom domain with a free App Service managed certificate | **Verified (Azure)** on the documentation site (2026-11-20): CNAME and `asuid` TXT record at the DNS provider (not proxied), domain and certificate added in the portal (Azure CLI does not support site-scoped certificates on Flex Consumption, per Microsoft Learn; the template does not include it). HTTPS answers with a certificate for the domain valid until 2027-05-20, HTTP redirects to HTTPS, and redirects and page bodies carry the public host. Renewal of the certificate: **Unverified**. |
 
 ## Known gaps
 

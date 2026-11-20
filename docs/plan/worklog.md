@@ -1149,3 +1149,10 @@ ADR-0016 (a Next.js adapter without OpenNext) was proposed and withdrawn the sam
 - **Consequence:** Front Door stays **Unverified** on Azure. It needs a pay-as-you-go subscription; that is the maintainer's decision. `Microsoft.Cdn` stays registered (harmless, no cost). The cost of the 39 s attempt is expected to be near zero; not read yet.
 - **Still open:** the cost figure of both stages, the next-day inventory (2026-11-15).
 
+## Session 72 (2026-11-20): `0.1.0` published
+
+- Security check before the publish (secret scan including history, `pnpm audit --prod`, licenses, `github-settings.sh check`, the tarball's file list): no findings. A read-only code review found no blocker; candidates for `0.1.1`: a client-supplied `x-forwarded-host` is trusted in `entry.mjs`, a failed server start is cached for the life of the instance, hop-by-hop request headers are forwarded, a corrupt cache blob gives a 500 instead of a miss, the build id falls back to `dev` silently.
+- The maintainer published `next-on-azure@0.1.0` by hand (the registry also shows a `0.0.0-stage` placeholder version created during processing). The trusted publisher (with "Allow npm publish") and "require two-factor, disallow tokens" were saved. The environment `npm-publish` got a required reviewer (the maintainer).
+- The tag `v0.1.0` (unsigned, annotated, on `d0ae09c`) was pushed. The `release` run passed `verify and pack`; `publish to npm` failed at once: `Tag "v0.1.0" is not allowed to deploy to npm-publish due to environment protection rules` (the rule was of type branch). The maintainer changed it to a tag rule. Nothing was published by the run.
+- **Not done:** the GitHub release, the documentation site's switch from the vendored tarball to npm, the cost figure and the second inventory, the `0.1.1` candidates above, a run of `release.yml` through to the approval.
+

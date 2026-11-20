@@ -22,11 +22,11 @@
     "check-links": "node scripts/check-links.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.5",
+    "@biomejs/biome": "2.6.8",
     "@changesets/cli": "^3.0.3",
-    "azure-functions-core-tools": "^4.16.0",
+    "azure-functions-core-tools": "^4.16.1",
     "azurite": "^3.37.0",
-    "turbo": "2.11.10"
+    "turbo": "2.11.11"
   },
   "engines": {
     "node": ">=22",

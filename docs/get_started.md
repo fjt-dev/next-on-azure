@@ -1,6 +1,6 @@
 # Get started
 
-> **Experimental, pre-release.** The package is not published to npm yet, so the install step works from a checkout of this repository only (`examples/standalone` is a working app). What is verified is in [Compatibility](./compatibility.md).
+> **Experimental.** `0.1.0` is on npm (`examples/standalone` in the repository is a working app). What is verified is in [Compatibility](./compatibility.md).
 
 ## Prerequisites
 
@@ -9,7 +9,13 @@
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli?wt.mc_id=studentamb_679600), signed in (`az login`), with the right to create resources in a resource group
 - `zip` on the PATH (used by `package`)
 
-## 1. Configure Next.js
+## 1. Install and configure Next.js
+
+```bash
+npm install next-on-azure   # or: pnpm add next-on-azure, yarn add next-on-azure (Yarn 1)
+```
+
+The package has `next` as a peer dependency. An install of `0.1.0` into an empty project with Next.js 16.4.5 was checked on 2026-11-20 (npm).
 
 ```js
 // next.config.mjs

@@ -9,7 +9,7 @@
 
 ---
 
-> **Experimental, pre-release, not published to npm.** What is promised and what is not: [Support](./docs/support.md).
+> **Experimental.** `0.1.0` is on [npm](https://www.npmjs.com/package/next-on-azure). What is promised and what is not: [Support](./docs/support.md).
 
 <p align="center">
   <img src="./docs/assets/banner.png" alt="Next.js + Azure" width="480">
@@ -43,13 +43,14 @@ export default withAzure({ /* your Next.js configuration */ });
 ```
 
 ```bash
+npm install next-on-azure   # or pnpm add / yarn add
 export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="$(openssl rand -base64 32)"
 next build
 next-on-azure package
 next-on-azure deploy --resource-group <rg> --name <short-name> --location <region>
 ```
 
-The package is not published, so this works from a checkout of this repository only (`examples/standalone` is a working app). The full guide is [Get started](./docs/get_started.md).
+`examples/standalone` is a working app. The full guide is [Get started](./docs/get_started.md).
 
 ## Repository layout
 
